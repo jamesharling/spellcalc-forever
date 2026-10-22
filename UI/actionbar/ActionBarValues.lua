@@ -342,9 +342,16 @@ end
 --- Update style and position with current settings.
 function ActionBarValues:UpdateStyle()
     if buttonText then
-        buttonText.UpdateFonts();
-        buttonText.UpdatePositions();
+        buttonText.UpdateStyle();
     end
+end
+
+--- Text shown on an action slot, for debugging and tests.
+---@param slot integer
+---@return string|nil
+function ActionBarValues:GetSlotText(slot)
+    local fs = buttonText and buttonText.GetFontString(slot);
+    return fs and fs:GetText() or nil;
 end
 
 --- Setup action button values.

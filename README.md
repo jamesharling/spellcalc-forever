@@ -45,6 +45,10 @@ from upstream SpellCalc in more than the TOC:
   identity is secret inside instances, where those bosses are). Target level and creature type are still read
   when available, and the default level difference applies otherwise.
 - **Weapon damage and speed** come from `C_TooltipInfo.GetItemByID` instead of scanning a hidden tooltip.
+- **Action bar text** sits on its own overlay frame above the button's cooldown swipe (text drawn on the
+  button itself is hidden by the swipe), and Settings > Actionbar adds an anchor point with x/y pixel
+  offsets, thick outline styles and a drop shadow. The old "percent of button height" position migrates to
+  the bottom anchor with a matching offset.
 - **Talents** are read from the trait system (`C_SpecializationInfo` / `C_ClassTalents` + `C_Traits`), which is how
   Forever stores its classic-style trees. Talent data is keyed by the rank-1 spell ID of each talent
   (`spellId` in `data/forever/classes/*_talents.lua`) instead of tree/tier/column.
@@ -69,6 +73,7 @@ Nothing here has run on a live Forever client (the beta closed before this port 
 4. Downranking: compare low-rank tooltips with the addon's numbers.
 5. Events: unknown events are skipped with a warning in chat; check for warnings after login.
 6. Action bar support: stock bars use `MainActionBar` paging; Bartender4, Dominos and ElvUI need their Forever builds.
+   Check the value stays visible during a cooldown swipe and doesn't sit over the hotkey or stack count.
 7. Mana regen: Forever stores mp5 as an item stat, so mp5 has to show up in `GetManaRegen`. The addon treats
    whatever `GetManaRegen` reports above its spirit formula as mp5 and uses the larger of that and the mp5 it
    knows from aura data, so mp5 is not counted twice. Spirit regen uses 0.125 mana per spirit per second for
@@ -146,7 +151,10 @@ npm test
   simulated trait API), and with a sample of buffs from `auras.lua`. It runs the spell tooltip hook for each
   spell too. It then enables every target aura offered in the settings through the real settings options,
   checks they change the numbers, and checks that clearing them restores the previous numbers. Warrior,
-  hunter and rogue are loaded too, to check the tooltip hook copes with a class that has no data. Lua errors,
+  hunter and rogue are loaded too, to check the tooltip hook copes with a class that has no data. It puts
+  spells on the stock action bar and checks their values show, sit above the cooldown frame, and follow every
+  anchor, outline and shadow setting, validates the settings table with AceConfig, and checks old saved
+  settings migrate. Lua errors,
   `NaN` or infinite results, min above max, and talents not read back fail the run.
 
 It catches load errors, broken data references and crashes in the calculation and tooltip code. The stub

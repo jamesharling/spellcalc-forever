@@ -206,7 +206,10 @@ local allFrames = {}
 
 local function newObject(kind, name, parent)
     local o = setmetatable({ __kind = kind, __name = name, __parent = parent, __scripts = {},
-        __events = {}, __shown = true, __lines = {}, __text = "" }, FrameMT)
+        __events = {}, __shown = true, __lines = {}, __text = "", __children = {} }, FrameMT)
+    if type(parent) == "table" and rawget(parent, "__children") then
+        table.insert(parent.__children, o)
+    end
     if name and name ~= "" then
         if parent and type(parent) == "table" and name:find("$parent", 1, true) then
             name = name:gsub("%$parent", parent.__name or "")
@@ -271,7 +274,18 @@ function FrameMethods:GetBottom() return 0 end
 function FrameMethods:GetCenter() return 50, 10 end
 function FrameMethods:GetScale() return 1 end
 function FrameMethods:GetEffectiveScale() return 1 end
-function FrameMethods:GetFrameLevel() return 1 end
+function FrameMethods:GetFrameLevel()
+    if self.__level then return self.__level end
+    local p = rawget(self, "__parent")
+    if type(p) == "table" and p.GetFrameLevel then return p:GetFrameLevel() + 1 end
+    return 1
+end
+function FrameMethods:SetFrameLevel(l) self.__level = l end
+function FrameMethods:SetPoint(point, rel, relPoint, x, y) self.__point = { point, rel, relPoint, x, y } end
+function FrameMethods:ClearAllPoints() self.__point = nil end
+function FrameMethods:SetFont(font, size, flags) self.__font, self.__fontSize, self.__flags = font, size, flags; return true end
+function FrameMethods:SetShadowOffset(x, y) self.__shadowOffset = { x, y } end
+function FrameMethods:SetJustifyH(j) self.__justifyH = j end
 function FrameMethods:GetFrameStrata() return "MEDIUM" end
 function FrameMethods:GetNumPoints() return 0 end
 function FrameMethods:GetAlpha() return 1 end
@@ -335,7 +349,10 @@ ItemRefTooltip = newObject("GameTooltip", "ItemRefTooltip", UIParent)
 SettingsPanel = newObject("Frame", "SettingsPanel", UIParent)
 MainActionBar = newObject("Frame", "MainActionBar", UIParent)
 for i = 1, 12 do
-    newObject("CheckButton", "ActionButton" .. i, MainActionBar)
+    local button = newObject("CheckButton", "ActionButton" .. i, MainActionBar)
+    -- Stock action buttons have a cooldown frame one level above the button.
+    button.cooldown = newObject("Cooldown", nil, button)
+    button.cooldown:SetFrameLevel(button:GetFrameLevel() + 1)
     for _, bar in ipairs({ "MultiBarRightButton", "MultiBarLeftButton", "MultiBarBottomRightButton", "MultiBarBottomLeftButton" }) do
         newObject("CheckButton", bar .. i, UIParent)
     end
@@ -565,8 +582,9 @@ GetComboPoints = function() return 0 end
 GetShapeshiftForm = function() return 0 end
 GetShapeshiftFormInfo = function() return nil end
 GetNumShapeshiftForms = function() return 0 end
-GetActionInfo = function() return nil end
-HasAction = function() return false end
+__ACTION_SLOTS = {}
+GetActionInfo = function(slot) local id = __ACTION_SLOTS[slot]; if id then return "spell", id end end
+HasAction = function(slot) return __ACTION_SLOTS[slot] ~= nil end
 GetMacroSpell = function() return nil end
 GetActionBarPage = function() return 1 end
 GetBonusBarOffset = function() return 0 end

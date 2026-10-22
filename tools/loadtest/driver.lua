@@ -14,6 +14,11 @@ local function settle()
     __RunTimers(60)
 end
 
+-- Saved settings from before the action bar text rework (version 3, percent position): must migrate.
+if not __UNSUPPORTED then
+    SpellCalc_settings = { version = 3, abPosition = 50, firstStart = false }
+end
+
 -- Login sequence
 __FireEvent("ADDON_LOADED", ADDON)
 __FireEvent("PLAYER_LOGIN")
@@ -158,6 +163,85 @@ local function sampleLine(id)
 end
 
 local base = runAll("no talents")
+
+-- The options table must pass AceConfig validation (it is only validated when the panel opens in game)
+do
+    local registry = LibStub("AceConfigRegistry-3.0")
+    local ok, err = pcall(registry.GetOptionsTable, registry, ADDON, "dialog", "AceConfigDialog-3.0")
+    if ok then emit("settings options table passes AceConfig validation")
+    else emit("FAIL settings options table invalid: " .. tostring(err):gsub("\n.*", "")) end
+end
+
+-- Settings migration (version 3 -> current)
+do
+    local sv = SpellCalc_settings
+    local expectedY = math.floor(50 * 0.36 + 0.5) - 6
+    if sv.abPosition ~= nil or sv.abAnchor ~= "BOTTOM" or sv.abOffsetY ~= expectedY or (sv.version or 0) < 4 then
+        emit(("FAIL settings migration: abPosition=%s abAnchor=%s abOffsetY=%s version=%s"):format(
+            tostring(sv.abPosition), tostring(sv.abAnchor), tostring(sv.abOffsetY), tostring(sv.version)))
+    else
+        emit(("settings migrated to version %d (old 50%% position -> BOTTOM %+d px)"):format(sv.version, sv.abOffsetY))
+    end
+end
+
+-- Action bar text: put calculated spells on the first 12 stock slots
+do
+    local abv = A.ActionBarValues
+    local slotted = 0
+    for _, id in ipairs(spellIds) do
+        if slotted == 12 then break end
+        if id ~= 6603 then
+            slotted = slotted + 1
+            __ACTION_SLOTS[slotted] = id
+        end
+    end
+    for slot = 1, slotted do __FireEvent("ACTIONBAR_SLOT_CHANGED", slot) end
+    __TickOnUpdate(50, 0.1) -- delayed full slot update after 3s, then the update loop
+    local shown = 0
+    for slot = 1, slotted do
+        local text = abv:GetSlotText(slot)
+        if text and text ~= "" then shown = shown + 1 end
+    end
+    emit(("action bar: %d of %d slotted spells show a value"):format(shown, slotted))
+    if shown == 0 then emit("FAIL no action bar values shown") end
+
+    -- The text must live on an overlay frame above the button's cooldown frame
+    local button = _G.ActionButton1
+    local fs, overlay
+    for _, child in ipairs(button.__children) do
+        for _, region in ipairs(child.__children or {}) do
+            if region.__kind == "FontString" then fs, overlay = region, child end
+        end
+    end
+    if not fs then
+        emit("FAIL no action bar font string found on ActionButton1")
+    else
+        local ok = overlay:GetFrameLevel() > button.cooldown:GetFrameLevel()
+        emit(("action bar text on an overlay at frame level %d, cooldown at %d"):format(overlay:GetFrameLevel(), button.cooldown:GetFrameLevel()))
+        if not ok then emit("FAIL action bar text is not above the cooldown frame") end
+
+        -- Every anchor and font style must apply
+        local styleErrors = 0
+        for _, anchor in ipairs({ "TOPLEFT", "TOP", "TOPRIGHT", "LEFT", "CENTER", "RIGHT", "BOTTOMLEFT", "BOTTOM", "BOTTOMRIGHT" }) do
+            for _, flags in ipairs({ "NONE", "OUTLINE", "THICKOUTLINE", "MONOCHROME", "MONOCHROME,OUTLINE", "MONOCHROME,THICKOUTLINE" }) do
+                for _, shadow in ipairs({ false, true }) do
+                    SpellCalc_settings.abAnchor, SpellCalc_settings.abFontFlags, SpellCalc_settings.abShadow = anchor, flags, shadow
+                    SpellCalc_settings.abOffsetX, SpellCalc_settings.abOffsetY = -4, 7
+                    local okStyle, err = pcall(abv.UpdateStyle, abv)
+                    local p = fs.__point
+                    local expectedFlags = flags == "NONE" and "" or flags
+                    if not okStyle or not p or p[1] ~= anchor or p[3] ~= anchor or p[4] ~= -4 or p[5] ~= 7
+                        or fs.__flags ~= expectedFlags or (shadow and fs.__shadowOffset[1] == 0) or (not shadow and fs.__shadowOffset[1] ~= 0) then
+                        styleErrors = styleErrors + 1
+                        if styleErrors <= 3 then emit(("FAIL style %s/%s/%s not applied: %s"):format(anchor, flags, tostring(shadow), tostring(err))) end
+                    end
+                end
+            end
+        end
+        emit(("action bar styles: %d anchor/outline/shadow combinations checked, %d wrong"):format(9 * 6 * 2, styleErrors))
+    end
+end
+
 local baseSamples = {}
 for _, id in ipairs(sampleIds) do baseSamples[id] = sampleLine(id) end
 

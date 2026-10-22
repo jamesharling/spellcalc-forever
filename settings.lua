@@ -45,10 +45,13 @@ local DEFAULTSETTINGS = {
 	--["abSealValue"] = "avg",
 	abDmgShieldValue = "avgCombined",
     abManaRestoreValue = "allTicks",
-	["abPosition"] = 25,
+	abAnchor = "BOTTOM",
+	abOffsetX = 0,
+	abOffsetY = 3,
 	["abSize"] = 12,
 	["abFont"] = "Friz Quadrata TT",
 	["abFontFlags"] = "OUTLINE",
+	abShadow = false,
 	["abColorHarm"] = {1, 1, 0.3},
 	["abColorHelp"] = {0.3, 1, 0.3},
     abColorMana = {0.1, 0.7, 1},
@@ -63,7 +66,7 @@ local DEFAULTSETTINGS = {
 	assumedComboPoints = 5,
 	assumedTargetAuras = {},
 
-	["version"] = 3
+	["version"] = 4
 };
 
 ---@param info string[]
@@ -280,18 +283,53 @@ local SETTINGS_TABLE = {
 						end
 					end
 				},
-				abPosition = {
+				positionSettings = {
 					order = 2,
-					type = "range",
+					type = "group",
+					guiInline = true,
 					name = L["Position"],
-					desc = L["Offset from the bottom of the button in percent."],
-					min = 0,
-					max = 100,
-					step = 1,
-					set = function(i, val)
-						SpellCalc_settings.abPosition = val;
+					set = function(info, val)
+						SpellCalc_settings[info[#info]] = val;
 						_addon.ActionBarValues:UpdateStyle();
-					end
+					end,
+					args = {
+						abAnchor = {
+							order = 1,
+							type = "select",
+							name = L["Anchor"],
+							desc = L["Point of the button the text is attached to. Text on the left or right edge is aligned to that edge."],
+							values = {
+								TOPLEFT = L["Top left"],
+								TOP = L["Top"],
+								TOPRIGHT = L["Top right"],
+								LEFT = L["Left"],
+								CENTER = L["Center"],
+								RIGHT = L["Right"],
+								BOTTOMLEFT = L["Bottom left"],
+								BOTTOM = L["Bottom"],
+								BOTTOMRIGHT = L["Bottom right"],
+							},
+							sorting = { "TOPLEFT", "TOP", "TOPRIGHT", "LEFT", "CENTER", "RIGHT", "BOTTOMLEFT", "BOTTOM", "BOTTOMRIGHT" },
+						},
+						abOffsetX = {
+							order = 2,
+							type = "range",
+							name = L["X offset"],
+							desc = L["Pixels to the right (negative: left) of the anchor."],
+							min = -40,
+							max = 40,
+							step = 1,
+						},
+						abOffsetY = {
+							order = 3,
+							type = "range",
+							name = L["Y offset"],
+							desc = L["Pixels up (negative: down) from the anchor."],
+							min = -40,
+							max = 40,
+							step = 1,
+						},
+					},
 				},
 				fontSettings = {
 					order = 3,
@@ -329,11 +367,24 @@ local SETTINGS_TABLE = {
 							values = {
 								NONE = L["None"],
 								OUTLINE = L["Outline"],
+								THICKOUTLINE = L["Thick outline"],
 								MONOCHROME = L["Monochrome"],
 								["MONOCHROME,OUTLINE"] = L["Monochrome + Outline"],
+								["MONOCHROME,THICKOUTLINE"] = L["Monochrome + Thick outline"],
 							},
+							sorting = { "NONE", "OUTLINE", "THICKOUTLINE", "MONOCHROME", "MONOCHROME,OUTLINE", "MONOCHROME,THICKOUTLINE" },
 							set = function(i, val)
 								SpellCalc_settings.abFontFlags = val;
+								_addon.ActionBarValues:UpdateStyle();
+							end
+						},
+						abShadow = {
+							order = 4,
+							type = "toggle",
+							name = L["Shadow"],
+							desc = L["Drop shadow behind the text, can be combined with an outline."],
+							set = function(i, val)
+								SpellCalc_settings.abShadow = val;
 								_addon.ActionBarValues:UpdateStyle();
 							end
 						},
@@ -598,6 +649,19 @@ local function CheckUpdates()
         ---@diagnostic disable-next-line: no-unknown
 		sv.auraEffectToggleSactifiedRetribution = nil;
 		sv.version = 3;
+	end
+
+	if oldSettingsVer < 4 then
+		-- Action bar text: the percent-of-button-height position became an anchor with pixel offsets.
+		-- Approximate the old position for a 36px button and centred 12px text.
+		if type(sv.abPosition) == "number" then
+			sv.abAnchor = "BOTTOM";
+			sv.abOffsetX = 0;
+			sv.abOffsetY = math.max(-40, math.min(40, math.floor(sv.abPosition * 0.36 + 0.5) - 6));
+		end
+        ---@diagnostic disable-next-line: no-unknown
+		sv.abPosition = nil;
+		sv.version = 4;
 	end
 end
 

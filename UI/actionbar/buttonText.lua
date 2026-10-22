@@ -4,10 +4,21 @@ local _addon = select(2, ...);
 local LSM = LibStub("LibSharedMedia-3.0");
 
 ---@class ABFontString : FontString
----@field UpdatePosition fun(self:ABFontString, offsetpct:number)|nil
----@field SetIsHeal fun(self:ABFontString, isHeal:boolean|nil, isMana:boolean|nil)|nil
+---@field ApplyStyle fun(self:ABFontString, style:ABTextStyle)
+---@field SetIsHeal fun(self:ABFontString, isHeal:boolean|nil, isMana:boolean|nil)
+---@field button WoWFrame The action button
+---@field overlay WoWFrame Frame holding the text, above the button's cooldown swipe
 ---@field isHeal boolean|nil
 ---@field isMana boolean|nil
+
+---@class ABTextStyle
+---@field font string
+---@field size number
+---@field flags string
+---@field shadow boolean
+---@field anchor string
+---@field x number
+---@field y number
 
 ---@type ABFontString[]
 local buttonFontStrings = {};
@@ -17,34 +28,36 @@ local colorHarm = {1, 1, 0.3};
 local colorHelp = {0.3, 1, 0.3};
 local colorMana = {0.1, 0.7, 1};
 
+--- Horizontal justification that matches an anchor point, so text grows away from the button edge.
+local ANCHOR_JUSTIFY = {
+    TOPLEFT = "LEFT", LEFT = "LEFT", BOTTOMLEFT = "LEFT",
+    TOPRIGHT = "RIGHT", RIGHT = "RIGHT", BOTTOMRIGHT = "RIGHT",
+};
+
 ------------------------------------------------------------------------
 -- Button Fontstring
 ------------------------------------------------------------------------
 
---- Get vertical offset based on button frame height.
----@param self ABFontString
----@param offsetpct number
-local function GetVOffset(self, offsetpct)
-    local oldString = self:GetText();
-    self:SetText("-");
-    local hs = self:GetStringHeight();
-    self:SetText(oldString);
-    return self:GetParent():GetHeight() * offsetpct / 100 - hs / 2;
-end
-
---- Update text positions.
----@param self ABFontString
----@param offsetpct number
-local function UpdatePosition(self, offsetpct)
-    self:ClearAllPoints();
-    local offset = GetVOffset(self, offsetpct);
-    self:SetPoint("BOTTOMLEFT", 0, offset);
-    self:SetPoint("BOTTOMRIGHT", 0, offset);
+--- Frame level for the text overlay: above the button and its cooldown frames.
+-- Regions (textures, font strings) of a frame always draw below child frames with a higher frame level,
+-- so text on the button itself would be hidden by the cooldown swipe whatever its draw layer. The overlay
+-- stays below Blizzard's own hotkey/count container, so those still draw on top.
+---@param button WoWFrame
+---@return integer
+local function OverlayLevel(button)
+    local level = button:GetFrameLevel();
+    for _, key in ipairs({ "cooldown", "Cooldown", "chargeCooldown", "lossOfControlCooldown" }) do
+        local cd = button[key];
+        if type(cd) == "table" and cd.GetFrameLevel then
+            level = math.max(level, cd:GetFrameLevel());
+        end
+    end
+    return level + 2;
 end
 
 --- Set text color to dmg or heal.
 ---@param self ABFontString
----@param isHeal boolean
+---@param isHeal boolean|nil
 ---@param isMana boolean|nil
 local function SetIsHeal(self, isHeal, isMana)
     if isHeal then
@@ -58,15 +71,61 @@ local function SetIsHeal(self, isHeal, isMana)
     self.isMana = isMana;
 end
 
+--- Apply font, outline, shadow and position.
+---@param self ABFontString
+---@param style ABTextStyle
+local function ApplyStyle(self, style)
+    -- Re-applied on every style update: bar addons may change their buttons' frame levels later.
+    self.overlay:SetFrameLevel(OverlayLevel(self.button));
+
+    self:SetFont(style.font, style.size, style.flags);
+    if style.shadow then
+        self:SetShadowColor(0, 0, 0, 1);
+        self:SetShadowOffset(1, -1);
+    else
+        self:SetShadowColor(0, 0, 0, 0);
+        self:SetShadowOffset(0, 0);
+    end
+
+    self:ClearAllPoints();
+    self:SetPoint(style.anchor, self.overlay, style.anchor, style.x, style.y);
+    self:SetJustifyH(ANCHOR_JUSTIFY[style.anchor] or "CENTER");
+    self:SetIsHeal(self.isHeal, self.isMana);
+end
+
 --- Add string to the given button frame.
 ---@param buttonFrame WoWFrame
 ---@return ABFontString
 local function CreateActionButtonFS(buttonFrame)
-    local fs = buttonFrame:CreateFontString(nil, "ARTWORK");
+    -- A plain child frame: no mouse input, not protected, so the text can change at any time.
+    local overlay = CreateFrame("Frame", nil, buttonFrame);
+    overlay:SetAllPoints(buttonFrame);
+    overlay:SetFrameLevel(OverlayLevel(buttonFrame));
+
+    local fs = overlay:CreateFontString(nil, "OVERLAY")--[[@as ABFontString]];
+    fs:SetWordWrap(false);
+    fs.button = buttonFrame;
+    fs.overlay = overlay;
     fs.SetIsHeal = SetIsHeal;
-    fs.UpdatePosition = UpdatePosition;
+    fs.ApplyStyle = ApplyStyle;
     fs:Show();
-    return fs--[[@as ABFontString]];
+    return fs;
+end
+
+--- Current style from the settings.
+---@return ABTextStyle
+local function CurrentStyle()
+    local flags = SpellCalc_settings.abFontFlags or "OUTLINE";
+    if flags == "NONE" then flags = "" end
+    return {
+        font = LSM:Fetch("font", SpellCalc_settings.abFont),
+        size = SpellCalc_settings.abSize or 12,
+        flags = flags,
+        shadow = SpellCalc_settings.abShadow == true,
+        anchor = SpellCalc_settings.abAnchor or "BOTTOM",
+        x = SpellCalc_settings.abOffsetX or 0,
+        y = SpellCalc_settings.abOffsetY or 3,
+    };
 end
 
 ------------------------------------------------------------------------
@@ -126,8 +185,7 @@ local function CreateBT4ButtonFS()
                 if name:find("BT4Button") then
                     _addon.util.PrintDebug("Add bartender4 button " .. name);
                     buttonFontStrings[slotId] = CreateActionButtonFS(_G[name]);
-                    buttonFontStrings[slotId]:SetFont(LSM:Fetch("font", SpellCalc_settings.abFont), SpellCalc_settings.abSize, SpellCalc_settings.abFontFlags);
-                    buttonFontStrings[slotId]:UpdatePosition(SpellCalc_settings.abPosition);
+                    buttonFontStrings[slotId]:ApplyStyle(CurrentStyle());
                 end
             end);
         end
@@ -155,24 +213,22 @@ function _addon:SetupActionButtonText()
         end
     end;
 
-    --- Update font style based on current settings.
-    buttonText.UpdateFonts = function()
-        ---@type any
-        local font = LSM:Fetch("font", SpellCalc_settings.abFont);
+    --- Update font, outline, colors and position based on current settings.
+    buttonText.UpdateStyle = function()
         colorHarm = SpellCalc_settings.abColorHarm;
         colorHelp = SpellCalc_settings.abColorHelp;
         colorMana = SpellCalc_settings.abColorMana;
+        local style = CurrentStyle();
         for _, v in pairs(buttonFontStrings) do
-            v:SetFont(font, SpellCalc_settings.abSize, SpellCalc_settings.abFontFlags);
-            v:SetIsHeal(v.isHeal, v.isMana);
+            v:ApplyStyle(style);
         end
     end;
 
-    --- Update string positions.
-    buttonText.UpdatePositions = function()
-        for _, v in pairs(buttonFontStrings) do
-            v:UpdatePosition(SpellCalc_settings.abPosition);
-        end
+    --- Font string of a slot, if any (for debugging and tests).
+    ---@param slot number
+    ---@return ABFontString|nil
+    buttonText.GetFontString = function(slot)
+        return buttonFontStrings[slot];
     end;
 
     --- Check if text for button slot exists.
@@ -208,7 +264,7 @@ function _addon:SetupActionButtonText()
         CreateStockButtonFS();
     end
 
-    buttonText.UpdateFonts();
+    buttonText.UpdateStyle();
 
     isSetup = buttonText;
     return buttonText;
