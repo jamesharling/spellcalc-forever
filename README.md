@@ -16,7 +16,9 @@ are not supported, same as upstream.
 ## Installing
 
 Copy or clone this repository into the Forever client's `Interface\AddOns` folder as `SpellCalc_Forever`
-(the folder name must match `SpellCalc_Forever.toc`). `/sc` or `/spellcalc` opens the options.
+(the folder name must match `SpellCalc_Forever.toc`), for example
+`World of Warcraft\_forever_\Interface\AddOns\SpellCalc_Forever`. For development, a directory junction
+from that path to your clone works too. `/sc` or `/spellcalc` opens the options.
 
 ## What the Forever port changed
 
@@ -48,13 +50,17 @@ from upstream SpellCalc in more than the TOC:
 Nothing here has run on a live Forever client (the beta closed before this port was written). Check first:
 
 1. Secret values: which stat and aura APIs are secret, and only in combat or also elsewhere.
-2. Talent reading: tree IDs and ranks from `C_Traits` (`/sc debugtalents`).
+2. Talent reading: tree IDs and ranks from `C_Traits` (`/sc debugtalents` also prints which API returned the
+   config ID). The config comes from `C_SpecializationInfo.GetCombatConfigIDForSpecGroup`, as in StatLogic and
+   RatingBuster on Forever, with `C_ClassTalents.GetActiveConfigID` as a fallback.
 3. Weapon skill values from `C_SkillInfo` (`/sc info` shows attack values).
 4. Downranking: compare low-rank tooltips with the addon's numbers.
 5. Events: unknown events are skipped with a warning in chat; check for warnings after login.
 6. Action bar support: stock bars use `MainActionBar` paging; Bartender4, Dominos and ElvUI need their Forever builds.
 7. Mana regen from gear: Forever stores mp5 and similar bonuses as item stats instead of equip auras, so
    `system/stats.lua` has to take them from the API (`GetManaRegen`) rather than from `itemEffects.lua`.
+   StatLogic's Forever data also uses the same 0.125 mana per spirit per second for every caster, while
+   `stats.lua` still splits priest/mage from the other classes.
 8. Talents listed in `generation_report.txt` as "SPELL_AURA_DUMMY spell not handled" (Fire Power, Shadow
    Weaving, Eclipse, Maelstrom Weapon, ...) have no effect in the calculator until someone writes handlers.
 

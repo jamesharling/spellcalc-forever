@@ -4,7 +4,7 @@ local combat = _addon.combat;
 local GetSpellName = _addon.api.GetSpellName;
 
 -- Forever's class talent trees are regular trait trees (the Mainline talent system), so
--- they are read through C_ClassTalents / C_Traits. Addon talent data is keyed by the rank-1
+-- they are read through C_SpecializationInfo / C_Traits. Addon talent data is keyed by the rank-1
 -- spell ID of the talent (TraitDefinition.SpellID), which survives Blizzard moving talents
 -- around the tree.
 
@@ -34,12 +34,32 @@ local function SetupTalentData()
     _addon.util.PrintDebug("Tracking " .. #(_addon.talentDataRaw or {}) .. " talents");
 end
 
+---Trait config ID of the active talent spec group.
+-- Forever keeps classic dual spec (spec groups 1 and 2). Addons already running on Forever
+-- (StatLogic, RatingBuster) get the config through C_SpecializationInfo; C_ClassTalents is
+-- only a fallback because other addons treat it as optional on non-retail clients.
+---@return integer|nil configID
+---@return string|nil source which API returned it, for /sc debugtalents
+local function GetActiveTraitConfigID()
+    local specInfo = C_SpecializationInfo;
+    if specInfo and specInfo.GetActiveSpecGroup and specInfo.GetCombatConfigIDForSpecGroup then
+        local specGroup = specInfo.GetActiveSpecGroup();
+        local configID = specGroup and specInfo.GetCombatConfigIDForSpecGroup(specGroup);
+        if configID then return configID, "C_SpecializationInfo (spec group " .. specGroup .. ")" end
+    end
+    if C_ClassTalents and C_ClassTalents.GetActiveConfigID then
+        local configID = C_ClassTalents.GetActiveConfigID();
+        if configID then return configID, "C_ClassTalents" end
+    end
+    return nil, nil;
+end
+
 ---Read rank per rank-1 spell ID from the active trait config.
 ---@return table<integer, integer>|nil ranks nil if the talent API isn't ready yet
 local function ReadTraitRanks()
-    if not C_ClassTalents or not C_Traits then return nil end
+    if not C_Traits then return nil end
 
-    local configID = C_ClassTalents.GetActiveConfigID();
+    local configID = GetActiveTraitConfigID();
     if not configID then return nil end
 
     local configInfo = C_Traits.GetConfigInfo(configID);
@@ -55,7 +75,7 @@ local function ReadTraitRanks()
                     local entryID, rank;
                     if nodeInfo.activeEntry then
                         entryID = nodeInfo.activeEntry.entryID;
-                        rank = nodeInfo.activeEntry.rank;
+                        rank = nodeInfo.activeEntry.rank or nodeInfo.activeRank;
                     elseif nodeInfo.entryIDs and nodeInfo.entryIDs[1] then
                         entryID = nodeInfo.entryIDs[1];
                         rank = nodeInfo.activeRank or nodeInfo.ranksPurchased;
@@ -178,6 +198,8 @@ _addon:RegisterSlashCommand("debugtalents", function()
     local debugSetting = SpellCalc_settings.debug;
     SpellCalc_settings.debug = true;
     SetupTalentData();
+    local configID, source = GetActiveTraitConfigID();
+    print(("  Talent config: %s (from %s)"):format(tostring(configID), tostring(source)));
     UpdateTalents();
     for spellId, talent in pairs(trackedTalents) do
         print(("  %s (%d): rank %d"):format(talent.name, spellId, currentRanks[spellId] or 0));
