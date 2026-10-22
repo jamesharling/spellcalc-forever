@@ -17,6 +17,10 @@ export interface SpellLevel
     SpellID: number
 }
 
+/**
+ * SpellEffect row (Forever / Mainline schema).
+ * Values: EffectBasePointsF is the mean value, Variance the spread (see effectValues.ts).
+ */
 export interface SpellEffect
 {
     ID: number,
@@ -27,11 +31,10 @@ export interface SpellEffect
     EffectAttributes: number,
     EffectAura: number,
     EffectAuraPeriod: number,
-    EffectBasePoints: number,
+    EffectBasePointsF: number,
     EffectBonusCoefficient: number,
     EffectChainAmplitude: number,
     EffectChainTargets: number,
-    EffectDieSides: number,
     EffectItemType: number,
     EffectMechanic: number,
     EffectPointsPerResource: number,
@@ -44,6 +47,7 @@ export interface SpellEffect
     Variance: number,
     ResourceCoefficient: number,
     GroupSizeBasePointsCoefficient: number,
+    ScalingClass: number,
     EffectMiscValue_0: number,
     EffectMiscValue_1: number,
     EffectRadiusIndex_0: number,
@@ -96,6 +100,9 @@ export interface SpellMisc
     Attributes_11: number,
     Attributes_12: number,
     Attributes_13: number,
+    Attributes_14: number,
+    Attributes_15: number,
+    Attributes_16: number,
     SpellID: number
 }
 
@@ -124,8 +131,8 @@ export interface SpellDuration
 {
     ID: number,
     Duration: number,
-    DurationPerLevel: number,
-    MaxDuration: number
+    MaxDuration: number,
+    DurationPerResource: number
 }
 
 export interface SpellCooldown
@@ -140,13 +147,15 @@ export interface SpellCooldown
 export interface SpellPower
 {
     ID: number,
+    OrderIndex: number,
     ManaCost: number,
     ManaCostPerLevel: number,
     ManaPerSecond: number,
     PowerCostPct: number,
     PowerCostMaxPct: number,
-    PowerCostPctPerSecond: number,
+    PowerPctPerSecond: number,
     PowerType: number,
+    OptionalCost: number,
     SpellID: number
 }
 
@@ -175,7 +184,6 @@ export interface SpellAuraOptions
 
 export class SpellData
 {
-    //private readonly spellEffects: { [index: number]: SpellEffect };
     readonly spellEffectsBySpellId = new Map<number, SpellEffect[]>();
     private readonly spellsByName: { [spellName: string]: number[] } = {};
     private readonly spellLevels: { [index: number]: SpellLevel };
@@ -187,7 +195,9 @@ export class SpellData
     readonly spellCategories: { [index: number]: SpellCategory };
     private readonly spellCooldowns: { [index: number]: SpellCooldown };
     private readonly spellPowerCost: { [index: number]: SpellPower };
+    private readonly spellPowerCostBySpell = new Map<number, SpellPower[]>();
     readonly spellClassOptions: { [index: number]: SpellClassOptions };
+    private readonly spellClassOptionsBySpell = new Map<number, SpellClassOptions>();
     private readonly spellEquippedItems: { [index: number]: SpellEquippedItems };
     private readonly spellAuraOptions: { [index: number]: SpellAuraOptions };
 
@@ -197,22 +207,37 @@ export class SpellData
 
         const baseDir = cfg.dataDir;
 
-        this.spellNames = readDBCSV<SpellName>(baseDir + "dbc/spellname.csv", "ID");
-        this.spell = readDBCSV<Spell>(baseDir + "dbc/spell.csv", "ID");
-        this.spellDuration = readDBCSV<SpellDuration>(baseDir + "dbc/spellduration.csv", "ID");
-        this.spellCategories = readDBCSV<SpellCategory>(baseDir + "dbc/spellcategories.csv", "SpellID", [{ key: "DifficultyID", is: 0 }]);
-        this.spellCooldowns = readDBCSV<SpellCooldown>(baseDir + "dbc/spellcooldowns.csv", "SpellID", [{ key: "DifficultyID", is: 0 }]);
-        this.spellPowerCost = readDBCSV<SpellPower>(baseDir + "dbc/spellpower.csv", "ID");
-        this.spellClassOptions = readDBCSV<SpellClassOptions>(baseDir + "dbc/spellclassoptions.csv", "SpellID");
-        this.spellEquippedItems = readDBCSV<SpellEquippedItems>(baseDir + "dbc/spellequippeditems.csv", "SpellID");
-        this.spellAuraOptions = readDBCSV<SpellAuraOptions>(baseDir + "dbc/spellauraoptions.csv", "SpellID", [{ key: "DifficultyID", is: 0 }]);
+        this.spellNames = readDBCSV<SpellName>(baseDir + "dbc/SpellName.csv", "ID");
+        // The CSV reader turns numeric looking fields into numbers; names must stay strings.
+        for (const id in this.spellNames) this.spellNames[id].Name_lang = String(this.spellNames[id].Name_lang);
+        this.spell = readDBCSV<Spell>(baseDir + "dbc/Spell.csv", "ID");
+        this.spellDuration = readDBCSV<SpellDuration>(baseDir + "dbc/SpellDuration.csv", "ID");
+        this.spellCategories = readDBCSV<SpellCategory>(baseDir + "dbc/SpellCategories.csv", "SpellID", [{ key: "DifficultyID", is: 0 }]);
+        this.spellCooldowns = readDBCSV<SpellCooldown>(baseDir + "dbc/SpellCooldowns.csv", "SpellID", [{ key: "DifficultyID", is: 0 }]);
+        this.spellPowerCost = readDBCSV<SpellPower>(baseDir + "dbc/SpellPower.csv", "ID");
+        this.spellClassOptions = readDBCSV<SpellClassOptions>(baseDir + "dbc/SpellClassOptions.csv", "SpellID");
+        this.spellEquippedItems = readDBCSV<SpellEquippedItems>(baseDir + "dbc/SpellEquippedItems.csv", "SpellID");
+        this.spellAuraOptions = readDBCSV<SpellAuraOptions>(baseDir + "dbc/SpellAuraOptions.csv", "SpellID", [{ key: "DifficultyID", is: 0 }]);
         this.totemSpells = JSON.parse(fs.readFileSync(baseDir + "totemSpells.json", "utf8"));
-        this.spellCategories = readDBCSV<SpellCategory>(baseDir + "dbc/spellcategories.csv", "SpellID", [{ key: "DifficultyID", is: 0 }]);
-        this.spellMiscs = readDBCSV<SpellMisc>(baseDir + "dbc/spellmisc.csv", "SpellID", [{ key: "DifficultyID", is: 0 }]);
-        this.spellLevels = readDBCSV<SpellLevel>(baseDir + "dbc/spelllevels.csv", "SpellID", [{ key: "DifficultyID", is: 0 }]);
+        this.spellMiscs = readDBCSV<SpellMisc>(baseDir + "dbc/SpellMisc.csv", "SpellID", [{ key: "DifficultyID", is: 0 }]);
+        this.spellLevels = readDBCSV<SpellLevel>(baseDir + "dbc/SpellLevels.csv", "SpellID", [{ key: "DifficultyID", is: 0 }]);
+
+        for (const costId in this.spellPowerCost)
+        {
+            const cost = this.spellPowerCost[costId];
+            if (!this.spellPowerCostBySpell.has(cost.SpellID)) this.spellPowerCostBySpell.set(cost.SpellID, []);
+            this.spellPowerCostBySpell.get(cost.SpellID)!.push(cost);
+        }
+
+        for (const scoId in this.spellClassOptions)
+        {
+            const sco = this.spellClassOptions[scoId];
+            this.spellClassOptionsBySpell.set(sco.SpellID, sco);
+        }
 
         {
-            const spellEffects = readDBCSV<SpellEffect>(baseDir + "dbc/spelleffect.csv", "ID");
+            // Only the base difficulty; dungeon/raid difficulties duplicate effects of creature spells.
+            const spellEffects = readDBCSV<SpellEffect>(baseDir + "dbc/SpellEffect.csv", "ID", [{ key: "DifficultyID", is: 0 }]);
             for (let effectId in spellEffects)
             {
                 const spellId = spellEffects[effectId].SpellID;
@@ -224,9 +249,13 @@ export class SpellData
         for (const [spellId, effects] of this.spellEffectsBySpellId)
         {
             // Build name list
-            const name = this.getSpellName(spellId).Name_lang;
-            if (!this.spellsByName[name]) this.spellsByName[name] = [];
-            this.spellsByName[name].push(spellId); 
+            const nameEntry = this.getSpellName(spellId, true);
+            if (nameEntry)
+            {
+                const name = nameEntry.Name_lang;
+                if (!this.spellsByName[name]) this.spellsByName[name] = [];
+                this.spellsByName[name].push(spellId);
+            }
 
             // make sure direct dmg is always the 1st effect on spells that also have a duration effect
             if (isSeal(spellId)) continue;
@@ -235,11 +264,10 @@ export class SpellData
             {
                 if (effect1.EffectIndex != 1 || effect1.Effect != EFFECT_TYPE.SPELL_EFFECT_SCHOOL_DAMAGE) continue;
 
-                console.log("Effindex is 1 and SPELL_EFFECT_SCHOOL_DAMAGE on spell " + spellId);
                 for (const effect2 of effects)
                 {
                     if (effect2.EffectIndex != 0 || effect2.Effect != EFFECT_TYPE.SPELL_EFFECT_APPLY_AURA) continue;
-                    console.log("Effindex is 0 and SPELL_EFFECT_APPLY_AURA on spell " + spellId);
+                    // Put the direct damage effect first (the addon expects it in slot 1)
                     effect1.EffectIndex = 0;
                     effect2.EffectIndex = 1;
                     break;
@@ -257,9 +285,24 @@ export class SpellData
         console.log("SpellData created!");
     }
 
-    getSpellsByName(spellName: string)
+    /**
+     * Does the spell exist in the client data (name and misc entry)?
+     * The Forever tables still reference many removed Classic Era spells (ranks, old talents).
+     */
+    spellExists(spellId: number)
     {
-        if (!this.spellsByName[spellName]) throw new Error("No spells with name " + spellName + " exist!");
+        return !!this.spellNames[spellId] && !!this.spellMiscs[spellId];
+    }
+
+    getSpellsByName(spellName: string): number[]
+    getSpellsByName(spellName: string, noerr: true): number[] | undefined
+    getSpellsByName(spellName: string, noerr = false)
+    {
+        if (!this.spellsByName[spellName])
+        {
+            if (noerr) return;
+            throw new Error("No spells with name " + spellName + " exist!");
+        }
         return this.spellsByName[spellName];
     }
 
@@ -276,7 +319,9 @@ export class SpellData
         return effects;
     }
 
-    getSpellLevel(spellId: number)
+    getSpellLevel(spellId: number): SpellLevel
+    getSpellLevel(spellId: number, noerr: true): SpellLevel | undefined
+    getSpellLevel(spellId: number, noerr = false)
     {
         if (this.spellLevels[spellId]) return this.spellLevels[spellId];
 
@@ -284,18 +329,24 @@ export class SpellData
             || spellId == 23590
             || spellId == 58381 /** Mind Flay */)
         {
-            return {
-                ID: 0,
-                DifficultyID: 0,
-                BaseLevel: 0,
-                MaxLevel: 0,
-                SpellLevel: 0,
-                MaxPassiveAuraLevel: 0,
-                SpellID: spellId
-            }
+            return SpellData.emptySpellLevel(spellId);
         }
 
+        if (noerr) return;
         throw new Error("Spelllevel not found for " + spellId);
+    }
+
+    static emptySpellLevel(spellId: number): SpellLevel
+    {
+        return {
+            ID: 0,
+            DifficultyID: 0,
+            BaseLevel: 0,
+            MaxLevel: 0,
+            SpellLevel: 0,
+            MaxPassiveAuraLevel: 0,
+            SpellID: spellId
+        }
     }
 
     getSpellMisc(spellId: number): SpellMisc
@@ -316,9 +367,22 @@ export class SpellData
         throw new Error("Spellname not found for " + spellId);
     }
 
-    getSpell(spellId: number)
+    /**
+     * Spell name with rank subtext, for comments: "Fireball (Rank 2)".
+     */
+    getSpellNameWithRank(spellId: number)
+    {
+        const name = this.getSpellName(spellId, true)?.Name_lang ?? ("spell " + spellId);
+        const subtext = this.spell[spellId]?.NameSubtext_lang;
+        return name + ((subtext && subtext.length) ? ` (${subtext})` : "");
+    }
+
+    getSpell(spellId: number): Spell
+    getSpell(spellId: number, noerr: true): Spell | undefined
+    getSpell(spellId: number, noErr = false)
     {
         if (this.spell[spellId]) return this.spell[spellId];
+        if (noErr) return;
         throw new Error("Spellspell not found for " + spellId);
     }
 
@@ -326,10 +390,6 @@ export class SpellData
     {
         if (this.spellDuration[durationId])
         {
-            if (this.spellDuration[durationId].DurationPerLevel != 0)
-            {
-                throw new Error("Spellduration scales with level, not handled! " + durationId);
-            }
             return this.spellDuration[durationId];
         }
         throw new Error("Spellduration not found " + durationId);
@@ -354,7 +414,7 @@ export class SpellData
             return sc;
         }
 
-        if (spellId == 23590 || spellId == 20168 || this.getSpellName(spellId).Name_lang == "Healing Stream Totem")
+        if (spellId == 23590 || spellId == 20168 || this.getSpellName(spellId, true)?.Name_lang == "Healing Stream Totem")
         {
             let sc: SpellCategory = {
                 DefenseType: DEFENSE_TYPE.NONE,
@@ -364,7 +424,6 @@ export class SpellData
             return sc;
         }
 
-        //throw new Error("SpellCategory not found for " + spellId);
         return;
     }
 
@@ -382,29 +441,19 @@ export class SpellData
         return sc;
     }
 
-    getSpellPowerCosts(spellId: number)
+    getSpellPowerCosts(spellId: number): SpellPower[]
     {
-        let costs: SpellPower[] = [];
-
-        for (let costId in this.spellPowerCost)
-        {
-            if (this.spellPowerCost[costId].SpellID == spellId)
-                costs.push(this.spellPowerCost[costId]);
-        }
-
-        return costs;
+        return this.spellPowerCostBySpell.get(spellId) ?? [];
     }
 
     getSpellClassOption(spellId: number): SpellClassOptions
     getSpellClassOption(spellId: number, noerr: true): SpellClassOptions | undefined
     getSpellClassOption(spellId: number, noerr = false)
     {
-        for (let scoid in this.spellClassOptions)
-        {
-            if (this.spellClassOptions[scoid].SpellID == spellId) return this.spellClassOptions[scoid];
-        }
+        const sco = this.spellClassOptionsBySpell.get(spellId);
+        if (sco) return sco;
         if (noerr) return;
-        throw "No spell class options for spell ID!";
+        throw new Error("No spell class options for spell " + spellId);
     }
 
     getSpellClassOptions()
@@ -419,7 +468,6 @@ export class SpellData
 
     getSpellAuraOptions(spellId: number): SpellAuraOptions | undefined
     {
-        //if (!this.spellAuraOptions[spellId]) throw "SpellAuraOptions not forund for spell " + spellId;
         return this.spellAuraOptions[spellId];
     }
 }

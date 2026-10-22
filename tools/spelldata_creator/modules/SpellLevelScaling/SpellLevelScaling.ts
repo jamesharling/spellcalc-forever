@@ -1,7 +1,9 @@
-import { readDBCSV } from "../../CSVReader";
+import { readDBCSV, readDBCSVtoMap } from "../../CSVReader";
 import { SpellData } from "../../SpellData";
 import { cfg } from "../../config";
+import { report, reportSection } from "../../report";
 import { ScalingFormulaParsed } from "./parser";
+import { ClassSpellLists } from "../../ClassSpellLists";
 
 interface SpellXDescriptionVariables
 {
@@ -16,96 +18,124 @@ interface SpellDescriptionVariables
     Variables: string,
 }
 
+/** Variables that describe level based scaling of a spell's values (Season of Discovery style). */
+const SCALING_LABELS = ["damagepower", "power", "base", "healpower"];
+
+const LUA_IDENTIFIER = /^[A-Za-z_][A-Za-z0-9_]*$/;
+
+/**
+ * Spells whose values scale with the player level through description variables
+ * ("$<power>" etc. in the description).
+ *
+ * Forever attaches description variable sets to many Classic Era spells only to show
+ * talent multipliers in the tooltip (e.g. "$<frostdamage>" on Frostbolt), so a spell is
+ * only treated as scaling when its description actually references a scaling variable.
+ */
 export class SpellLevelScaling
 {
     private readonly spellData: SpellData;
     /** Map<set id, Map<name, formula>> */
     private readonly descriptionVariables = new Map<number, Map<string, ScalingFormulaParsed>>();
+    /** Variable sets the parser could not handle (not needed unless a spell uses them). */
+    private readonly unparsableSets = new Map<number, string>();
     /** SpellId -> variable set Id */
     private readonly spellMappings = new Map<number, { variablesId: number, variablesKey: string }>();
 
-    constructor(spellData: SpellData)
+    /**
+     * @param classSpellLists Only spells in these lists are mentioned in the report.
+     */
+    constructor(spellData: SpellData, classSpellLists: ClassSpellLists)
     {
         this.spellData = spellData;
+        reportSection("Spell level scaling");
 
         const spellDescVars = readDBCSV<SpellDescriptionVariables>(cfg.dataDir + "dbc/SpellDescriptionVariables.csv", "ID");
         for (const id in spellDescVars)
         {
-            const varSplit = spellDescVars[id].Variables.trim().split("\n");
-            const variables = new Map<string, ScalingFormulaParsed>();
-
-            for (const varEntry of varSplit)
+            const setId = parseInt(id);
+            try
             {
-                const parsed = ScalingFormulaParsed.fromString(varEntry);
-                variables.set(parsed.label, parsed);
-            }
+                const varSplit = spellDescVars[id].Variables.trim().split("\n");
+                const variables = new Map<string, ScalingFormulaParsed>();
 
-            this.descriptionVariables.set(parseInt(id), variables);
-        }
-
-        const spellXDescVars = readDBCSV<SpellXDescriptionVariables>(cfg.dataDir + "dbc/SpellXDescriptionVariables.csv", "SpellID");
-        for (const spellId in spellXDescVars)
-        {
-            const variablesId = spellXDescVars[spellId].SpellDescriptionVariablesID;
-            const variables = this.descriptionVariables.get(variablesId);
-            if (variables)
-            {
-                const keyForSpell = this.spellResolveVariableName(variablesId, parseInt(spellId));
-                if (!keyForSpell)
+                for (const varEntry of varSplit)
                 {
-                    console.log("SpellLevelScaling: Spell " + spellId + " doesn't seem to exist.");
-                    continue;
+                    if (varEntry.trim().length === 0) continue;
+                    const parsed = ScalingFormulaParsed.fromString(varEntry);
+                    if (!LUA_IDENTIFIER.test(parsed.label)) throw new Error(`label "${parsed.label}" is not a valid Lua identifier`);
+                    variables.set(parsed.label, parsed);
                 }
-                this.spellMappings.set(spellXDescVars[spellId].SpellID, { variablesId: variablesId, variablesKey: keyForSpell });
+
+                this.descriptionVariables.set(setId, variables);
+            }
+            catch (error)
+            {
+                const msg = error instanceof Error ? error.message : String(error);
+                this.unparsableSets.set(setId, msg);
             }
         }
 
-        if (cfg.expansion == "CLASSIC")
+        const spellXDescVars = readDBCSVtoMap<SpellXDescriptionVariables>(cfg.dataDir + "dbc/SpellXDescriptionVariables.csv", "ID");
+        for (const entry of spellXDescVars.values())
         {
-            // Force add Earth Shield
-            this.spellMappings.set(408514, { variablesId: 824, variablesKey: "healpower" });
+            const variablesId = entry.SpellDescriptionVariablesID;
+            const spellId = entry.SpellID;
+
+            if (!this.spellData.spellExists(spellId)) continue;
+
+            const keyForSpell = this.spellResolveVariableName(variablesId, spellId);
+            if (!keyForSpell) continue;
+
+            if (this.unparsableSets.has(variablesId))
+            {
+                report(`${this.spellData.getSpellNameWithRank(spellId)} [${spellId}] uses variable set ${variablesId} which could not be parsed: ${this.unparsableSets.get(variablesId)}`);
+                continue;
+            }
+
+            this.spellMappings.set(spellId, { variablesId: variablesId, variablesKey: keyForSpell });
+            if (classSpellLists.isHandledSpell(spellId))
+            {
+                report(`${this.spellData.getSpellNameWithRank(spellId)} [${spellId}] scales with level: set ${variablesId} variable "${keyForSpell}"`);
+            }
         }
+
+        console.log(`Spell level scaling: ${this.spellMappings.size} spells use scaling variables`);
     }
 
+    /**
+     * Scaling variable a spell uses in its description, if any.
+     */
     private spellResolveVariableName(variablesId: number, spellId: number)
     {
-        const variables = this.descriptionVariables.get(variablesId);
-        if (!variables) throw new Error("No variables for this Id!");
-
         const effects = this.spellData.getSpellEffects(spellId, true);
-
         if (!effects) return;
 
-        if (variables.size === 1)
-        {
-            if (variables.has("ticks")) return;
-            return variables.keys().next().value;
-        } 
+        const spell = this.spellData.getSpell(spellId, true);
+        if (!spell) return;
+        const description = spell.Description_lang + " " + spell.AuraDescription_lang;
 
-        if (effects[0].Effect == EFFECT_TYPE.SPELL_EFFECT_HEAL || effects[0].EffectAura == AURA_TYPE.SPELL_AURA_PERIODIC_HEAL)
+        const variables = this.descriptionVariables.get(variablesId);
+        const isReferenced = (label: string) =>
         {
-            if (!variables.has("healpower")) throw new Error("Healing spell but no variable healpower exists!");
-            return "healpower";
+            if (variables && !variables.has(label)) return false;
+            return description.indexOf("$<" + label + ">") !== -1;
+        };
+
+        const isHeal = effects[0].Effect == EFFECT_TYPE.SPELL_EFFECT_HEAL || effects[0].EffectAura == AURA_TYPE.SPELL_AURA_PERIODIC_HEAL;
+        if (isHeal && isReferenced("healpower")) return "healpower";
+
+        for (const label of SCALING_LABELS)
+        {
+            if (isReferenced(label)) return label;
         }
 
-        if (cfg.expansion == "CLASSIC")
-        {
-            // Prayer of Mending
-            if (spellId == 401859) return "healpower";
-        }
-
-        if (variables.has("damagepower")) return "damagepower";
-        if (variables.has("power")) return "power";
-        if (variables.has("base")) return "base";
-        if (variables.has("mult")) return //"mult"; don't need those...
-
-        throw new Error("Not healing spell but no variable damagepower, power or base exists!");
+        return;
     }
 
     /**
      * Get key for variable function if spell uses special scaling.
-     * @param spellId 
-     * @returns 
+     * @param spellId
+     * @returns
      */
     getVariableKeyForSpell(spellId: number)
     {
@@ -115,39 +145,32 @@ export class SpellLevelScaling
     }
 
     /**
-     * Get generated Lua code for addon.
-     * @returns 
+     * Variable set IDs used by at least one spell.
      */
-    getVariablesLua()
+    private getUsedSetIds()
     {
-        console.log("Generate level scaling data");
-
-        let lua = `-- GENERATED
-
----@class AddonEnv
-local _addon = select(2, ...);
-`;
-        lua += this.getVarSetsLua("_addon.spellScalingVariables");
-        return lua;
+        const ids = new Set<number>();
+        for (const mapping of this.spellMappings.values()) ids.add(mapping.variablesId);
+        return Array.from(ids).sort((a, b) => a - b);
     }
 
     /**
-     * Get Lua table of this crap.
+     * Get Lua table of the variable sets.
      * @param varName For the table variable.
-     * @param ids Optionally get specific sets of crap.
-     * @returns 
+     * @param ids Optionally get specific sets; default are the sets used by spells.
+     * @returns
      */
     getVarSetsLua(varName: string, ids?: number[])
     {
         let lua = `---@type table<number, table<string, fun(playerLevel:number):number>>
 ${varName} = {\n`;
 
-        ids = ids ?? Array.from(this.descriptionVariables.keys());
+        ids = ids ?? this.getUsedSetIds();
 
         for (const setId of ids)
         {
             const vars = this.descriptionVariables.get(setId);
-            if (!vars) throw new Error("Invalid variable set id " + setId);
+            if (!vars) throw new Error("Invalid or unparsable variable set id " + setId);
 
             lua += `    [${setId}] = {\n`;
 

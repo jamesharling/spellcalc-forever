@@ -1,7 +1,7 @@
 import { ClassSpellLists } from "./ClassSpellLists";
 import { ClassSpellSets } from "./ClassSpellSets";
 import { SpellData, SpellEffect } from "./SpellData";
-import { cfg } from "./config";
+import { getEffectBase } from "./effectValues";
 
 export const USELESS_AURAS: { [index: number]: boolean } = {
     [AURA_TYPE.SPELL_AURA_MOD_ATTACK_POWER]: true,
@@ -99,17 +99,9 @@ export const USELESS_AURAS: { [index: number]: boolean } = {
     [AURA_TYPE.SPELL_AURA_WATER_WALK]: true,
 }
 
-if (cfg.expansion != "CLASSIC")
-{
-    USELESS_AURAS[AURA_TYPE.SPELL_AURA_MOD_POWER_REGEN] = true; // As of TBC the API provides regen values including MP5
-    USELESS_AURAS[AURA_TYPE.SPELL_AURA_MOD_HIT_CHANCE] = true; // can get from ingame API
-    USELESS_AURAS[AURA_TYPE.SPELL_AURA_MOD_SPELL_HIT_CHANCE] = true; // can get from ingame API
-}
-
 function getBaseValue(effect: SpellEffect)
 {
-    if (effect.EffectDieSides == 0) return effect.EffectBasePoints;
-    return effect.EffectBasePoints + 1;
+    return getEffectBase(effect);
 }
 
 
@@ -472,7 +464,7 @@ export class AuraHandlers
                 case 9: // pushback reduction?
                     return;
                 default:
-                    throw "SPELL_AURA_ADD_FLAT_MODIFIER type not handled!";
+                    throw new Error(`SPELL_AURA_ADD_FLAT_MODIFIER misc value ${effect.EffectMiscValue_0} not handled: ${effect.SpellID} // ${spellData.getSpell(effect.SpellID, true)?.Description_lang}`);
             }
 
             if (!this.spellEffectTargetsValidSpells(effect)) return;
@@ -505,6 +497,9 @@ export class AuraHandlers
                     break;
                 case 15: // SPELLMOD_CRIT_DAMAGE_BONUS
                     aed.type = ADDON_EFFECT_TYPE.SPELLMOD_PCT_CRIT_MULT;
+                    break;
+                case 7: // SPELLMOD_CRITICAL_CHANCE (Forever's Holy Power uses the pct modifier; it adds crit chance points)
+                    aed.type = ADDON_EFFECT_TYPE.SPELLMOD_FLAT_CRIT_CHANCE;
                     break;
                 case 3: // SPELLMOD_EFFECT1 (melee stuff mostly?)
                     {
@@ -573,7 +568,7 @@ export class AuraHandlers
                 case 26: // SPELLMOD_FREQUENCY_OF_SUCCESS
                     return;
                 default:
-                    throw "SPELL_AURA_ADD_FLAT_MODIFIER type not handled!";
+                    throw new Error(`SPELL_AURA_ADD_PCT_MODIFIER misc value ${effect.EffectMiscValue_0} not handled: ${effect.SpellID} // ${spellData.getSpell(effect.SpellID, true)?.Description_lang}`);
             }
 
             if (!this.spellEffectTargetsValidSpells(effect)) return;

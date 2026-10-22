@@ -1,6 +1,7 @@
 import { createEffectLua, createFileHead } from "../itemFunctions";
 import { SpellData, SpellEffect } from "../SpellData";
 import { TargetAuraHandlers } from "./TargetAuraHandlers";
+import { report } from "../report";
 
 const DO_AURAS: { [index: number]: true | undefined } = {
     [AURA_TYPE.SPELL_AURA_MOD_DAMAGE_TAKEN]: true, // = spell power? (misc_0 = school mask)
@@ -39,7 +40,7 @@ export class TargetAuras
 
         if (!misc
             || !name
-            || name.toLowerCase().indexOf("test") !== -1
+            || String(name).toLowerCase().indexOf("test") !== -1
             || misc.Attributes_0 & SPELL_ATTR0.SPELL_ATTR_DO_NOT_DISPLAY) return aedarr;
 
         for (let spellEffect of spellEffects)
@@ -48,15 +49,20 @@ export class TargetAuras
                 && spellEffect.Effect !== EFFECT_TYPE.SPELL_EFFECT_PERSISTENT_AREA_AURA
                 && spellEffect.Effect !== EFFECT_TYPE.SPELL_EFFECT_APPLY_AREA_AURA_PARTY) continue;
             if (!DO_AURAS[spellEffect.EffectAura]) continue;
-            if (!this.handlers[spellEffect.EffectAura]) 
+            if (!this.handlers[spellEffect.EffectAura])
             {
-                //console.log("Aura type " + spellEffect.EffectAura + " not handled! spellId: " + spellEffect.SpellID);
                 throw new Error("Aura type " + spellEffect.EffectAura + " not handled! spellId: " + spellEffect.SpellID);
-                continue;
             }
 
-            const aed = this.handlers[spellEffect.EffectAura](spellEffect);
-            if (aed) aedarr.push(aed);
+            try
+            {
+                const aed = this.handlers[spellEffect.EffectAura](spellEffect);
+                if (aed) aedarr.push(aed);
+            }
+            catch (error)
+            {
+                report(`${name} [${spellId}] effect ${spellEffect.EffectIndex} skipped: ${error}`);
+            }
         }
 
         return aedarr;

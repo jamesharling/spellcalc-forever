@@ -1,0 +1,805 @@
+SpellCalc Forever data generation report
+Client build: wowf 1.60.1.70532
+Generated: 2026-10-22T18:04:56.055Z
+
+Everything listed here was skipped or guessed by the generator and should be reviewed.
+
+== Spell data fixes (0)
+
+== Spell list: druid (4)
+  druid: skill lines 134 (Feral Combat), 573 (Restoration), 574 (Balance)
+  druid: 207 skill line spells, 62 passives ignored, 105 skill line entries point to removed spells
+  druid: 2 additional spells from trait tree 1089
+  Feral Charge [1238122, Feral Combat] skipped: Triggered spell has no valid effects!
+
+== Spell list: priest (3)
+  priest: skill lines 56 (Holy), 78 (Shadow Magic), 613 (Discipline), 2885 (Meditation)
+  priest: 265 skill line spells, 48 passives ignored, 93 skill line entries point to removed spells
+  priest: 0 additional spells from trait tree 1114
+
+== Spell list: warlock (3)
+  warlock: skill lines 355 (Affliction), 354 (Demonology), 593 (Destruction), 2898 (Explorer Imp)
+  warlock: 180 skill line spells, 57 passives ignored, 113 skill line entries point to removed spells
+  warlock: 0 additional spells from trait tree 1116
+
+== Spell list: mage (4)
+  mage: skill lines 237 (Arcane), 6 (Frost), 8 (Fire)
+  mage: 208 skill line spells, 43 passives ignored, 97 skill line entries point to removed spells
+  mage: 0 additional spells from trait tree 1112
+  Combustion [11129, Fire] skipped: Triggered spell has no valid effects!
+
+== Spell list: paladin (3)
+  paladin: skill lines 267 (Protection), 184 (Retribution), 594 (Holy)
+  paladin: 170 skill line spells, 53 passives ignored, 102 skill line entries point to removed spells
+  paladin: 0 additional spells from trait tree 1100
+
+== Spell list: shaman (3)
+  shaman: skill lines 373 (Enhancement), 375 (Elemental Combat), 374 (Restoration)
+  shaman: 193 skill line spells, 60 passives ignored, 92 skill line entries point to removed spells
+  shaman: 1 additional spells from trait tree 1082
+
+== Spell level scaling (0)
+
+== Spell data: druid (3)
+  Enrage [5229]: no SpellCategories entry, defense type set to none
+  Frenzied Regeneration [22845]: no SpellLevels entry, using level 0 (no per-level scaling)
+  Frenzied Regeneration [22845]: no SpellCategories entry, defense type set to none
+
+== Talents: druid (25)
+  Nature's Majesty (1223082) effect 0: aura type 290 is not handled, effect skipped
+  Improved Starfire (16850) effect 1 skipped: Triggered spell needs some love: 16922
+  Nature's Grace (16880) effect 0 skipped: Triggered spell needs some love: 16886
+  Eclipse (408248) effect 0 skipped: SPELL_AURA_DUMMY spell not handled! 408248
+  Eclipse (408248) effect 1 skipped: SPELL_AURA_DUMMY spell not handled! 408248
+  Eclipse (408248) effect 2 skipped: SPELL_AURA_DUMMY spell not handled! 408248
+  Eclipse (408248) effect 3 skipped: SPELL_AURA_DUMMY spell not handled! 408248
+  Heart of the Wild (17003) effect 1 skipped: SPELL_AURA_DUMMY spell not handled! 17003
+  Heart of the Wild (17003) effect 2 skipped: SPELL_AURA_DUMMY spell not handled! 17003
+  Feral Instinct (16947) effect 0 skipped: Error: Unhandled FLAT SPELLMOD_EFFECT1: 16947: // Increases damage done by your Swipe ability by $s2% and reduces the chance enemies have to detect you while Prowling as if you were ${$m1/5} $llevel:levels; higher.
+  Thick Hide (16929) effect 0 skipped: SPELL_AURA_DUMMY spell not handled! 16929
+  Thick Hide (16929) effect 1 skipped: SPELL_AURA_DUMMY spell not handled! 16929
+  Feral Swiftness (17002) effect 1 skipped: SPELL_AURA_DUMMY spell not handled! 17002
+  Sharpened Claws (16942) effect 0: aura type 290 is not handled, effect skipped
+  Blood Frenzy (16958) effect 0 skipped: SPELL_AURA_DUMMY spell not handled! 16958
+  Blood Frenzy (16958) effect 1 skipped: SPELL_AURA_DUMMY spell not handled! 16958
+  Predatory Strikes (16972) effect 0 skipped: SPELL_AURA_DUMMY spell not handled! 16972
+  Rend and Tear (1223246) effect 0 skipped: SPELL_AURA_DUMMY spell not handled! 1223246
+  Natural Reaction (417051) effect 1 skipped: SPELL_AURA_DUMMY spell not handled! 417051
+  Natural Reaction (417051) effect 2 skipped: SPELL_AURA_DUMMY spell not handled! 417051
+  Natural Reaction (417051) effect 3 skipped: SPELL_AURA_DUMMY spell not handled! 417051
+  Leader of the Pack (17007) effect 0 skipped: SPELL_AURA_DUMMY spell not handled! 17007
+  Furor (17056) effect 0 skipped: SPELL_AURA_DUMMY spell not handled! 17056
+  Furor (17056) effect 1 skipped: SPELL_AURA_DUMMY spell not handled! 17056
+  Overgrowth (17245) effect 0 skipped: SPELL_AURA_DUMMY spell not handled! 17245
+
+== Spell data: priest (0)
+
+== Talents: priest (26)
+  Devouring Contagion (1309950) effect 1 skipped: SPELL_AURA_DUMMY spell not handled! 1309950
+  Devouring Contagion (1309950) effect 2 skipped: SPELL_AURA_DUMMY spell not handled! 1309950
+  Shadow Weaving (15257) effect 0 skipped: Triggered spell needs some love: 15258
+  Dark Inspiration (1326159) effect 0 skipped: SPELL_AURA_DUMMY spell not handled! 1326159
+  Improved Mind Flay (1225139) effect 0 skipped: SPELL_AURA_DUMMY spell not handled! 1225139
+  Blackout (15326) effect 0 skipped: Triggered spell needs some love: 15269
+  Spirit Tap (15270) effect 0 skipped: Triggered spell needs some love: 15271
+  Renewed Hope (425280) effect 0 skipped: SPELL_AURA_DUMMY spell not handled! 425280
+  Renewed Hope (425280) effect 1 skipped: SPELL_AURA_DUMMY spell not handled! 425280
+  Divine Aegis (431622) effect 0 skipped: SPELL_AURA_DUMMY spell not handled! 431622
+  Divine Aegis (431622) effect 1 skipped: SPELL_AURA_DUMMY spell not handled! 431622
+  Martyrdom (14531) effect 0 skipped: Triggered spell needs some love: 27828
+  Improved Power Word: Shield (14748) effect 0 skipped: Error: Unhandled FLAT SPELLMOD_EFFECT1: 14748: // Increases the damage absorbed by your Power Word: Shield by $s1%.
+  Silent Resolve (14523) effect 1: aura type 232 is not handled, effect skipped
+  Silent Resolve (14523) effect 2: aura type 232 is not handled, effect skipped
+  Silent Resolve (14523) effect 3: aura type 232 is not handled, effect skipped
+  Spirit of Redemption (20711) effect 0 skipped: SPELL_AURA_DUMMY spell not handled! 20711
+  Litany of Light (1317006) effect 0 skipped: Triggered spell needs some love
+  Searing Light (14909) effect 1 skipped: Triggered spell needs some love: 1284536
+  Inspiration (14892) effect 0 skipped: SPELL_AURA_DUMMY spell not handled! 14892
+  Blessed Recovery (27811) effect 0 skipped: SPELL_AURA_DUMMY spell not handled! 27811
+  Blessed Recovery (27811) effect 1 skipped: SPELL_AURA_DUMMY spell not handled! 27811
+  Power in Light (1309969) effect 0 skipped: SPELL_AURA_DUMMY spell not handled! 1309969
+  Early Demise (1310076) effect 0 skipped: SPELL_AURA_DUMMY spell not handled! 1310076
+  Early Demise (1310076) effect 1 skipped: SPELL_AURA_DUMMY spell not handled! 1310076
+  node 110855: spell 14889 already handled by another node, skipped
+
+== Spell data: warlock (0)
+
+== Talents: warlock (27)
+  Shadow and Flame (426316) effect 0 skipped: SPELL_AURA_DUMMY spell not handled! 426316
+  Shadow and Flame (426316) effect 1 skipped: SPELL_AURA_DUMMY spell not handled! 426316
+  Shadow and Flame (426316) effect 2 skipped: SPELL_AURA_DUMMY spell not handled! 426316
+  Shadow and Flame (426316) effect 3 skipped: SPELL_AURA_DUMMY spell not handled! 426316
+  Fire and Brimstone (412751) effect 0 skipped: SPELL_AURA_DUMMY spell not handled! 412751
+  Pyroclasm (18073) effect 0 skipped: SPELL_AURA_DUMMY spell not handled! 18073
+  Aftermath (18119) effect 0 skipped: Triggered spell needs some love: 18118
+  Improved Shadow Bolt (17793) effect 0 skipped: SPELL_AURA_DUMMY spell not handled! 17793
+  Demonic Pact (425464) effect 0 skipped: SPELL_AURA_DUMMY spell not handled! 425464
+  Master Demonologist (23785) effect 0 skipped: SPELL_AURA_DUMMY spell not handled! 23785
+  Master Demonologist (23785) effect 1 skipped: SPELL_AURA_DUMMY spell not handled! 23785
+  Master Demonologist (23785) effect 2 skipped: SPELL_AURA_DUMMY spell not handled! 23785
+  Master Demonologist (23785) effect 3 skipped: SPELL_AURA_DUMMY spell not handled! 23785
+  Demonic Knowledge (412732) effect 0 skipped: SPELL_AURA_DUMMY spell not handled! 412732
+  Decimation (440870) effect 0 skipped: SPELL_AURA_DUMMY spell not handled! 440870
+  Decimation (440870) effect 2 skipped: SPELL_AURA_DUMMY spell not handled! 440870
+  Demonic Energies (1225214) effect 0 skipped: SPELL_AURA_DUMMY spell not handled! 1225214
+  Demonic Energies (1225214) effect 1 skipped: SPELL_AURA_DUMMY spell not handled! 1225214
+  Fel Vitality (18731) effect 1: aura type 178 is not handled, effect skipped
+  Improved Health Funnel (18703) effect 0 skipped: Error: Unhandled FLAT SPELLMOD_EFFECT1: 18703: // Increases the amount of health transferred by your Health Funnel spell by $m1%, reduces its health cost by $m2%, and reduces all threat your Health Funnel generates by $m3%. Allows Health Funnel to be used regardless of your demon's health.
+  Improved Health Funnel (18703) effect 3 skipped: Error: SPELL_AURA_ADD_PCT_MODIFIER misc value 32 not handled: 18703 // Increases the amount of health transferred by your Health Funnel spell by $m1%, reduces its health cost by $m2%, and reduces all threat your Health Funnel generates by $m3%. Allows Health Funnel to be used regardless of your demon's health.
+  Improved Imp (18694) effect 2 skipped: SPELL_AURA_DUMMY spell not handled! 18694
+  Soul Siphon (17804) effect 0 skipped: SPELL_AURA_DUMMY spell not handled! 17804
+  Nightfall (18094) effect 0 skipped: SPELL_AURA_DUMMY spell not handled! 18094
+  Improved Life Tap (18182) effect 0 skipped: SPELL_AURA_DUMMY spell not handled! 18182
+  Soul Harvest (437032) effect 0 skipped: SPELL_AURA_DUMMY spell not handled! 437032
+  Soul Harvest (437032) effect 1 skipped: SPELL_AURA_DUMMY spell not handled! 437032
+
+== Spell data: mage (0)
+
+== Talents: mage (27)
+  Winter's Chill (11180) effect 0 skipped: Triggered spell needs some love: 12579
+  Winter's Chill (11180) effect 1 skipped: SPELL_AURA_DUMMY spell not handled! 11180
+  Fingers of Frost (400647) effect 0 skipped: SPELL_AURA_DUMMY spell not handled! 400647
+  Fingers of Frost (400647) effect 1 skipped: SPELL_AURA_DUMMY spell not handled! 400647
+  Shatter (11170) effect 0 skipped: SPELL_AURA_DUMMY spell not handled! 11170
+  Improved Blizzard (11185) effect 0 skipped: SPELL_AURA_DUMMY spell not handled! 11185
+  Piercing Ice (11151) effect 1: no rank curve, value 2 is used for all 3 ranks (check the tooltip)
+  Frostbite (11071) effect 0 skipped: Triggered spell needs some love: 12494
+  Permafrost (11175) effect 1 skipped: Error: Unhandled FLAT SPELLMOD_EFFECT1: 11175: // Increases the duration of your Chill effects by $s1% and reduces the target's speed by an additional $s2%.
+  Frost Warding (11189) effect 1 skipped: Error: Unhandled FLAT SPELLMOD_EFFECT2: 11189: // Increases the Armor and resistance given by your Frost Armor and Ice Armor spells by $s1%. In addition, gives your Frost Ward a $s2% chance to reflect Frost spells and effects while active.
+  Combustion (11129) effect 0 skipped: SPELL_AURA_DUMMY spell not handled! 11129
+  Fire Power (11124) effect 0 skipped: SPELL_AURA_DUMMY spell not handled! 11124
+  Fire Power (11124) effect 1 skipped: SPELL_AURA_DUMMY spell not handled! 11124
+  Master of Elements (29074) uses a hand-written definition: ILLUMINATION=10/pt
+  Heating Up (400624) effect 0 skipped: SPELL_AURA_DUMMY spell not handled! 400624
+  Improved Fire Ward (11094) effect 0 skipped: Error: Unhandled FLAT SPELLMOD_EFFECT2: 11094: // Causes your Fire Ward to have a $s1% chance to reflect Fire spells while active.
+  Improved Scorch (11095) effect 0 skipped: SPELL_AURA_ADD_TARGET_TRIGGER spell not handled! 22959
+  Impact (11103) effect 0 skipped: Triggered spell needs some love: 12355
+  Ignite (11119) uses a hand-written definition: SPELLMOD_EXTRA_ON_CRIT=8/pt
+  Arcane Instability (15058) effect 2: aura type 290 is not handled, effect skipped
+  Missile Barrage (400588) effect 0 skipped: Triggered spell needs some love: 400589
+  Missile Barrage (400588) effect 1 skipped: SPELL_AURA_DUMMY spell not handled! 400588
+  Improved Counterspell (11255) effect 0 skipped: SPELL_AURA_DUMMY spell not handled! 11255
+  Arcane Shielding (11252) effect 1 skipped: Error: Unhandled FLAT SPELLMOD_EFFECT1: 11252: // Decreases the Mana lost per point of damage taken when your Mana Shield spell is active by $m1% and increases the resistances granted by your Mage Armor spell by $m2%.
+  Arcane Resilience (28574) effect 0: aura type 268 is not handled, effect skipped
+  Arcane Concentration (11213) uses a hand-written definition: CLEARCAST_CHANCE_DMG=2/pt
+  Magic Absorption (29441) effect 0 skipped: SPELL_AURA_DUMMY spell not handled! 29441
+
+== Spell data: paladin (0)
+
+== Talents: paladin (22)
+  Illumination (20210) uses a hand-written definition: ILLUMINATION=10/pt
+  Unyielding Faith (9453) effect 0: aura type 232 is not handled, effect skipped
+  Unyielding Faith (9453) effect 1: aura type 232 is not handled, effect skipped
+  Redoubt (20127) effect 0 skipped: SPELL_AURA_DUMMY spell not handled! 20127
+  Reckoning (20177) effect 0 skipped: SPELL_AURA_DUMMY spell not handled! 20177
+  Toughness (20143) effect 0: aura type 142 is not handled, effect skipped
+  Toughness (20143) effect 1: aura type 466 is not handled, effect skipped
+  Improved Righteous Fury (20468) effect 0 skipped: Error: Unhandled FLAT SPELLMOD_EFFECT2: 20468: // While Righteous Fury is active, all damage taken is reduced by $m1%.
+  Vengeance (20049) effect 0: aura type 231 is not handled, effect skipped
+  Eye for an Eye (9799) effect 0 skipped: SPELL_AURA_DUMMY spell not handled! 9799
+  Sanctified Judgement (1311074) effect 0 skipped: SPELL_AURA_DUMMY spell not handled! 1311074
+  Sanctified Judgement (1311074) effect 1 skipped: SPELL_AURA_DUMMY spell not handled! 1311074
+  Vindication (9452) effect 0 skipped: SPELL_AURA_DUMMY spell not handled! 9452
+  Vindication (9452) effect 1 skipped: SPELL_AURA_DUMMY spell not handled! 9452
+  Consecrated Ground (1310905) effect 0 skipped: SPELL_AURA_DUMMY spell not handled! 1310905
+  Infusion of Light (426065) effect 0 skipped: SPELL_AURA_DUMMY spell not handled! 426065
+  Shield Specialization (20150) effect 0: aura type 272 is not handled, effect skipped
+  Shield Specialization (20150) effect 1 skipped: Triggered spell needs some love: 1310925
+  Improved Seal of Fury (1314103) effect 0 skipped: SPELL_AURA_DUMMY spell not handled! 1314103
+  Improved Seal of Fury (1314103) effect 1 skipped: SPELL_AURA_DUMMY spell not handled! 1314103
+  Improved Seal of Fury (1314103) effect 2 skipped: SPELL_AURA_DUMMY spell not handled! 1314103
+  Iron Creed (1311034) effect 1: aura type 231 is not handled, effect skipped
+
+== Spell data: shaman (1)
+  Water Shield [408511]: no SpellCategories entry, defense type set to none
+
+== Talents: shaman (28)
+  Ancestral Healing (16176) effect 0 skipped: SPELL_AURA_DUMMY spell not handled! 16176
+  Water Shield (408510) effect 0 skipped: Triggered spell needs some love: 408511
+  Water Shield (408510) effect 1 skipped: SPELL_AURA_DUMMY spell not handled! 408510
+  Improved Reincarnation (16184) effect 1: aura type 133 is not handled, effect skipped
+  Rage of the Farseer (425336) effect 0: aura type 342 is not handled, effect skipped
+  Rage of the Farseer (425336) effect 1: aura type 61 is not handled, effect skipped
+  Maelstrom Weapon (408498) effect 0 skipped: SPELL_AURA_DUMMY spell not handled! 408498
+  Maelstrom Weapon (408498) effect 1 skipped: SPELL_AURA_DUMMY spell not handled! 408498
+  Maelstrom Weapon (408498) effect 2 skipped: SPELL_AURA_DUMMY spell not handled! 408498
+  Improved Stormstrike (1223031) effect 0 skipped: SPELL_AURA_DUMMY spell not handled! 1223031
+  Improved Stormstrike (1223031) effect 1 skipped: SPELL_AURA_DUMMY spell not handled! 1223031
+  Improved Stormstrike (1223031) effect 2 skipped: SPELL_AURA_DUMMY spell not handled! 1223031
+  Spirit Weapons (16268) effect 1 skipped: Error: Unhandled FLAT SPELLMOD_EFFECT2: 16268: // Gives a chance to parry enemy melee attacks, reduces all threat generated by your attacks by $s1% while Rockbiter Weapon is not active, and increases all threat generated by $s3% while Rockbiter Weapon is active.
+  Spirit Weapons (16268) effect 2 skipped: SPELL_AURA_DUMMY spell not handled! 16268
+  Flurry (16256) effect 0 skipped: SPELL_AURA_DUMMY spell not handled! 16256
+  Elemental Weapons (16266) effect 0 skipped: Error: Unhandled FLAT SPELLMOD_EFFECT1: 16266: // Increases the melee attack power bonus of your Rockbiter Weapon by $m1%, your Windfury Weapon effect by $m3% and increases the damage caused by your Flametongue Weapon and Frostbrand Weapon by $m2%.
+  Elemental Weapons (16266) effect 2 skipped: Error: Unhandled FLAT SPELLMOD_EFFECT1: 16266: // Increases the melee attack power bonus of your Rockbiter Weapon by $m1%, your Windfury Weapon effect by $m3% and increases the damage caused by your Flametongue Weapon and Frostbrand Weapon by $m2%.
+  Improved Ghost Wolf (16262) effect 1: aura type 332 is not handled, effect skipped
+  Improved Ghost Wolf (16262) effect 2: aura type 332 is not handled, effect skipped
+  Thundering Strikes (16255) effect 0: aura type 290 is not handled, effect skipped
+  Guardian Totems (16258) effect 0 skipped: Error: Unhandled FLAT SPELLMOD_EFFECT1: 16258: // Increases the amount of damage reduced by your Stoneskin Totem and Windwall Totem by $m1% and reduces the cooldown of your Grounding Totem by ${$m2/-1000} sec.
+  Mental Dexterity (415140) effect 0: aura type 598 is not handled, effect skipped
+  Mental Dexterity (415140) effect 1 skipped: SPELL_AURA_DUMMY spell not handled! 415140
+  Lightning Overload (408438) effect 0 skipped: SPELL_AURA_DUMMY spell not handled! 408438
+  Elemental Reach (28999) effect 1 skipped: SPELL_AURA_DUMMY spell not handled! 28999
+  Earthbound (1222988) effect 0 skipped: SPELL_AURA_DUMMY spell not handled! 1222988
+  Elemental Focus (16164) uses a hand-written definition: CLEARCAST_CHANCE_DMG=10/pt
+  Elemental Devastation (30160) effect 0 skipped: SPELL_AURA_DUMMY spell not handled! 30160
+
+== Item sets (538)
+  Item set bonus spell 1301123 effect 0: Triggered spell needs some love: 1301124
+  Item set bonus spell 1301123 effect 1: SPELL_AURA_DUMMY spell not handled! 1301123
+  Item set bonus spell 1301123 effect 2: SPELL_AURA_DUMMY spell not handled! 1301123
+  Item set bonus spell 1314795 effect 0: aura type 290 is not handled, skipped
+  Item set bonus spell 1302380 effect 0: Triggered spell needs some love: 1302378
+  Item set bonus spell 1292546 effect 0: aura type 232 is not handled, skipped
+  Item set bonus spell 1292546 effect 1: aura type 232 is not handled, skipped
+  Item set bonus spell 1299737 effect 0: Triggered spell needs some love: 1299735
+  Item set bonus spell 1299740 effect 0: Triggered spell needs some love: 1299739
+  Item set bonus spell 1299743 effect 0: Triggered spell needs some love: 1299746
+  Item set bonus spell 1213289 effect 0: aura type 593 is not handled, skipped
+  Item set bonus spell 1213289 effect 1: aura type 593 is not handled, skipped
+  Item set bonus spell 1292028 effect 0: Triggered spell needs some love: 1292029
+  Item set bonus spell 1291796 effect 0: Triggered spell needs some love: 1291797
+  Item set bonus spell 1291807 effect 0: Triggered spell needs some love: 1291806
+  Item set bonus spell 1293674 effect 0: Triggered spell needs some love: 1293673
+  Item set bonus spell 1293670 effect 0: Triggered spell needs some love: 1293733
+  Item set bonus spell 450527 effect 0: Triggered spell needs some love: 450554
+  Item set bonus spell 450576 effect 0: Triggered spell needs some love: 450554
+  Item set bonus spell 450585 effect 0: Triggered spell needs some love: 450583
+  Item set bonus spell 1302698 effect 0: Triggered spell needs some love: 1302700
+  Item set bonus spell 1302708 effect 0: Triggered spell needs some love: 1302707
+  Item set bonus spell 450608 effect 0: SPELL_AURA_DUMMY spell not handled! 450608
+  Item set bonus spell 1302712 effect 0: Triggered spell needs some love: 1302711
+  Item set bonus spell 450577 effect 0: Triggered spell needs some love: 450554
+  Item set bonus spell 1302718 effect 0: Triggered spell needs some love: 1302717
+  Item set bonus spell 1302716 effect 0: Triggered spell needs some love: 1302715
+  Item set bonus spell 1302721 effect 0: Triggered spell needs some love: 1302720
+  Item set bonus spell 450587 effect 0: Triggered spell needs some love: 450589
+  Item set bonus spell 23562 effect 0: aura type 274 is not handled, skipped
+  Item set bonus spell 1314828 effect 0: aura type 290 is not handled, skipped
+  Item set bonus spell 1302372 effect 0: aura type 305 is not handled, skipped
+  Item set bonus spell 1251991 effect 0: aura type 290 is not handled, skipped
+  Item set bonus spell 15693 effect 0: aura type 674 is not handled, skipped
+  Item set bonus spell 14803 effect 0: aura type 674 is not handled, skipped
+  Item set bonus spell 1302374 effect 0: aura type 255 is not handled, skipped
+  Item set bonus spell 28746 effect 0: aura type 572 is not handled, skipped
+  Item set bonus spell 436239 effect 0: aura type 290 is not handled, skipped
+  Item set bonus spell 15666 effect 0: aura type 674 is not handled, skipped
+  Item set bonus spell 438169 has no effects, skipped
+  Item set bonus spell 450012 effect 0: Triggered spell needs some love: 450013
+  Item set bonus spell 449921 effect 0: Triggered spell needs some love: 449923
+  Item set bonus spell 449919 effect 0: Triggered spell needs some love: 449920
+  Item set bonus spell 449924 effect 0: Triggered spell needs some love: 449925
+  Item set bonus spell 449928 effect 0: Triggered spell needs some love: 449927
+  Item set bonus spell 449929 effect 0: Triggered spell needs some love: 408261
+  Item set bonus spell 449931 effect 0: Triggered spell needs some love: 449932
+  Item set bonus spell 449935 effect 0: Triggered spell needs some love: 449934
+  Item set bonus spell 450083 effect 0: Triggered spell needs some love: 450084
+  Item set bonus spell 449970 effect 0: Triggered spell needs some love: 21919
+  Item set bonus spell 449974 effect 0: Triggered spell needs some love: 449975
+  Item set bonus spell 446233 effect 0: Triggered spell needs some love: 446231
+  Item set bonus spell 447284 has no effects, skipped
+  Item set bonus spell 447285 has no effects, skipped
+  Item set bonus spell 447286 has no effects, skipped
+  Item set bonus spell 447289 has no effects, skipped
+  Item set bonus spell 447291 has no effects, skipped
+  Item set bonus spell 447292 has no effects, skipped
+  Item set bonus spell 447295 has no effects, skipped
+  Item set bonus spell 447294 has no effects, skipped
+  Item set bonus spell 29097 effect 0: aura type 674 is not handled, skipped
+  Item set bonus spell 29094 effect 0: aura type 674 is not handled, skipped
+  Item set bonus spell 29091 effect 0: aura type 674 is not handled, skipped
+  Item set bonus spell 29093 effect 0: aura type 674 is not handled, skipped
+  Item set bonus spell 29096 effect 0: aura type 674 is not handled, skipped
+  Item set bonus spell 29095 effect 0: aura type 674 is not handled, skipped
+  Item set bonus spell 29090 effect 0: aura type 674 is not handled, skipped
+  Item set bonus spell 29092 effect 0: aura type 674 is not handled, skipped
+  Item set bonus spell 455864 effect 0: SPELL_AURA_ADD_TARGET_TRIGGER spell not handled! 455868
+  Item set bonus spell 455872 effect 0: aura type 608 is not handled, skipped
+  Item set bonus spell 455873 effect 0: SPELL_AURA_ADD_TARGET_TRIGGER spell not handled! 455903
+  Item set bonus spell 456194 effect 0: SPELL_AURA_DUMMY spell not handled! 456194
+  Item set bonus spell 456222 effect 0: SPELL_AURA_DUMMY spell not handled! 456222
+  Item set bonus spell 456325 effect 0: aura type 275 is not handled, skipped
+  Item set bonus spell 456337 effect 0: SPELL_AURA_ADD_TARGET_TRIGGER spell not handled! 456339
+  Item set bonus spell 457324 effect 0: SPELL_AURA_DUMMY spell not handled! 457324
+  Item set bonus spell 456379 effect 0: SPELL_AURA_ADD_TARGET_TRIGGER spell not handled! 456382
+  Item set bonus spell 456389 effect 0: SPELL_AURA_ADD_TARGET_TRIGGER spell not handled! 456393
+  Item set bonus spell 456341 effect 0: SPELL_AURA_DUMMY spell not handled! 456341
+  Item set bonus spell 456394 effect 0: Triggered spell needs some love: 5302
+  Item set bonus spell 456396 effect 0: SPELL_AURA_DUMMY spell not handled! 456396
+  Item set bonus spell 456398 effect 0: SPELL_AURA_DUMMY spell not handled! 456398
+  Item set bonus spell 456402 effect 0: Error: Unhandled FLAT SPELLMOD_EFFECT2: 456402: // Mage Armor increases your mana regeneration while casting by an additional $s1%. Molten Armor increases your spell damage and healing by $s2. Ice Armor grants $s3% increased chance to trigger Fingers of Frost.
+  Item set bonus spell 456402 effect 1: SPELL_AURA_DUMMY spell not handled! 456402
+  Item set bonus spell 456402 effect 2: SPELL_AURA_DUMMY spell not handled! 456402
+  Item set bonus spell 456404 effect 1: Error: Unhandled FLAT SPELLMOD_EFFECT3: 456404: // Your Temporal Beacons last $s1% longer.
+  Item set bonus spell 456477 effect 0: Error: SPELL_AURA_ADD_PCT_MODIFIER misc value 32 not handled: 456477 // Increases all chronomantic healing you deal by $s1%.
+  Item set bonus spell 456481 effect 0: SPELL_AURA_DUMMY spell not handled! 456481
+  Item set bonus spell 456488 effect 0: SPELL_AURA_DUMMY spell not handled! 456488
+  Item set bonus spell 456492 effect 0: SPELL_AURA_DUMMY spell not handled! 456492
+  Item set bonus spell 456494 effect 0: SPELL_AURA_DUMMY spell not handled! 456494
+  Item set bonus spell 456533 effect 0: SPELL_AURA_DUMMY spell not handled! 456533
+  Item set bonus spell 456533 effect 1: SPELL_AURA_DUMMY spell not handled! 456533
+  Item set bonus spell 456536 effect 0: aura type 274 is not handled, skipped
+  Item set bonus spell 456538 effect 0: Triggered spell needs some love: 456540
+  Item set bonus spell 456541 effect 1: SPELL_AURA_DUMMY spell not handled! 456541
+  Item set bonus spell 456548 effect 0: aura type 275 is not handled, skipped
+  Item set bonus spell 457325 effect 0: Triggered spell needs some love: 456549
+  Item set bonus spell 457329 effect 0: SPELL_AURA_ADD_TARGET_TRIGGER spell not handled! 457331
+  Item set bonus spell 457344 effect 0: SPELL_AURA_ADD_TARGET_TRIGGER spell not handled! 457342
+  Item set bonus spell 457349 effect 0: SPELL_AURA_DUMMY spell not handled! 457349
+  Item set bonus spell 457440 effect 0: aura type 332 is not handled, skipped
+  Item set bonus spell 457464 effect 0: SPELL_AURA_ADD_TARGET_TRIGGER spell not handled! 457469
+  Item set bonus spell 457478 effect 0: SPELL_AURA_DUMMY spell not handled! 457478
+  Item set bonus spell 457494 effect 1: SPELL_AURA_DUMMY spell not handled! 457494
+  Item set bonus spell 457520 effect 0: Triggered spell needs some love: 415105
+  Item set bonus spell 457520 effect 1: SPELL_AURA_DUMMY spell not handled! 457520
+  Item set bonus spell 457524 effect 0: SPELL_AURA_DUMMY spell not handled! 457524
+  Item set bonus spell 457540 effect 0: Triggered spell needs some love: 16280
+  Item set bonus spell 457541 effect 0: SPELL_AURA_DUMMY spell not handled! 457541
+  Item set bonus spell 457544 effect 0: Error: Unhandled FLAT SPELLMOD_EFFECT2: 457544: // Your Stoneskin Totem also reduces Physical damage taken by $s1% and your Windwall Totem also reduces Magical damage taken by $s1%.
+  Item set bonus spell 457548 effect 0: SPELL_AURA_DUMMY spell not handled! 457548
+  Item set bonus spell 457548 effect 1: wtf?
+  Item set bonus spell 457553 effect 1: Triggered spell needs some love: 440873
+  Item set bonus spell 457571 effect 0: aura type 332 is not handled, skipped
+  Item set bonus spell 457571 effect 1: aura type 332 is not handled, skipped
+  Item set bonus spell 457572 effect 0: SPELL_AURA_DUMMY spell not handled! 457572
+  Item set bonus spell 457642 effect 0: Triggered spell needs some love: 457643
+  Item set bonus spell 457645 effect 0: aura type 274 is not handled, skipped
+  Item set bonus spell 457646 effect 0: Triggered spell needs some love: 457648
+  Item set bonus spell 457651 effect 0: Error: Unhandled FLAT SPELLMOD_EFFECT3: 457651: // Increases all threat you generate in Defensive Stance by an additional $s1% and increases all damage you deal in Gladiator Stance by $s2%.
+  Item set bonus spell 457651 effect 1: Error: Unhandled FLAT SPELLMOD_EFFECT3: 457651: // Increases all threat you generate in Defensive Stance by an additional $s1% and increases all damage you deal in Gladiator Stance by $s2%.
+  Item set bonus spell 457652 effect 0: SPELL_AURA_DUMMY spell not handled! 457652
+  Item set bonus spell 457697 effect 0: SPELL_AURA_DUMMY spell not handled! 457697
+  Item set bonus spell 457820 effect 0: SPELL_AURA_DUMMY spell not handled! 457820
+  Item set bonus spell 461267 effect 0: Triggered spell needs some love: 461266
+  Item set bonus spell 461268 effect 0: Triggered spell needs some love: 461270
+  Item set bonus spell 461698 effect 0: Triggered spell needs some love: 464591
+  Item set bonus spell 461990 effect 0: Triggered spell needs some love: 463512
+  Item set bonus spell 9764 effect 0: aura type 674 is not handled, skipped
+  Item set bonus spell 448324 effect 0: aura type 290 is not handled, skipped
+  Item set bonus spell 467743 effect 0: Triggered spell needs some love: 467742
+  Item set bonus spell 468256 effect 0: Triggered spell needs some love: 468255
+  Item set bonus spell 467084 effect 0: SPELL_AURA_DUMMY spell not handled! 467084
+  Item set bonus spell 467090 effect 0: Triggered spell needs some love: 467088
+  Item set bonus spell 467099 effect 0: Triggered spell needs some love: 408261
+  Item set bonus spell 467203 effect 0: Triggered spell needs some love: 467204
+  Item set bonus spell 467208 effect 0: SPELL_AURA_DUMMY spell not handled! 467208
+  Item set bonus spell 467211 effect 0: SPELL_AURA_DUMMY spell not handled! 467211
+  Item set bonus spell 467211 effect 1: SPELL_AURA_DUMMY spell not handled! 467211
+  Item set bonus spell 467216 effect 0: SPELL_AURA_DUMMY spell not handled! 467216
+  Item set bonus spell 467221 effect 0: SPELL_AURA_DUMMY spell not handled! 467221
+  Item set bonus spell 467227 effect 0: SPELL_AURA_DUMMY spell not handled! 467227
+  Item set bonus spell 467235 effect 0: SPELL_AURA_DUMMY spell not handled! 467235
+  Item set bonus spell 467312 effect 0: SPELL_AURA_DUMMY spell not handled! 467312
+  Item set bonus spell 467326 effect 0: SPELL_AURA_DUMMY spell not handled! 467326
+  Item set bonus spell 467329 effect 0: Triggered spell needs some love: 467331
+  Item set bonus spell 467333 effect 0: SPELL_AURA_DUMMY spell not handled! 467333
+  Item set bonus spell 467334 effect 0: SPELL_AURA_DUMMY spell not handled! 467334
+  Item set bonus spell 467388 effect 0: SPELL_AURA_DUMMY spell not handled! 467388
+  Item set bonus spell 467399 effect 0: SPELL_AURA_DUMMY spell not handled! 467399
+  Item set bonus spell 467401 effect 0: SPELL_AURA_DUMMY spell not handled! 467401
+  Item set bonus spell 467405 effect 0: SPELL_AURA_DUMMY spell not handled! 467405
+  Item set bonus spell 467494 effect 0: SPELL_AURA_DUMMY spell not handled! 467494
+  Item set bonus spell 467513 effect 0: SPELL_AURA_DUMMY spell not handled! 467513
+  Item set bonus spell 467529 effect 0: SPELL_AURA_DUMMY spell not handled! 467529
+  Item set bonus spell 467531 effect 0: Error: Unhandled FLAT SPELLMOD_EFFECT1: 467531: // Increases the bonus chance to Block from Holy Shield by $s1%.
+  Item set bonus spell 467532 effect 0: SPELL_AURA_DUMMY spell not handled! 467532
+  Item set bonus spell 467536 effect 0: SPELL_AURA_DUMMY spell not handled! 467536
+  Item set bonus spell 467544 effect 0: Triggered spell needs some love: 467543
+  Item set bonus spell 467586 effect 0: SPELL_AURA_DUMMY spell not handled! 467586
+  Item set bonus spell 467608 effect 0: SPELL_AURA_DUMMY spell not handled! 467608
+  Item set bonus spell 467608 effect 1: SPELL_AURA_DUMMY spell not handled! 467608
+  Item set bonus spell 467624 effect 0: SPELL_AURA_DUMMY spell not handled! 467624
+  Item set bonus spell 467708 effect 0: Triggered spell needs some love: 467735
+  Item set bonus spell 467737 effect 0: SPELL_AURA_DUMMY spell not handled! 467737
+  Item set bonus spell 467739 effect 1: Error: Unhandled FLAT SPELLMOD_EFFECT2: 467739: // Reduces the cooldown on Vanish to ${$m3/60000} min. Cannot be combined with Elusiveness.
+  Item set bonus spell 467739 effect 2: SPELL_AURA_DUMMY spell not handled! 467739
+  Item set bonus spell 467746 effect 0: SPELL_AURA_DUMMY spell not handled! 467746
+  Item set bonus spell 467797 effect 0: Error: Unhandled FLAT SPELLMOD_EFFECT2: 467797: // Your Rolling with the Punches also grants you $s1% increased Armor from items per stack (capped at ${$s1*5}%).
+  Item set bonus spell 467803 effect 0: SPELL_AURA_DUMMY spell not handled! 467803
+  Item set bonus spell 467804 effect 0: SPELL_AURA_DUMMY spell not handled! 467804
+  Item set bonus spell 467809 effect 0: SPELL_AURA_DUMMY spell not handled! 467809
+  Item set bonus spell 467818 effect 0: Triggered spell needs some love: 16246
+  Item set bonus spell 467823 effect 0: Error: Unhandled FLAT SPELLMOD_EFFECT3: 467823: // Loyal Beta from your Spirit of the Alpha ability now also increases Fire, Frost, and Nature damage by $s1%.
+  Item set bonus spell 467863 effect 0: SPELL_AURA_DUMMY spell not handled! 467863
+  Item set bonus spell 467863 effect 1: SPELL_AURA_DUMMY spell not handled! 467863
+  Item set bonus spell 467879 effect 0: SPELL_AURA_DUMMY spell not handled! 467879
+  Item set bonus spell 467882 effect 0: SPELL_AURA_DUMMY spell not handled! 467882
+  Item set bonus spell 467889 effect 0: Triggered spell needs some love: 467891
+  Item set bonus spell 467909 effect 0: SPELL_AURA_DUMMY spell not handled! 467909
+  Item set bonus spell 467916 effect 0: SPELL_AURA_DUMMY spell not handled! 467916
+  Item set bonus spell 467917 effect 1: Error: SPELL_AURA_ADD_FLAT_MODIFIER misc value 32 not handled: 467917 // Increases the damage of your periodic spells and Felguard pet by $s1%.
+  Item set bonus spell 467983 effect 0: Triggered spell needs some love: 17941
+  Item set bonus spell 467983 effect 1: SPELL_AURA_OVERRIDE_CLASS_SCRIPTS spell not handled! 467983
+  Item set bonus spell 467988 effect 0: SPELL_AURA_DUMMY spell not handled! 467988
+  Item set bonus spell 467988 effect 1: SPELL_AURA_DUMMY spell not handled! 467988
+  Item set bonus spell 468028 effect 0: SPELL_AURA_DUMMY spell not handled! 468028
+  Item set bonus spell 468046 effect 0: SPELL_AURA_DUMMY spell not handled! 468046
+  Item set bonus spell 468046 effect 1: Triggered spell needs some love: 468062
+  Item set bonus spell 468061 effect 0: SPELL_AURA_DUMMY spell not handled! 468061
+  Item set bonus spell 468065 effect 0: Triggered spell needs some love: 468066
+  Item set bonus spell 468067 effect 0: Triggered spell needs some love: 12970
+  Item set bonus spell 468069 effect 0: SPELL_AURA_DUMMY spell not handled! 468069
+  Item set bonus spell 468072 effect 0: SPELL_AURA_DUMMY spell not handled! 468072
+  Item set bonus spell 468236 effect 0: SPELL_AURA_DUMMY spell not handled! 468236
+  Item set bonus spell 468417 effect 0: SPELL_AURA_DUMMY spell not handled! 468417
+  Item set bonus spell 468425 effect 0: SPELL_AURA_DUMMY spell not handled! 468425
+  Item set bonus spell 468428 effect 0: SPELL_AURA_DUMMY spell not handled! 468428
+  Item set bonus spell 468434 effect 0: SPELL_AURA_DUMMY spell not handled! 468434
+  Item set bonus spell 468446 effect 0: SPELL_AURA_DUMMY spell not handled! 468446
+  Item set bonus spell 468447 effect 0: SPELL_AURA_DUMMY spell not handled! 468447
+  Item set bonus spell 468453 effect 0: SPELL_AURA_DUMMY spell not handled! 468453
+  Item set bonus spell 1213160 effect 0: SPELL_AURA_DUMMY spell not handled! 1213160
+  Item set bonus spell 1213188 effect 0: Triggered spell needs some love: 1213190
+  Item set bonus spell 1213171 effect 0: SPELL_AURA_DUMMY spell not handled! 1213171
+  Item set bonus spell 1213174 effect 0: SPELL_AURA_DUMMY spell not handled! 1213174
+  Item set bonus spell 1213306 effect 0: SPELL_AURA_DUMMY spell not handled! 1213306
+  Item set bonus spell 1213246 effect 0: SPELL_AURA_DUMMY spell not handled! 1213246
+  Item set bonus spell 1213246 effect 2: SPELL_AURA_DUMMY spell not handled! 1213246
+  Item set bonus spell 1213246 effect 3: SPELL_AURA_DUMMY spell not handled! 1213246
+  Item set bonus spell 1213246 effect 4: SPELL_AURA_DUMMY spell not handled! 1213246
+  Item set bonus spell 1213307 effect 1: SPELL_AURA_DUMMY spell not handled! 1213307
+  Item set bonus spell 1213318 effect 0: SPELL_AURA_DUMMY spell not handled! 1213318
+  Item set bonus spell 1213319 effect 0: SPELL_AURA_DUMMY spell not handled! 1213319
+  Item set bonus spell 1213312 effect 0: Error: Unhandled FLAT SPELLMOD_EFFECT1: 1213312: // Your Arcane Blast increases damage done by an additional $s1% per stack.
+  Item set bonus spell 1213314 effect 0: Error: Unhandled FLAT SPELLMOD_EFFECT1: 1213314: // Your Mana Shield, Fire Ward, and Frost Ward absorb $s1% more damage and also place a Temporal Beacon on the target for $400735d.
+  Item set bonus spell 1213353 effect 0: SPELL_AURA_DUMMY spell not handled! 1213353
+  Item set bonus spell 1213410 effect 0: SPELL_AURA_DUMMY spell not handled! 1213410
+  Item set bonus spell 1213413 effect 0: SPELL_AURA_DUMMY spell not handled! 1213413
+  Item set bonus spell 1213406 effect 0: Triggered spell needs some love: 1217927
+  Item set bonus spell 1213624 effect 0: Error: Unhandled FLAT SPELLMOD_EFFECT2: 1213624: // Your Prayer of Mending gains $s1 additional charges.
+  Item set bonus spell 1213631 effect 0: SPELL_AURA_DUMMY spell not handled! 1213631
+  Item set bonus spell 1213754 effect 1: SPELL_AURA_DUMMY spell not handled! 1213754
+  Item set bonus spell 1213759 effect 0: SPELL_AURA_DUMMY spell not handled! 1213759
+  Item set bonus spell 1213759 effect 1: SPELL_AURA_DUMMY spell not handled! 1213759
+  Item set bonus spell 1213810 effect 0: Error: Unhandled FLAT SPELLMOD_EFFECT3: 1213810: // Your Riptide increases the amount healed by Chain Heal by an additional $s1%.
+  Item set bonus spell 1213930 effect 0: Triggered spell needs some love: 1213934
+  Item set bonus spell 1213937 effect 0: SPELL_AURA_DUMMY spell not handled! 1213937
+  Item set bonus spell 1213910 effect 1 doesn't apply an aura (effect 3), skipped
+  Item set bonus spell 1213918 effect 0: SPELL_AURA_DUMMY spell not handled! 1213918
+  Item set bonus spell 1214087 effect 0: Triggered spell needs some love: 1214088
+  Item set bonus spell 1214095 effect 0: SPELL_AURA_DUMMY spell not handled! 1214095
+  Item set bonus spell 1214163 effect 0: SPELL_AURA_DUMMY spell not handled! 1214163
+  Item set bonus spell 1213201 effect 0: aura type 593 is not handled, skipped
+  Item set bonus spell 1213201 effect 1: aura type 593 is not handled, skipped
+  Item set bonus spell 1213321 effect 0: SPELL_AURA_DUMMY spell not handled! 1213321
+  Item set bonus spell 1213321 effect 1: SPELL_AURA_DUMMY spell not handled! 1213321
+  Item set bonus spell 1213467 effect 0: SPELL_AURA_DUMMY spell not handled! 1213467
+  Item set bonus spell 1213708 effect 0: SPELL_AURA_DUMMY spell not handled! 1213708
+  Item set bonus spell 1213708 effect 1: aura type 332 is not handled, skipped
+  Item set bonus spell 1213957 effect 0: SPELL_AURA_DUMMY spell not handled! 1213957
+  Item set bonus spell 1214151 effect 0: Triggered spell needs some love: 1214156
+  Item set bonus spell 1219073 effect 0: SPELL_AURA_DUMMY spell not handled! 1219073
+  Item set bonus spell 1219540 effect 0: aura type 593 is not handled, skipped
+  Item set bonus spell 1219540 effect 1: aura type 593 is not handled, skipped
+  Item set bonus spell 1219543 effect 2: aura type 275 is not handled, skipped
+  Item set bonus spell 1219543 effect 3: Error: Unhandled FLAT SPELLMOD_EFFECT2: 1219543: // Reduces the cooldown on your Shield Wall ability by ${$m1/-60000} min and reduces the cooldown on your Recklessness ability by ${$m1/-60000} min. Recklessness can now be used in any Stance and does not increase damage taken.
+  Item set bonus spell 1219544 effect 0: SPELL_AURA_DUMMY spell not handled! 1219544
+  Item set bonus spell 1219486 effect 0: Triggered spell needs some love: 1219485
+  Item set bonus spell 1219474 effect 0: aura type 593 is not handled, skipped
+  Item set bonus spell 1219474 effect 1: aura type 593 is not handled, skipped
+  Item set bonus spell 1219479 effect 0: SPELL_AURA_DUMMY spell not handled! 1219479
+  Item set bonus spell 1219423 effect 0: SPELL_AURA_DUMMY spell not handled! 1219423
+  Item set bonus spell 1219462 effect 0: SPELL_AURA_DUMMY spell not handled! 1219462
+  Item set bonus spell 1219382 effect 0: aura type 593 is not handled, skipped
+  Item set bonus spell 1219382 effect 1: aura type 593 is not handled, skipped
+  Item set bonus spell 1219413 effect 0: Error: Unhandled FLAT SPELLMOD_EFFECT1: 1219413: // Increases the damage taken reduction from your Shamanistic Rage ability by an additional $s1% and during Shamanistic Rage your attack speed and spellcasting speed are increased by $s2%.
+  Item set bonus spell 1219413 effect 1: Error: SPELL_AURA_ADD_FLAT_MODIFIER misc value 33 not handled: 1219413 // Increases the damage taken reduction from your Shamanistic Rage ability by an additional $s1% and during Shamanistic Rage your attack speed and spellcasting speed are increased by $s2%.
+  Item set bonus spell 1219414 effect 0: aura type 69 is not handled, skipped
+  Item set bonus spell 1219361 effect 0: SPELL_AURA_DUMMY spell not handled! 1219361
+  Item set bonus spell 1219364 effect 0: SPELL_AURA_DUMMY spell not handled! 1219364
+  Item set bonus spell 1219365 effect 0: SPELL_AURA_DUMMY spell not handled! 1219365
+  Item set bonus spell 1219373 effect 0: SPELL_AURA_DUMMY spell not handled! 1219373
+  Item set bonus spell 1219376 effect 0: SPELL_AURA_DUMMY spell not handled! 1219376
+  Item set bonus spell 1219369 effect 0: SPELL_AURA_DUMMY spell not handled! 1219369
+  Item set bonus spell 1219356 effect 0: aura type 593 is not handled, skipped
+  Item set bonus spell 1219356 effect 1: aura type 593 is not handled, skipped
+  Item set bonus spell 1219359 effect 0: aura type 69 is not handled, skipped
+  Item set bonus spell 1219359 effect 1: SPELL_AURA_DUMMY spell not handled! 1219359
+  Item set bonus spell 1219260 effect 1: SPELL_AURA_DUMMY spell not handled! 1219260
+  Item set bonus spell 1219286 effect 0: Triggered spell needs some love: 1219288
+  Item set bonus spell 1219293 effect 0: SPELL_AURA_DUMMY spell not handled! 1219293
+  Item set bonus spell 1219233 effect 0: Triggered spell needs some love: 1219232
+  Item set bonus spell 1219238 effect 0: SPELL_AURA_DUMMY spell not handled! 1219238
+  Item set bonus spell 1219250 effect 0: SPELL_AURA_DUMMY spell not handled! 1219250
+  Item set bonus spell 1219205 effect 0: aura type 593 is not handled, skipped
+  Item set bonus spell 1219205 effect 1: aura type 593 is not handled, skipped
+  Item set bonus spell 1219226 effect 0: SPELL_AURA_DUMMY spell not handled! 1219226
+  Item set bonus spell 1219010 effect 1: SPELL_AURA_DUMMY spell not handled! 1219010
+  Item set bonus spell 1219059 effect 0: SPELL_AURA_DUMMY spell not handled! 1219059
+  Item set bonus spell 1219098 effect 0: SPELL_AURA_DUMMY spell not handled! 1219098
+  Item set bonus spell 1219189 effect 0: SPELL_AURA_DUMMY spell not handled! 1219189
+  Item set bonus spell 1219191 effect 3: aura type 601 is not handled, skipped
+  Item set bonus spell 1219193 effect 0: SPELL_AURA_DUMMY spell not handled! 1219193
+  Item set bonus spell 1218592 effect 0: SPELL_AURA_DUMMY spell not handled! 1218592
+  Item set bonus spell 1218693 effect 0: Error: Unhandled FLAT SPELLMOD_EFFECT2: 1218693: // Your Regeneration ability grants your target $s1% increased movement speed while you are channeling, and each time it heals your target, they have a chance to gain $1218695s2% increased attack and casting speed for $1218695d.
+  Item set bonus spell 1218697 effect 0: SPELL_AURA_DUMMY spell not handled! 1218697
+  Item set bonus spell 1218697 effect 1: SPELL_AURA_DUMMY spell not handled! 1218697
+  Item set bonus spell 1218700 effect 0: SPELL_AURA_DUMMY spell not handled! 1218700
+  Item set bonus spell 1218700 effect 1: SPELL_AURA_DUMMY spell not handled! 1218700
+  Item set bonus spell 1218995 effect 0: SPELL_AURA_DUMMY spell not handled! 1218995
+  Item set bonus spell 1218995 effect 1: SPELL_AURA_DUMMY spell not handled! 1218995
+  Item set bonus spell 1218575 effect 0: Triggered spell needs some love: 1226739
+  Item set bonus spell 1218589 effect 0: Triggered spell needs some love: 1218587
+  Item set bonus spell 1218482 effect 0: aura type 593 is not handled, skipped
+  Item set bonus spell 1218482 effect 1: aura type 593 is not handled, skipped
+  Item set bonus spell 1218509 effect 0: SPELL_AURA_DUMMY spell not handled! 1218509
+  Item set bonus spell 1218509 effect 1: SPELL_AURA_DUMMY spell not handled! 1218509
+  Item set bonus spell 1218423 effect 0: SPELL_AURA_DUMMY spell not handled! 1218423
+  Item set bonus spell 1218427 effect 0: SPELL_AURA_DUMMY spell not handled! 1218427
+  Item set bonus spell 1218429 effect 0: SPELL_AURA_DUMMY spell not handled! 1218429
+  Item set bonus spell 1218476 effect 0: SPELL_AURA_DUMMY spell not handled! 1218476
+  Item set bonus spell 1218476 effect 2: SPELL_AURA_DUMMY spell not handled! 1218476
+  Item set bonus spell 1218478 effect 0: Triggered spell needs some love: 1218479
+  Item set bonus spell 1218445 effect 0: SPELL_AURA_DUMMY spell not handled! 1218445
+  Item set bonus spell 1223336 effect 0: SPELL_AURA_DUMMY spell not handled! 1223336
+  Item set bonus spell 1223336 effect 1: SPELL_AURA_DUMMY spell not handled! 1223336
+  Item set bonus spell 1227232 effect 0: SPELL_AURA_DUMMY spell not handled! 1227232
+  Item set bonus spell 1227234 effect 0: SPELL_AURA_DUMMY spell not handled! 1227234
+  Item set bonus spell 1227234 effect 1: SPELL_AURA_DUMMY spell not handled! 1227234
+  Item set bonus spell 1227237 effect 1: SPELL_AURA_DUMMY spell not handled! 1227237
+  Item set bonus spell 1227242 effect 1: SPELL_AURA_DUMMY spell not handled! 1227242
+  Item set bonus spell 1227245 effect 0: Triggered spell needs some love: 1234067
+  Item set bonus spell 1227245 effect 1: aura type 275 is not handled, skipped
+  Item set bonus spell 1226843 effect 0: SPELL_AURA_DUMMY spell not handled! 1226843
+  Item set bonus spell 1226843 effect 1: SPELL_AURA_DUMMY spell not handled! 1226843
+  Item set bonus spell 1226869 effect 0: Triggered spell needs some love: 1226868
+  Item set bonus spell 1226874 effect 0: SPELL_AURA_DUMMY spell not handled! 1226874
+  Item set bonus spell 1226874 effect 1: SPELL_AURA_DUMMY spell not handled! 1226874
+  Item set bonus spell 1226882 effect 0: Error: Unhandled FLAT SPELLMOD_EFFECT1: 1226882: // Your Blade Flurry now also strikes a third target and increases your attack speed by an additional $s1%. In addition, each combo point you spend reduces the remaining cooldown on your Blade Flurry by ${$m2/1000}.1 sec.
+  Item set bonus spell 1226882 effect 1: SPELL_AURA_DUMMY spell not handled! 1226882
+  Item set bonus spell 1226956 effect 0: Triggered spell needs some love: 1226957
+  Item set bonus spell 1226956 effect 1: Error: Unhandled FLAT SPELLMOD_EFFECT1: 1226956: // Your Rolling with the Punches now grants $s2% more health and $s1% more damage per stack. At $s3 stacks, each time you Dodge or Parry you will gain $1226957s3 Energy. 
+  Item set bonus spell 1226956 effect 2: SPELL_AURA_DUMMY spell not handled! 1226956
+  Item set bonus spell 1226340 effect 0: SPELL_AURA_DUMMY spell not handled! 1226340
+  Item set bonus spell 1226359 effect 0: Triggered spell needs some love: 1226357
+  Item set bonus spell 1226365 effect 0: Error: Unhandled FLAT SPELLMOD_EFFECT2: 1226365: // Increases the bonus damage from Raptor Fury by an additional $s1% per stack.
+  Item set bonus spell 1226132 effect 0: SPELL_AURA_DUMMY spell not handled! 1226132
+  Item set bonus spell 1226137 effect 0: Triggered spell needs some love: 1226136
+  Item set bonus spell 1226138 effect 1: Triggered spell needs some love: 1233451
+  Item set bonus spell 1226585 effect 1: SPELL_AURA_DUMMY spell not handled! 1226585
+  Item set bonus spell 1226591 effect 1: SPELL_AURA_DUMMY spell not handled! 1226591
+  Item set bonus spell 1226595 effect 0: SPELL_AURA_DUMMY spell not handled! 1226595
+  Item set bonus spell 1226499 effect 0: SPELL_AURA_DUMMY spell not handled! 1226499
+  Item set bonus spell 1226565 effect 0: SPELL_AURA_DUMMY spell not handled! 1226565
+  Item set bonus spell 1226565 effect 1: SPELL_AURA_DUMMY spell not handled! 1226565
+  Item set bonus spell 1226501 effect 1: SPELL_AURA_DUMMY spell not handled! 1226501
+  Item set bonus spell 1226460 effect 0: Triggered spell needs some love: 1226461
+  Item set bonus spell 1226462 effect 0: SPELL_AURA_DUMMY spell not handled! 1226462
+  Item set bonus spell 1226462 effect 1: SPELL_AURA_DUMMY spell not handled! 1226462
+  Item set bonus spell 1226463 effect 0: SPELL_AURA_DUMMY spell not handled! 1226463
+  Item set bonus spell 1226452 effect 0: SPELL_AURA_DUMMY spell not handled! 1226452
+  Item set bonus spell 1226454 effect 0: SPELL_AURA_DUMMY spell not handled! 1226454
+  Item set bonus spell 1226459 effect 0: Error: Unhandled FLAT SPELLMOD_EFFECT1: 1226459: // An additional $s1% of your healing is transferred to your Beacon of Light target.
+  Item set bonus spell 1226467 effect 0: Triggered spell needs some love: 1226466
+  Item set bonus spell 1226477 effect 0: SPELL_AURA_DUMMY spell not handled! 1226477
+  Item set bonus spell 1226423 effect 0: SPELL_AURA_DUMMY spell not handled! 1226423
+  Item set bonus spell 1226423 effect 1: SPELL_AURA_DUMMY spell not handled! 1226423
+  Item set bonus spell 1226423 effect 2: SPELL_AURA_DUMMY spell not handled! 1226423
+  Item set bonus spell 1226423 effect 4: SPELL_AURA_DUMMY spell not handled! 1226423
+  Item set bonus spell 1226446 effect 0: SPELL_AURA_DUMMY spell not handled! 1226446
+  Item set bonus spell 1226446 effect 1: SPELL_AURA_DUMMY spell not handled! 1226446
+  Item set bonus spell 1226432 effect 0: SPELL_AURA_DUMMY spell not handled! 1226432
+  Item set bonus spell 1226432 effect 2: SPELL_AURA_DUMMY spell not handled! 1226432
+  Item set bonus spell 1226432 effect 4: SPELL_AURA_DUMMY spell not handled! 1226432
+  Item set bonus spell 1226407 effect 0: Triggered spell needs some love: 1226406
+  Item set bonus spell 1226407 effect 1: SPELL_AURA_DUMMY spell not handled! 1226407
+  Item set bonus spell 1226415 effect 0: SPELL_AURA_DUMMY spell not handled! 1226415
+  Item set bonus spell 1226378 effect 2: SPELL_AURA_DUMMY spell not handled! 1226378
+  Item set bonus spell 1226378 effect 3: SPELL_AURA_DUMMY spell not handled! 1226378
+  Item set bonus spell 1226109 effect 0: Triggered spell needs some love: 1226113
+  Item set bonus spell 1226116 effect 0: Error: Unhandled FLAT SPELLMOD_EFFECT1: 1226116: // Multiplies the damage bonus from Tiger's Fury by ${1+$m2/100}.0.
+  Item set bonus spell 1226119 effect 0: SPELL_AURA_ADD_TARGET_TRIGGER spell not handled! 1226118
+  Item set bonus spell 1226119 effect 1: SPELL_AURA_DUMMY spell not handled! 1226119
+  Item set bonus spell 1226092 effect 0: SPELL_AURA_DUMMY spell not handled! 1226092
+  Item set bonus spell 1226092 effect 1: SPELL_AURA_DUMMY spell not handled! 1226092
+  Item set bonus spell 1226108 effect 0: SPELL_AURA_DUMMY spell not handled! 1226108
+  Item set bonus spell 1226032 effect 0: SPELL_AURA_DUMMY spell not handled! 1226032
+  Item set bonus spell 1226040 effect 0: SPELL_AURA_DUMMY spell not handled! 1226040
+  Item set bonus spell 1226044 effect 0: SPELL_AURA_DUMMY spell not handled! 1226044
+  Item set bonus spell 1226121 effect 0: Triggered spell needs some love: 410144
+  Item set bonus spell 1226126 effect 0: Triggered spell needs some love: 1226127
+  Item set bonus spell 1226126 effect 1: SPELL_AURA_DUMMY spell not handled! 1226126
+  Item set bonus spell 1227153 effect 0: SPELL_AURA_DUMMY spell not handled! 1227153
+  Item set bonus spell 1227159 effect 0: SPELL_AURA_DUMMY spell not handled! 1227159
+  Item set bonus spell 1227159 effect 1: SPELL_AURA_DUMMY spell not handled! 1227159
+  Item set bonus spell 1227164 effect 0: SPELL_AURA_DUMMY spell not handled! 1227164
+  Item set bonus spell 1227093 effect 0: SPELL_AURA_DUMMY spell not handled! 1227093
+  Item set bonus spell 1227099 effect 0: SPELL_AURA_DUMMY spell not handled! 1227099
+  Item set bonus spell 1226984 effect 0: SPELL_AURA_DUMMY spell not handled! 1226984
+  Item set bonus spell 1226986 effect 1: Error: SPELL_AURA_ADD_PCT_MODIFIER misc value 19 not handled: 1226986 // Reduces the cooldown on your Fire Nova Totem by $s1%, increases its damage by $s4%, and reduces its mana cost by $s5%. Additionally, your Fire Nova Totem now activates instantly on cast.
+  Item set bonus spell 1226986 effect 3: SPELL_AURA_DUMMY spell not handled! 1226986
+  Item set bonus spell 1226997 effect 0: SPELL_AURA_DUMMY spell not handled! 1226997
+  Item set bonus spell 1226997 effect 1: SPELL_AURA_DUMMY spell not handled! 1226997
+  Item set bonus spell 1226997 effect 2: SPELL_AURA_DUMMY spell not handled! 1226997
+  Item set bonus spell 1226997 effect 3: SPELL_AURA_DUMMY spell not handled! 1226997
+  Item set bonus spell 1226961 effect 0: SPELL_AURA_DUMMY spell not handled! 1226961
+  Item set bonus spell 1226977 effect 1: Triggered spell needs some love: 1233835
+  Item set bonus spell 1226978 effect 0: SPELL_AURA_DUMMY spell not handled! 1226978
+  Item set bonus spell 1226978 effect 1: SPELL_AURA_DUMMY spell not handled! 1226978
+  Item set bonus spell 1227214 effect 0: SPELL_AURA_DUMMY spell not handled! 1227214
+  Item set bonus spell 1227204 effect 0: SPELL_AURA_DUMMY spell not handled! 1227204
+  Item set bonus spell 1227204 effect 1: SPELL_AURA_DUMMY spell not handled! 1227204
+  Item set bonus spell 1227228 effect 1: SPELL_AURA_ADD_TARGET_TRIGGER spell not handled! 1233988
+  Item set bonus spell 1227175 effect 0: SPELL_AURA_DUMMY spell not handled! 1227175
+  Item set bonus spell 1227186 effect 0: SPELL_AURA_DUMMY spell not handled! 1227186
+  Item set bonus spell 1227196 effect 0: Triggered spell needs some love: 1227200
+  Item set bonus spell 1227196 effect 1: SPELL_AURA_DUMMY spell not handled! 1227196
+  Item set bonus spell 1232184 effect 0: SPELL_AURA_DUMMY spell not handled! 1232184
+  Item set bonus spell 1231556 effect 0: SPELL_AURA_DUMMY spell not handled! 1231556
+  Item set bonus spell 1234318 effect 0: SPELL_AURA_DUMMY spell not handled! 1234318
+  Item set bonus spell 1240571 effect 0: Triggered spell needs some love: 1226461
+  Item set bonus spell 1240573 effect 0: SPELL_AURA_DUMMY spell not handled! 1240573
+  Item set bonus spell 1302375 effect 0 doesn't apply an aura (effect 35), skipped
+  Item set bonus spell 1294087 effect 0: Triggered spell needs some love: 1294071
+  Item set bonus spell 1301488 effect 0: SPELL_AURA_DUMMY spell not handled! 1301488
+  Item set bonus spell 1301488 effect 1: SPELL_AURA_DUMMY spell not handled! 1301488
+  Item set bonus spell 1301488 effect 2: SPELL_AURA_DUMMY spell not handled! 1301488
+  Item set bonus spell 1301715 effect 0: SPELL_AURA_DUMMY spell not handled! 1301715
+  Item set bonus spell 1300945 effect 0: aura type 342 is not handled, skipped
+  Item set bonus spell 1300945 effect 1: aura type 65 is not handled, skipped
+  Item set bonus spell 1300968 effect 0: aura type 342 is not handled, skipped
+  Item set bonus spell 1300968 effect 1: aura type 65 is not handled, skipped
+  Item set bonus spell 1300951 effect 0: aura type 342 is not handled, skipped
+  Item set bonus spell 1300951 effect 1: aura type 65 is not handled, skipped
+  Item set bonus spell 1301697 effect 0: SPELL_AURA_DUMMY spell not handled! 1301697
+  Item set bonus spell 1300957 effect 0: aura type 342 is not handled, skipped
+  Item set bonus spell 1300957 effect 1: aura type 65 is not handled, skipped
+  Item set bonus spell 1301005 effect 1: aura type 275 is not handled, skipped
+  Item set bonus spell 1300934 effect 0: aura type 342 is not handled, skipped
+  Item set bonus spell 1300934 effect 1: aura type 65 is not handled, skipped
+  Item set bonus spell 1300999 effect 2: aura type 275 is not handled, skipped
+  Item set bonus spell 1315077 effect 0 doesn't apply an aura (effect 2), skipped
+  Item set bonus spell 1317039 effect 0: Triggered spell needs some love: 1317040
+  Item set bonus spell 1321560 effect 0: Triggered spell needs some love: 1321558
+  Item set bonus spell 1321587 effect 0: Triggered spell needs some love: 1321586
+  Item set bonus spell 1324318 effect 0: Triggered spell needs some love: 1324315
+  Item set bonus spell 1324323 effect 0: Triggered spell needs some love: 1326099
+  Item set bonus spell 1324287 effect 0: aura type 674 is not handled, skipped
+  Item set bonus spell 1324298 effect 0: Triggered spell needs some love: 1324296
+  Item set bonus spell 1324298 effect 1 doesn't apply an aura (effect 3), skipped
+  Item set bonus spell 1324309 effect 0: Triggered spell needs some love: 1324308
+  Item set bonus spell 1324684 effect 0: Triggered spell needs some love: 1324683
+  Item set 81 (The Postmaster): none of its items exist in the item DB, skipped
+  Item set 121 (Cadaverous Garb): none of its items exist in the item DB, skipped
+  Item set 161 (Defias Leather): none of its items exist in the item DB, skipped
+  Item set 163 (Chain of the Scarlet Crusade): none of its items exist in the item DB, skipped
+  Item set 181 (Magister's Regalia): none of its items exist in the item DB, skipped
+  Item set 182 (Vestments of the Devout): none of its items exist in the item DB, skipped
+  Item set 183 (Dreadmist Raiment): none of its items exist in the item DB, skipped
+  Item set 185 (Wildheart Raiment): none of its items exist in the item DB, skipped
+  Item set 186 (Beaststalker Armor): none of its items exist in the item DB, skipped
+  Item set 187 (The Elements): none of its items exist in the item DB, skipped
+  Item set 188 (Lightforge Armor): none of its items exist in the item DB, skipped
+  Item set 201 (Arcanist Regalia): none of its items exist in the item DB, skipped
+  Item set 202 (Vestments of Prophecy): none of its items exist in the item DB, skipped
+  Item set 205 (Cenarion Raiment): none of its items exist in the item DB, skipped
+  Item set 207 (The Earthfury): none of its items exist in the item DB, skipped
+  Item set 210 (Netherwind Regalia): none of its items exist in the item DB, skipped
+  Item set 211 (Vestments of Transcendence): none of its items exist in the item DB, skipped
+  Item set 214 (Stormrage Raiment): none of its items exist in the item DB, skipped
+  Item set 216 (The Ten Storms): none of its items exist in the item DB, skipped
+  Item set 217 (Judgement Armor): none of its items exist in the item DB, skipped
+  Item set 241 (Scale of the Gods): none of its items exist in the item DB, skipped
+  Item set 261 (Spirit of Eskhandar): none of its items exist in the item DB, skipped
+  Item set 462 (Zanzil's Concentration): none of its items exist in the item DB, skipped
+  Item set 520 (Ironweave Battlesuit): none of its items exist in the item DB, skipped
+  Item set 1570 (Twilight Invoker's Vestments): none of its items exist in the item DB, skipped
+  Item set 1577 (Blackfathom Avenger's Mail): none of its items exist in the item DB, skipped
+  Item set 1578 (Blackfathom Slayer's Leather): none of its items exist in the item DB, skipped
+  Item set 1579 (Blackfathom Elementalist's Hide): none of its items exist in the item DB, skipped
+  Item set 1586 (Insulated Sorceror's Leathers): none of its items exist in the item DB, skipped
+  Item set 1587 (Hyperconductive Wizard's Attire): none of its items exist in the item DB, skipped
+  Item set 1588 (Hyperconductive Mender's Meditation): none of its items exist in the item DB, skipped
+  Item set 1589 (H.A.Z.A.R.D. Suit): none of its items exist in the item DB, skipped
+  Item set 1592 (Shockforged Warplate): none of its items exist in the item DB, skipped
+  Item set 1637 (Nightmare Prophet's Garb): none of its items exist in the item DB, skipped
+  Item set 1638 (Benevolent Prophet's Vestments): none of its items exist in the item DB, skipped
+  Item set 1640 (Coagulate Bloodguard's Leathers): none of its items exist in the item DB, skipped
+  Item set 1641 (Blood Corrupted Leathers): none of its items exist in the item DB, skipped
+  Item set 1642 (Lost Worshipper's Armor): none of its items exist in the item DB, skipped
+  Item set 1643 (Exiled Prophet's Raiment): none of its items exist in the item DB, skipped
+  Item set 1644 (Corrupted Spiritweaver's Mail): none of its items exist in the item DB, skipped
+  Item set 1649 (Wailing Berserker's Plate Armor): none of its items exist in the item DB, skipped
+  Item set 1650 (Banished Martyr's Full Plate): none of its items exist in the item DB, skipped
+  Item set 1664 (Cenarion Eclipse): none of its items exist in the item DB, skipped
+  Item set 1667 (Feralheart Raiment): none of its items exist in the item DB, skipped
+  Item set 1669 (Beastmaster Armor): none of its items exist in the item DB, skipped
+  Item set 1671 (Sorcerer's Regalia): none of its items exist in the item DB, skipped
+  Item set 1673 (Soulforge Armor): none of its items exist in the item DB, skipped
+  Item set 1675 (Vestments of the Virtuous): none of its items exist in the item DB, skipped
+  Item set 1679 (The Five Thunders): none of its items exist in the item DB, skipped
+  Item set 1681 (Deathmist Raiment): none of its items exist in the item DB, skipped
+  Item set 1698 (Cenarion Eclipse): none of its items exist in the item DB, skipped
+  Item set 1700 (Cenarion Bounty): none of its items exist in the item DB, skipped
+  Item set 1708 (Lawbringer Will): none of its items exist in the item DB, skipped
+  Item set 1709 (Dawn Prophecy): none of its items exist in the item DB, skipped
+  Item set 1713 (Earthfury Relief): none of its items exist in the item DB, skipped
+  Item set 1731 (Warlord's Earthshaker): none of its items exist in the item DB, skipped
+  Item set 1732 (Warlord's Thunderfist): none of its items exist in the item DB, skipped
+  Item set 1733 (Warlord's Wartide): none of its items exist in the item DB, skipped
+  Item set 1734 (Warlord's Threads): none of its items exist in the item DB, skipped
+  Item set 1746 (Field Marshal's Threads): none of its items exist in the item DB, skipped
+  Item set 1757 (Champion's Thunderfist): none of its items exist in the item DB, skipped
+  Item set 1758 (Champion's Wartide): none of its items exist in the item DB, skipped
+  Item set 1759 (Champion's Earthshaker): none of its items exist in the item DB, skipped
+  Item set 1760 (Champion's Threads): none of its items exist in the item DB, skipped
+  Item set 1774 (Lieutenant Commander's Threads): none of its items exist in the item DB, skipped
+  Item set 1781 (Spirit of Eskhandar): none of its items exist in the item DB, skipped
+  Item set 1791 (Green Dragon Mail): none of its items exist in the item DB, skipped
+  Item set 1792 (Black Dragon Mail): none of its items exist in the item DB, skipped
+  Item set 1793 (Devilsaur Armor): none of its items exist in the item DB, skipped
+  Item set 1795 (Zanzil's Concentration): none of its items exist in the item DB, skipped
+  Item set 1802 (Bounty of Stormrage): none of its items exist in the item DB, skipped
+  Item set 1803 (Cunning of Stormrage): none of its items exist in the item DB, skipped
+  Item set 1809 (Merciful Judgement): none of its items exist in the item DB, skipped
+  Item set 1810 (Radiant Judgement): none of its items exist in the item DB, skipped
+  Item set 1812 (Dawn of Transcendence): none of its items exist in the item DB, skipped
+  Item set 1816 (Relief of the Ten Storms): none of its items exist in the item DB, skipped
+  Item set 1820 (Corrupted Nemesis): none of its items exist in the item DB, skipped
+  Item set 1824 (Haruspex's Garb): none of its items exist in the item DB, skipped
+  Item set 1826 (Illusionist's Attire): none of its items exist in the item DB, skipped
+  Item set 1827 (Freethinker's Armor): none of its items exist in the item DB, skipped
+  Item set 1836 (Genesis Eclipse): none of its items exist in the item DB, skipped
+  Item set 1851 (Stormcaller's Eruption): none of its items exist in the item DB, skipped
+  Item set 1853 (Stormcaller's Impact): none of its items exist in the item DB, skipped
+  Item set 1854 (Doomcaller's Corruption): none of its items exist in the item DB, skipped
+  Item set 1884 (Plagueheart Stitchings): none of its items exist in the item DB, skipped
+  Item set 1885 (Plagueheart Raiment): none of its items exist in the item DB, skipped
+  Item set 1889 (The Earthshatterer's Storm): none of its items exist in the item DB, skipped
+  Item set 1893 (Raiments of Faith): none of its items exist in the item DB, skipped
+  Item set 1903 (Dreamwalker Ferocity): none of its items exist in the item DB, skipped
+  Item set 1904 (Dreamwalker Eclipse): none of its items exist in the item DB, skipped
+  Item set 1939 (Vestments of Revelation): none of its items exist in the item DB, skipped
+  Item set 1946 (Waywatcher Eclipse): none of its items exist in the item DB, skipped
+  Item set 1950 (The Soulcrusher): none of its items exist in the item DB, skipped
+  Item set 2098 (Manaflare Regalia): none of its items exist in the item DB, skipped
+  Item set 2099 (Grimstitch Armor): none of its items exist in the item DB, skipped
+  Item set 2100 (Demonheart Raiment): none of its items exist in the item DB, skipped
+  Item set 2101 (Wildstalker Armor): none of its items exist in the item DB, skipped
+  Item set 2102 (Battlegear of Glory): none of its items exist in the item DB, skipped
+  Item set 2105 (Raiments of Conviction): none of its items exist in the item DB, skipped
+  Item set 2106 (Justice Battlegear): none of its items exist in the item DB, skipped
+  Item set 2110 (The Spiritcaller's Rage): none of its items exist in the item DB, skipped
+  Item set 2111 (The Spiritcaller's Storm): none of its items exist in the item DB, skipped
+  Item set 2114 (Grovekeeper Eclipse): none of its items exist in the item DB, skipped
+  Item set 2115 (Grovekeeper Ferocity): none of its items exist in the item DB, skipped
+
+== Item effects (0)
+
+== Player auras (26)
+  Nature's Grace [16886] effect 1 skipped: Error: SPELL_AURA_ADD_PCT_MODIFIER misc value 21 not handled: 16886 // 
+  Moonkin Form (Shapeshift) [24858] effect 4 skipped: Error: SPELL_AURA_ADD_PCT_MODIFIER misc value 18 not handled: 24858 // Shapeshift into Moonkin Form, increasing Omen of Clarity's chance to trigger by $s5%, Armor contribution from items by $24905s1%, and all party or raid members within $24907a1 yards have their spell Critical Strike chance increased by $24907s1%.  Also protects the caster from Polymorph effects and prevents the use of healing spells.
+
+The act of shapeshifting frees the caster of Polymorph and Movement Impairing effects.
+  Moonkin Form (Shapeshift) [24858] effect 5 skipped: Error: SPELL_AURA_ADD_PCT_MODIFIER misc value 38 not handled: 24858 // Shapeshift into Moonkin Form, increasing Omen of Clarity's chance to trigger by $s5%, Armor contribution from items by $24905s1%, and all party or raid members within $24907a1 yards have their spell Critical Strike chance increased by $24907s1%.  Also protects the caster from Polymorph effects and prevents the use of healing spells.
+
+The act of shapeshifting frees the caster of Polymorph and Movement Impairing effects.
+  Righteous Fury [25780] effect 2 skipped: Error: Unhandled FLAT SPELLMOD_EFFECT2: 25780: // Increases the threat generated by your Holy attacks by $s1%.  Lasts $d.
+  Righteous Fury [407627] effect 7 skipped: Error: Unhandled FLAT SPELLMOD_EFFECT2: 407627: // Increases the threat generated by your Holy spells by $s5% and gives you mana when healed by other friendly targets' spells equal to $s4% of the amount healed. Additionally, damage which takes you below $407627s6% health is reduced by $407627s7%. Lasts $d.
+
+  S03 - Item - T1 - Mage - Damage 6P Bonus [456402] effect 0 skipped: Error: Unhandled FLAT SPELLMOD_EFFECT2: 456402: // Mage Armor increases your mana regeneration while casting by an additional $s1%. Molten Armor increases your spell damage and healing by $s2. Ice Armor grants $s3% increased chance to trigger Fingers of Frost.
+  S03 - Item - T1 - Mage - Healer 2P Bonus [456404] effect 1 skipped: Error: Unhandled FLAT SPELLMOD_EFFECT3: 456404: // Your Temporal Beacons last $s1% longer.
+  S03 - Item - T1 - Mage - Healer 4P Bonus [456477] effect 0 skipped: Error: SPELL_AURA_ADD_PCT_MODIFIER misc value 32 not handled: 456477 // Increases all chronomantic healing you deal by $s1%.
+  Shapeshifter's Sigil [467467] effect 1 skipped: Error: Unhandled FLAT SPELLMOD_EFFECT1: 467467: // Decreases the mana cost of all Druid shapeshifting forms by $s1%, and increases the aura effect of Moonkin Aura, Tree of Life, and Leader of the Pack by $s2% for $d.
+  S03 - Item - T2 - Paladin - Protection 2P Bonus [467531] effect 0 skipped: Error: Unhandled FLAT SPELLMOD_EFFECT1: 467531: // Increases the bonus chance to Block from Holy Shield by $s1%.
+  S03 - Item - TAQ - Mage - Arcane 2P Bonus [1213312] effect 0 skipped: Error: Unhandled FLAT SPELLMOD_EFFECT1: 1213312: // Your Arcane Blast increases damage done by an additional $s1% per stack.
+  S03 - Item - TAQ - Mage - Arcane 4P Bonus [1213314] effect 0 skipped: Error: Unhandled FLAT SPELLMOD_EFFECT1: 1213314: // Your Mana Shield, Fire Ward, and Frost Ward absorb $s1% more damage and also place a Temporal Beacon on the target for $400735d.
+  S03 - Item - TAQ - Priest - Healer 2P Bonus [1213624] effect 0 skipped: Error: Unhandled FLAT SPELLMOD_EFFECT2: 1213624: // Your Prayer of Mending gains $s1 additional charges.
+  S03 - Item - TAQ - Shaman - Restoration 2P Bonus [1213810] effect 0 skipped: Error: Unhandled FLAT SPELLMOD_EFFECT3: 1213810: // Your Riptide increases the amount healed by Chain Heal by an additional $s1%.
+  S03 - Item - Naxxramas - Mage - Arcane 4P Bonus [1218693] effect 0 skipped: Error: Unhandled FLAT SPELLMOD_EFFECT2: 1218693: // Your Regeneration ability grants your target $s1% increased movement speed while you are channeling, and each time it heals your target, they have a chance to gain $1218695s2% increased attack and casting speed for $1218695d.
+  S03 - Item - Naxxramas - Shaman - Tank 4P Bonus [1219413] effect 0 skipped: Error: Unhandled FLAT SPELLMOD_EFFECT1: 1219413: // Increases the damage taken reduction from your Shamanistic Rage ability by an additional $s1% and during Shamanistic Rage your attack speed and spellcasting speed are increased by $s2%.
+  S03 - Item - Naxxramas - Shaman - Tank 4P Bonus [1219413] effect 1 skipped: Error: SPELL_AURA_ADD_FLAT_MODIFIER misc value 33 not handled: 1219413 // Increases the damage taken reduction from your Shamanistic Rage ability by an additional $s1% and during Shamanistic Rage your attack speed and spellcasting speed are increased by $s2%.
+  S03 - Item - Naxxramas - Warrior - Protection 4P Bonus [1219543] effect 3 skipped: Error: Unhandled FLAT SPELLMOD_EFFECT2: 1219543: // Reduces the cooldown on your Shield Wall ability by ${$m1/-60000} min and reduces the cooldown on your Recklessness ability by ${$m1/-60000} min. Recklessness can now be used in any Stance and does not increase damage taken.
+  S03 - Item - Scarlet Enclave - Druid - Feral 4P Bonus [1226116] effect 0 skipped: Error: Unhandled FLAT SPELLMOD_EFFECT1: 1226116: // Multiplies the damage bonus from Tiger's Fury by ${1+$m2/100}.0.
+  S03 - Item - Scarlet Enclave - Hunter - Melee 6P Bonus [1226365] effect 0 skipped: Error: Unhandled FLAT SPELLMOD_EFFECT2: 1226365: // Increases the bonus damage from Raptor Fury by an additional $s1% per stack.
+  S03 - Item - Scarlet Enclave - Paladin - Holy 6P Bonus [1226459] effect 0 skipped: Error: Unhandled FLAT SPELLMOD_EFFECT1: 1226459: // An additional $s1% of your healing is transferred to your Beacon of Light target.
+  S03 - Item - Scarlet Enclave - Rogue - Tank 4P Bonus [1226882] effect 0 skipped: Error: Unhandled FLAT SPELLMOD_EFFECT1: 1226882: // Your Blade Flurry now also strikes a third target and increases your attack speed by an additional $s1%. In addition, each combo point you spend reduces the remaining cooldown on your Blade Flurry by ${$m2/1000}.1 sec.
+  S03 - Item - Scarlet Enclave - Rogue - Tank 6P Bonus [1226956] effect 1 skipped: Error: Unhandled FLAT SPELLMOD_EFFECT1: 1226956: // Your Rolling with the Punches now grants $s2% more health and $s1% more damage per stack. At $s3 stacks, each time you Dodge or Parry you will gain $1226957s3 Energy. 
+  S03 - Item - Scarlet Enclave - Shaman - Enhancement 4P Bonus [1226986] effect 1 skipped: Error: SPELL_AURA_ADD_PCT_MODIFIER misc value 19 not handled: 1226986 // Reduces the cooldown on your Fire Nova Totem by $s1%, increases its damage by $s4%, and reduces its mana cost by $s5%. Additionally, your Fire Nova Totem now activates instantly on cast.
+  Eureka! (Racial) [1259817] effect 2 skipped: wtf?
+  Cooldown Reduction [1325739] effect 0 skipped: wtf?
+
+== Target auras (3)
+  Indiscriminate Outburst [423253] effect 1 skipped: Error: MOD_DAMAGE_PERCENT_TAKEN: EffectMiscValue_0 is 0!
+  Unyielding Aura [1214070] effect 0 skipped: Error: MOD_DAMAGE_PERCENT_TAKEN: EffectMiscValue_0 is 0!
+  Illimitable Dominion [1218089] effect 2 skipped: Error: MOD_DAMAGE_PERCENT_TAKEN: EffectMiscValue_0 is 0!
+

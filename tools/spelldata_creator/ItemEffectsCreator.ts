@@ -5,7 +5,8 @@ import { readDBCSVtoMap } from "./CSVReader";
 import { AuraHandlers, USELESS_AURAS } from "./ItemAuraHandlers";
 import { createEffectLua, createFileHead, getItemDbData, orderItemsByClass } from "./itemFunctions";
 import { SpellData } from "./SpellData";
-import { existsSync, readFileSync, writeFileSync } from "fs";
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from "fs";
+import { report } from "./report";
 
 const AURA_TYPES_TO_IGNORE: { [index: number]: true | undefined } = {
     [AURA_TYPE.SPELL_AURA_PERIODIC_DAMAGE_PERCENT]: true,
@@ -34,7 +35,15 @@ interface ItemEffect
     SpellCategoryID: number,
     SpellID: number,
     ChrSpecializationID: number,
-    ParentItemID: number
+    PlayerConditionID: number
+}
+
+/** Links item effects to items; replaces ItemEffect.ParentItemID of the Classic Era schema. */
+interface ItemXItemEffect
+{
+    ID: number,
+    ItemEffectID: number,
+    ItemID: number
 }
 
 interface DbRow
@@ -74,7 +83,7 @@ export class ItemEffectsCreator
                 || spellId === 24782 || (spellId === 24392 && spellEffect.EffectIndex === 1)
                 || spellId === 28143 || spellId === 28144 || spellId === 28145 || spellId === 28142
                 || spellId === 28282 || spellId === 24346 || spellId === 50009 || spellId === 48777 || spellId === 62106) continue;
-            if (spellEffect.Effect !== EFFECT_TYPE.SPELL_EFFECT_APPLY_AURA) 
+            if (spellEffect.Effect !== EFFECT_TYPE.SPELL_EFFECT_APPLY_AURA)
             {
                 switch(spellId)
                 {
@@ -85,11 +94,16 @@ export class ItemEffectsCreator
                     case 17232: // Broken SoD item https://www.wowhead.com/classic/item=211940/ecksavs-tribal-guardian
                         continue;
                     default:
-                        throw "Item bonus effect doesn't apply an aura?!" + spellId;
+                        report(`Item effect spell ${spellId} effect ${spellEffect.EffectIndex} doesn't apply an aura (effect ${spellEffect.Effect}), skipped`);
+                        continue;
                 }
             }
             if (AURA_TYPES_TO_IGNORE[spellEffect.EffectAura]) continue;
-            if (!this.auraHandlers.handlers[spellEffect.EffectAura]) throw "Aura type isn't ignore but also not handled!";
+            if (!this.auraHandlers.handlers[spellEffect.EffectAura])
+            {
+                report(`Item effect spell ${spellId} effect ${spellEffect.EffectIndex}: aura type ${spellEffect.EffectAura} is not handled, skipped`);
+                continue;
+            }
             try
             {
                 const aed = this.auraHandlers.handlers[spellEffect.EffectAura](spellEffect);
@@ -97,7 +111,7 @@ export class ItemEffectsCreator
             }
             catch (error)
             {
-                // Do nothing
+                report(`Item effect spell ${spellId} effect ${spellEffect.EffectIndex}: ${error}`);
             }
         }
 
@@ -106,11 +120,20 @@ export class ItemEffectsCreator
 
     private getItemEffectData(dbData: { [itemId: number]: DbRow })
     {
-        const cacheFile = "cache/itemEffDoneCache_" + cfg.expansion + ".json";
-        const itemEffects = readDBCSVtoMap<ItemEffect>(cfg.dataDir + "dbc/itemeffect.csv", "ID");
+        const cacheFile = "cache/itemEffDoneCache_forever.json";
+        const itemEffects = readDBCSVtoMap<ItemEffect>(cfg.dataDir + "dbc/ItemEffect.csv", "ID");
+        const itemXEffects = readDBCSVtoMap<ItemXItemEffect>(cfg.dataDir + "dbc/ItemXItemEffect.csv", "ID");
         const filteredItems = new Map<number, AddonEffectData[]>();
         let doneEffectIds: { [id: number]: true | AddonEffectData[] };
         let counter = 0;
+
+        // Item effect ID -> item IDs (an effect can be shared by several items)
+        const effectToItems = new Map<number, number[]>();
+        for (const link of itemXEffects.values())
+        {
+            if (!effectToItems.has(link.ItemEffectID)) effectToItems.set(link.ItemEffectID, []);
+            effectToItems.get(link.ItemEffectID)!.push(link.ItemID);
+        }
 
         try
         {
@@ -132,37 +155,52 @@ export class ItemEffectsCreator
 
         console.log("Building item effect data...");
 
+        const logEvery = 500;
+
         for (const ie of itemEffects.values())
         {
             const fromCache = doneEffectIds[ie.ID];
+            const itemIds = (effectToItems.get(ie.ID) ?? []).filter(itemId => !!dbData[itemId]);
             let effects: AddonEffectData[];
             counter++;
-            
+
+            if (counter % logEvery === 0) console.log(`${counter}/${itemEffects.size}`);
+
             if (!fromCache)
             {
-                console.log(`${counter}/${itemEffects.size} ${dbData[ie.ParentItemID] ? dbData[ie.ParentItemID].name : ie.ParentItemID}`);
                 doneEffectIds[ie.ID] = true;
                 if (ie.TriggerType !== 1) continue; // 1 == on equip auras, we can ignore the rest
                 // Items not in the DB shouldn't matter
-                if (!dbData[ie.ParentItemID]) continue;
+                if (itemIds.length === 0) continue;
                 effects = this.processSpell(ie.SpellID);
                 if (effects.length === 0) continue;
                 doneEffectIds[ie.ID] = effects;
-                writeFileSync("cache/itemEffDoneCache_" + cfg.expansion + ".json", JSON.stringify(doneEffectIds, null, 4));
             }
             else
             {
-                console.log(`${counter}/${itemEffects.size} ${dbData[ie.ParentItemID] ? dbData[ie.ParentItemID].name : ie.ParentItemID} (cached)`);
                 if (fromCache === true) continue;
                 effects = fromCache;
             }
 
-            if (!filteredItems.has(ie.ParentItemID)) filteredItems.set(ie.ParentItemID, []);
-            const flistentry = filteredItems.get(ie.ParentItemID)!;
-            for (const eff of effects)
+            for (const itemId of itemIds)
             {
-                flistentry.push(eff);
+                if (!filteredItems.has(itemId)) filteredItems.set(itemId, []);
+                const flistentry = filteredItems.get(itemId)!;
+                for (const eff of effects)
+                {
+                    flistentry.push(eff);
+                }
             }
+        }
+
+        try
+        {
+            mkdirSync("cache", { recursive: true });
+            writeFileSync(cacheFile, JSON.stringify(doneEffectIds, null, 4));
+        }
+        catch (error)
+        {
+            console.log("Could not write item effect cache: " + error);
         }
 
         return filteredItems;

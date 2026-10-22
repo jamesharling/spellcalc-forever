@@ -3,8 +3,9 @@ import { ClassSpellSets } from "./ClassSpellSets";
 import { cfg } from "./config";
 import { readDBCSVtoMap } from "./CSVReader";
 import { AuraHandlers, USELESS_AURAS } from "./ItemAuraHandlers";
-import { createEffectLua, createFileHead, orderItemsByClass } from "./itemFunctions";
+import { createEffectLua, createFileHead, getItemDbData, orderItemsByClass } from "./itemFunctions";
 import { SpellData } from "./SpellData";
+import { report } from "./report";
 
 const AURA_TYPES_TO_IGNORE: { [index: number]: true | undefined } = {
 
@@ -84,7 +85,7 @@ export class ItemSetCreator
         this.spellData = spellData;
         this.auraHandlers = new AuraHandlers(spellData, classSpellLists, classSpellSets);
 
-        this.itemsparse = readDBCSVtoMap<ItemSparse>(cfg.dataDir + "dbc/itemsparse.csv", "ID");
+        this.itemsparse = readDBCSVtoMap<ItemSparse>(cfg.dataDir + "dbc/ItemSparse.csv", "ID");
 
         for (const sparse of this.itemsparse.values())
         {
@@ -102,18 +103,39 @@ export class ItemSetCreator
      */
     private processSpell(spellId: number): AddonEffectData[]
     {
-        const spellEffects = this.spellData.getSpellEffects(spellId);
+        const spellEffects = this.spellData.getSpellEffects(spellId, true);
         const aedarr: AddonEffectData[] = [];
+
+        if (!spellEffects)
+        {
+            report(`Item set bonus spell ${spellId} has no effects, skipped`);
+            return aedarr;
+        }
 
         for (let spellEffect of spellEffects)
         {
             if (spellId === 24746 || spellId === 67191 || spellId === 70847 || spellId === 70844
                 || spellId === 70656) continue;
-            if (spellEffect.Effect !== EFFECT_TYPE.SPELL_EFFECT_APPLY_AURA) throw "Item bonus effect doesn't apply an aura?!" + spellId;
+            if (spellEffect.Effect !== EFFECT_TYPE.SPELL_EFFECT_APPLY_AURA)
+            {
+                report(`Item set bonus spell ${spellId} effect ${spellEffect.EffectIndex} doesn't apply an aura (effect ${spellEffect.Effect}), skipped`);
+                continue;
+            }
             if (AURA_TYPES_TO_IGNORE[spellEffect.EffectAura]) continue;
-            if (!this.auraHandlers.handlers[spellEffect.EffectAura]) throw "Aura type isn't ignored but also not handled!";
-            const aed = this.auraHandlers.handlers[spellEffect.EffectAura](spellEffect);
-            if (aed) aedarr.push(aed);
+            if (!this.auraHandlers.handlers[spellEffect.EffectAura])
+            {
+                report(`Item set bonus spell ${spellId} effect ${spellEffect.EffectIndex}: aura type ${spellEffect.EffectAura} is not handled, skipped`);
+                continue;
+            }
+            try
+            {
+                const aed = this.auraHandlers.handlers[spellEffect.EffectAura](spellEffect);
+                if (aed) aedarr.push(aed);
+            }
+            catch (error)
+            {
+                report(`Item set bonus spell ${spellId} effect ${spellEffect.EffectIndex}: ${error}`);
+            }
         }
 
         return aedarr;
@@ -216,7 +238,7 @@ export class ItemSetCreator
     private getSpellsByItemSet()
     {
         console.log("Mapping set spells...");
-        const itemSetSpellData = readDBCSVtoMap<ItemSetSpell>(cfg.dataDir + "dbc/itemsetspell.csv", "ID");
+        const itemSetSpellData = readDBCSVtoMap<ItemSetSpell>(cfg.dataDir + "dbc/ItemSetSpell.csv", "ID");
         const spellsbyItemSet = new Map<number, ItemSetSpell[]>();
 
         for (let spellEntry of itemSetSpellData.values())
@@ -243,7 +265,7 @@ export class ItemSetCreator
     private getProcessedSetData()
     {
         const spellsbyItemSet = this.getSpellsByItemSet();
-        const itemSetData = readDBCSVtoMap<ItemSet>(cfg.dataDir + "dbc/itemset.csv", "ID");
+        const itemSetData = readDBCSVtoMap<ItemSet>(cfg.dataDir + "dbc/ItemSet.csv", "ID");
         const setAddonExportData = new Map<number, ItemSetAddonData>();
 
         console.log("Creating data for sets...");
@@ -269,10 +291,18 @@ export class ItemSetCreator
         console.log("Creating Lua for  item set data...");
         const processedData = this.getProcessedSetData();
 
+        // Represent each set by one of its items that exists in the item DB (the class ordering looks it up there)
+        const dbData = getItemDbData();
         const itemToSetId = new Map<number, ItemSetAddonData>();
         for (const setData of processedData.values())
         {
-            itemToSetId.set(setData.items[0], setData);
+            const representative = setData.items.find(itemId => !!dbData[itemId]);
+            if (typeof representative === "undefined")
+            {
+                report(`Item set ${setData.ID} (${setData.name}): none of its items exist in the item DB, skipped`);
+                continue;
+            }
+            itemToSetId.set(representative, setData);
         }
         const ordered = await orderItemsByClass(itemToSetId);
 

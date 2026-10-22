@@ -1,14 +1,16 @@
 {
   "name": "spelldata_creator",
-  "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "version": "2.0.0",
+  "description": "Generates the SpellCalc Forever data files from World of Warcraft: Forever client tables (wago.tools)",
+  "main": "build/app.js",
   "scripts": {
-    "update-tables-forever": "tsc && node ./build/DataUpdater.js forever",
+    "build": "tsc",
+    "update-tables-forever": "tsc && node ./build/DataUpdater.js",
     "start": "tsc && node ./build/app.js"
   },
   "author": "coolmodi",
   "devDependencies": {
-    "@types/node": "^20.11.16"
+    "@types/node": "^22.0.0",
+    "typescript": "^5.4.0"
   }
 }

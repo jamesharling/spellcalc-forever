@@ -1,8 +1,9 @@
 # SpellCalc → World of Warcraft: Forever — feasibility analysis
 
 > Status update (2026-10-22, later the same day): the fork decision was taken (`SpellCalc_Forever`, repo
-> `spellcalc-forever`, Forever only) and phase 0 plus the talent rewrite from §8 are implemented in this tree.
-> See `README.md` for what changed and what still needs verification; §6 (data regeneration) is still open.
+> `spellcalc-forever`, Forever only), phase 0 plus the talent rewrite from §8 are implemented in this tree,
+> and phase 1 (§6, generator port and data regeneration from build 1.60.1.70532) is done as well. See
+> `README.md` for what changed, how to regenerate, and what still needs verification in-game.
 
 Date: 2026-10-22. Based on SpellCalc `master` (last commit c6b53a7, 2024-03-17), the Forever beta client 1.60.1.70532 data on wago.tools, Blizzard's Forever UI source (`forever` branch of wow-ui-source, build 70450), and community beta probes. Forever launches 2026-11-04; the beta closed 2026-10-21, so nothing below has been run in-game.
 

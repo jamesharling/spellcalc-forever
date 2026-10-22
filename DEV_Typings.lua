@@ -95,9 +95,9 @@ _addon.ClassSettings = function() end
 ---@field values integer[]|nil
 
 ---@class TalentDataRawEntry
----@field tree integer
----@field tier integer
----@field column integer
+---@field name string
+---@field spellId integer Spell ID of the talent (C_Traits definition spell)
+---@field maxRanks integer|nil
 ---@field effects TalentEffect[]
 
 ---@type TalentDataRawEntry[]

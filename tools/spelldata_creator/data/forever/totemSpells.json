@@ -1,4 +1,6 @@
 {
+    "_comment": "Totem summon spell -> the spell the totem casts. Fire Nova Totem no longer exists in Forever.",
+
     "searing":"searing",
     "3599": 3606,
     "6363": 6350,
@@ -12,13 +14,6 @@
     "10585": 10582,
     "10586": 10583,
     "10587": 10584,
-
-    "nova":"nova",
-    "1535": 8349,
-    "8498": 8502,
-    "8499": 8503,
-    "11314": 11306,
-    "11315": 11307,
 
     "healing":"healing",
     "5394": 5672,

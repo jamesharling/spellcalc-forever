@@ -1,24 +1,10 @@
 import { SpellData, SpellEffect } from "../SpellData";
+import { getEffectBase } from "../effectValues";
 
 function getBaseValue(effect: SpellEffect)
 {
-    let value = 0;
-    if (effect.EffectDieSides == 0)
-        value = effect.EffectBasePoints;
-    else if (effect.EffectDieSides == 1)
-        value = effect.EffectBasePoints + 1;
-    else
-        switch (effect.SpellID)
-        {
-            case 14147:
-            case 23314:
-            case 23313:
-                value = Math.round(effect.EffectBasePoints + effect.EffectDieSides / 2);
-                break;
-            default:
-                throw new Error("DieSides neither 0 nor 1!");
-        }
-
+    // Mean value; effects with a Variance (rolled values) use the middle like the old DieSides/2 handling did.
+    let value = Math.round(getEffectBase(effect));
 
     if (effect.EffectPointsPerResource != 0)
     {

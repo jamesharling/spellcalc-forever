@@ -2,6 +2,11 @@ import { SpellData, SpellEffect } from "./SpellData";
 import * as fs from "fs";
 import { isJudgeDummy, isSeal } from "./paladinCrap";
 import { cfg } from "./config";
+import { getSpellIdFromEffect } from "./effectValues";
+import { SkillData } from "./modules/SkillData";
+import { TraitData } from "./modules/TraitData";
+import { report, reportSection } from "./report";
+import { isPlayerClass } from "./helper";
 
 const DO_EFFECTS = [
     EFFECT_TYPE.SPELL_EFFECT_HEAL,
@@ -38,13 +43,7 @@ const DO_AURAS = [
     AURA_TYPE.SPELL_AURA_PERIODIC_TRIGGER_SPELL_WITH_VALUE
 ];
 
-/* const DMG_SHIELD_DATA: { [index: string]: boolean } = {
-    "Shadowguard": true,
-    "Lightning Shield": true,
-    "Touch of Weakness": true,
-    "Molten Armor": true
-} */
-
+/** Spells whose proc trigger aura is not interesting for the calculator. */
 const TRIGGER_SPELL_IGNORE: { [spellName: string]: boolean } = {
     "Feedback": true,
     "Frost Armor": true,
@@ -53,15 +52,11 @@ const TRIGGER_SPELL_IGNORE: { [spellName: string]: boolean } = {
     "Nature's Grasp": true,
     "Seal of Justice": true,
     "Seal of Light": true, // no scaling, no need to handle
-    //"Seal of Wisdom": true,
+    "Seal of Wisdom": true,
     "Barkskin": true,
 }
 
-if (cfg.expansion == "CLASSIC")
-{
-    TRIGGER_SPELL_IGNORE["Seal of Wisdom"] = true;
-}
-
+/** Periodic trigger auras to ignore (by spell ID). */
 const PTSA_IGNORES = [
     552, 1515, 2893, 1949, 11683, 11684
 ];
@@ -69,12 +64,16 @@ const PTSA_IGNORES = [
 export class ClassSpellLists
 {
     private readonly spellData: SpellData;
+    private readonly skillData: SkillData;
+    private readonly traitData: TraitData;
     private readonly validClassSpells: { [className: string]: Map<number, SpellEffect[]> } = {};
     private readonly judgementRemap: Map<number, number> = new Map<number, number>();
 
-    constructor(spellData: SpellData, classesToDo: string[])
+    constructor(spellData: SpellData, skillData: SkillData, traitData: TraitData, classesToDo: string[])
     {
         this.spellData = spellData;
+        this.skillData = skillData;
+        this.traitData = traitData;
 
         console.log("Loading class spell lists...");
 
@@ -134,17 +133,7 @@ export class ClassSpellLists
 
                 if (effect.EffectAura == AURA_TYPE.SPELL_AURA_PROC_TRIGGER_SPELL)
                 {
-                    if (TRIGGER_SPELL_IGNORE[spellName])
-                    {
-                        console.log("Ignoring spell " + spellName);
-                        continue;
-                    }
-                    /* if (!DMG_SHIELD_DATA[spellName])
-                    {
-                        console.error("Spell " + effect.SpellID + " " + spellName + " not handled correctly!");
-                        throw "SPELL_AURA_PROC_TRIGGER_SPELL not handled!";
-                    } */
-                    console.log("have trigger aura " + effect.SpellID + " " + spellName);
+                    if (TRIGGER_SPELL_IGNORE[spellName]) continue;
                     if (!this.addTriggeredSpellIfValid(effect.EffectTriggerSpell, binaryCache, list)) throw new Error("Triggered spell has no valid effects!");
                 }
 
@@ -174,7 +163,7 @@ export class ClassSpellLists
                     // pala seals
                     if (isJudgeDummy(effect) !== false)
                     {
-                        const jspell = this.spellData.getSpellEffects(effect.EffectBasePoints + effect.EffectDieSides);
+                        const jspell = this.spellData.getSpellEffects(getSpellIdFromEffect(effect));
                         if (jspell[0].Effect != EFFECT_TYPE.SPELL_EFFECT_SCHOOL_DAMAGE
                             && jspell[0].Effect != EFFECT_TYPE.SPELL_EFFECT_WEAPON_DAMAGE) continue;
                         if (!list.has(jspell[0].SpellID)) list.set(jspell[0].SpellID, jspell);
@@ -235,7 +224,6 @@ export class ClassSpellLists
 
             if (effect.Effect == EFFECT_TYPE.SPELL_EFFECT_DUMMY)
             {
-                const spellName = this.spellData.getSpellName(effect.SpellID).Name_lang;
                 switch (spellName)
                 {
                     case "Starfall":
@@ -254,22 +242,94 @@ export class ClassSpellLists
     }
 
     /**
+     * Spells to consider for a class: the learnable spells of its skill lines, the spells
+     * of its talent tree, and the hand-maintained extras in class_spells/<class>.json.
+     * @returns Map spell ID -> source (for reporting)
+     */
+    private collectClassSpellIds(pclass: string)
+    {
+        const spells = new Map<number, string>();
+        let passives = 0;
+
+        const addSpell = (spellId: number, source: string, skipPassive: boolean) =>
+        {
+            if (!this.spellData.spellExists(spellId)) return false;
+            if (skipPassive && (this.spellData.getSpellMisc(spellId).Attributes_0 & SPELL_ATTR0.SPELL_ATTR_PASSIVE) !== 0)
+            {
+                // Passive spells (talents, weapon/armor skills) are no castable spells; passive auras
+                // with calculator effects are collected by PlayerAuras instead.
+                passives++;
+                return true;
+            }
+            if (!spells.has(spellId)) spells.set(spellId, source);
+            return true;
+        };
+
+        if (isPlayerClass(pclass))
+        {
+            const lineIds = this.skillData.getClassSkillLineIds(pclass);
+            report(`${pclass}: skill lines ${lineIds.map(id => `${id} (${this.skillData.getSkillLineName(id)})`).join(", ")}`);
+
+            let missing = 0;
+            for (const [spellId, lineName] of this.skillData.getClassSpells(pclass))
+            {
+                if (!addSpell(spellId, lineName, true)) missing++;
+            }
+            report(`${pclass}: ${spells.size} skill line spells, ${passives} passives ignored, ${missing} skill line entries point to removed spells`);
+
+            const before = spells.size;
+            const treeId = this.traitData.getClassTreeId(pclass);
+            for (const spellId of this.traitData.getTalentSpellIds(treeId))
+            {
+                addSpell(spellId, "trait tree " + treeId, true);
+            }
+            report(`${pclass}: ${spells.size - before} additional spells from trait tree ${treeId}`);
+        }
+
+        const extrasFile = cfg.dataDir + "class_spells/" + pclass + ".json";
+        if (fs.existsSync(extrasFile))
+        {
+            const extras: { [name: string]: number | string } = JSON.parse(fs.readFileSync(extrasFile, "utf8"));
+            for (const name in extras)
+            {
+                if (name.startsWith("_")) continue;
+                const spellId = extras[name];
+                if (typeof spellId !== "number") continue;
+                if (!addSpell(spellId, "class_spells/" + pclass + ".json", false))
+                {
+                    report(`${pclass}: extra spell "${name}" (${spellId}) does not exist in the client data`);
+                }
+            }
+        }
+
+        return spells;
+    }
+
+    /**
      * Get list of valid/handled spells for a class
-     * @param pclass 
+     * @param pclass
      */
     private createValidSpellList(pclass: string)
     {
         console.log("Building list of spells for class " + pclass);
+        reportSection(`Spell list: ${pclass}`);
 
-        const data: { [index: string]: number } = JSON.parse(fs.readFileSync(cfg.dataDir + "class_spells/" + pclass + ".json", "utf8"));
         const list: Map<number, SpellEffect[]> = new Map<number, SpellEffect[]>();
         const binaryCache: Map<number, SpellEffect> = new Map<number, SpellEffect>();
+        const spells = this.collectClassSpellIds(pclass);
 
-        for (let nameRank in data)
+        for (const [spellId, source] of spells)
         {
-            const spellId = data[nameRank];
-            const validEffs = this.getValidEffectsForSpell(spellId, binaryCache, list);
-            if (validEffs) list.set(spellId, validEffs);
+            try
+            {
+                const validEffs = this.getValidEffectsForSpell(spellId, binaryCache, list);
+                if (validEffs) list.set(spellId, validEffs);
+            }
+            catch (error)
+            {
+                const msg = error instanceof Error ? error.message : String(error);
+                report(`${this.spellData.getSpellNameWithRank(spellId)} [${spellId}, ${source}] skipped: ${msg}`);
+            }
         }
 
         for (const [spellId, effect] of binaryCache)
@@ -278,12 +338,14 @@ export class ClassSpellLists
             if (listEntry) listEntry.push(effect);
         }
 
+        console.log(`${pclass}: ${list.size} spells with handled effects out of ${spells.size} candidates`);
+
         return list;
     }
 
     /**
      * Get list of spells to handle for a class.
-     * @param className 
+     * @param className
      */
     getListForClass(className: string)
     {
@@ -298,16 +360,13 @@ export class ClassSpellLists
 
     /**
      * Check if a spell is handled currently.
-     * @param spellId 
+     * @param spellId
      */
     isHandledSpell(spellId: number)
     {
         for (const className in this.validClassSpells)
         {
-            for (const cspellId of this.validClassSpells[className].keys())
-            {
-                if (cspellId === spellId) return true;
-            }
+            if (this.validClassSpells[className].has(spellId)) return true;
         }
 
         return false;

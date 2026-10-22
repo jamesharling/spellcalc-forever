@@ -1,250 +1,335 @@
-import { readFileSync } from "fs";
-import { cfg } from "../config";
-import { readDBCSVtoMap } from "../CSVReader";
-import { getClassMaskFromName } from "../helper";
 import { AuraHandlers, USELESS_AURAS } from "../ItemAuraHandlers";
 import { SpellData, SpellEffect } from "../SpellData";
-import { createEffectLua } from "../itemFunctions";
+import { createEffectLua, createFileHead } from "../itemFunctions";
 import { ClassSpellSets } from "../ClassSpellSets";
-import { getTalentDummies } from "./talentDummies";
-
-interface DBCTalent
-{
-    ID: number,
-    Description_lang: string,
-    TierID: number,
-    Flags: number,
-    ColumnIndex: number,
-    TabID: number,
-    ClassID: number,
-    SpecID: number,
-    SpellID: number,
-    OverridesSpellID: number,
-    RequiredSpellID: number,
-    CategoryMask_0: number,
-    CategoryMask_1: number,
-    SpellRank_0: number,
-    SpellRank_1: number,
-    SpellRank_2: number,
-    SpellRank_3: number,
-    SpellRank_4: number,
-}
-
-interface DBCTalentTab
-{
-    ID: number,
-    Name_lang: string,
-    BackgroundFile: string,
-    OrderIndex: number,
-    RaceMask: number,
-    ClassMask: ClassMask,
-    PetTalentMask: number,
-    SpellIconID: number
-}
+import { getTalentDummies, TalentDummyDef } from "./talentDummies";
+import { TraitData, TraitTalent } from "./TraitData";
+import { report, reportSection } from "../report";
+import { getEffectBase } from "../effectValues";
 
 interface TalentDef
 {
     name: string,
-    /** Rank-1 spell ID of the talent; the addon keys talents by it (see system/talents.lua). */
+    /** Spell ID of the talent (TraitDefinition.SpellID); the addon keys talents by it (see system/talents.lua). */
     spellId: number,
-    tree: number,
-    tier: number,
-    column: number,
+    maxRanks: number,
+    nodeId: number,
+    posX: number,
+    posY: number,
     effects: AddonTalentData[]
-}
-
-interface TalentTreeDef
-{
-    name: string,
-    talents: TalentDef[]
 }
 
 const AURA_TYPES_TO_IGNORE: { [index: number]: true | undefined } = {};
 Object.assign(AURA_TYPES_TO_IGNORE, USELESS_AURAS);
 
+const AURA_EFFECTS = [
+    EFFECT_TYPE.SPELL_EFFECT_APPLY_AURA,
+    EFFECT_TYPE.SPELL_EFFECT_APPLY_AREA_AURA_PARTY,
+    EFFECT_TYPE.SPELL_EFFECT_PERSISTENT_AREA_AURA,
+];
+
+/** Nodes further apart than this on the X axis belong to different columns groups (the three old talent trees). */
+const COLUMN_GROUP_WIDTH = 4000;
+
+function roundValue(v: number)
+{
+    return Math.round(v * 10000) / 10000;
+}
+
 export class TalentsCreator
 {
-    private readonly talents: Map<number, DBCTalent>;
-    private readonly talentTabs: Map<number, DBCTalentTab>;
     private readonly spellData: SpellData;
     private readonly auraHandlers: AuraHandlers;
-    private readonly dummyTalents: { [talentName: string]: AddonTalentData[] };
+    private readonly traitData: TraitData;
+    private readonly dummyTalents: { [talentName: string]: TalentDummyDef[] };
 
-    constructor(spellData: SpellData, auraHandlers: AuraHandlers, classSpellSets: ClassSpellSets)
+    constructor(spellData: SpellData, auraHandlers: AuraHandlers, classSpellSets: ClassSpellSets, traitData: TraitData)
     {
-        this.talents = readDBCSVtoMap<DBCTalent>(cfg.dataDir + "dbc/Talent.csv", "ID");
-        this.talentTabs = readDBCSVtoMap<DBCTalentTab>(cfg.dataDir + "dbc/TalentTab.csv", "ID");
         this.spellData = spellData;
         this.auraHandlers = auraHandlers;
+        this.traitData = traitData;
         this.dummyTalents = getTalentDummies(spellData, classSpellSets);
     }
 
     /**
-     * Filter and convert SpellEffects to AddonEffectData.
-     * @param effects 
-     * @returns 
+     * Copy of the talent spell's effects with the values of the given rank.
      */
-    private filterEffects(effects: SpellEffect[])
+    private getEffectsForRank(talent: TraitTalent, rank: number): SpellEffect[]
     {
-        const validEffects: AddonEffectData[] = [];
-        for (const eff of effects)
+        const effects = this.spellData.getSpellEffects(talent.spellId);
+        return effects.map(effect =>
         {
-            if (this.spellData.getSpellPowerCosts(eff.SpellID).length !== 0
-                || AURA_TYPES_TO_IGNORE[eff.EffectAura]) continue;
-
-            if (!this.auraHandlers.handlers[eff.EffectAura]) throw "Aura type isn't ignore but also not handled!";
-            const aed = this.auraHandlers.handlers[eff.EffectAura](eff);
-            if (aed) validEffects.push(aed);
-        }
-        return validEffects;
+            const value = TraitData.getRankValue(talent, effect.EffectIndex, rank, getEffectBase(effect));
+            if (value === getEffectBase(effect)) return effect;
+            const clone: SpellEffect = { ...effect, EffectBasePointsF: value, Variance: 0 };
+            return clone;
+        });
     }
 
     /**
-     * Build effect list for talent.
-     * @param talent 
-     * @returns 
+     * Convert the aura effects of one rank to addon effects.
+     * @returns one entry per effect index (undefined where the effect is not used)
      */
-    private getTalentEffects(talent: DBCTalent)
+    private convertEffects(talentName: string, effects: SpellEffect[]): (AddonEffectData | undefined)[]
     {
-        const talentEffects: AddonTalentData[] = [];
-        const spellEffects: AddonEffectData[][] = [];
+        const result: (AddonEffectData | undefined)[] = [];
 
-        for (let i = 0; i < 5; i++)
+        for (const eff of effects)
         {
-            const spellId = talent[("SpellRank_" + i) as keyof DBCTalent];
-            if (typeof spellId === "number" && spellId !== 0)
+            let converted: AddonEffectData | undefined;
+
+            if (AURA_EFFECTS.indexOf(eff.Effect) !== -1 && !AURA_TYPES_TO_IGNORE[eff.EffectAura])
             {
-                spellEffects[i] = this.filterEffects(this.spellData.getSpellEffects(spellId));
-                if (spellEffects[i].length === 0) break;
+                const handler = this.auraHandlers.handlers[eff.EffectAura];
+                if (!handler)
+                {
+                    report(`${talentName} (${eff.SpellID}) effect ${eff.EffectIndex}: aura type ${eff.EffectAura} is not handled, effect skipped`);
+                }
+                else
+                {
+                    try
+                    {
+                        converted = handler(eff) || undefined;
+                    }
+                    catch (error)
+                    {
+                        report(`${talentName} (${eff.SpellID}) effect ${eff.EffectIndex} skipped: ${error}`);
+                    }
+                }
             }
+
+            result[eff.EffectIndex] = converted;
         }
 
-        for (let effIndex = 0; effIndex < spellEffects[0].length; effIndex++)
+        return result;
+    }
+
+    /**
+     * Collapse per-rank values to perPoint when they grow linearly, otherwise keep the list.
+     */
+    private static applyRankValues(effect: AddonTalentData, values: number[])
+    {
+        effect.value = undefined;
+
+        const rounded = values.map(roundValue);
+        const perPoint = rounded[0];
+        const linear = rounded.every((v, i) => Math.abs(v - perPoint * (i + 1)) < 0.0001);
+
+        if (linear)
+            effect.perPoint = perPoint;
+        else
+            effect.values = rounded;
+    }
+
+    /**
+     * Build effect list for talent from its spell effects and rank curves.
+     */
+    private getTalentEffects(talentName: string, talent: TraitTalent): AddonTalentData[]
+    {
+        const perRank: (AddonEffectData | undefined)[][] = [];
+
+        for (let rank = 1; rank <= talent.maxRanks; rank++)
         {
-            talentEffects[effIndex] = spellEffects[0][effIndex];
-            talentEffects[effIndex].value = undefined;
+            perRank.push(this.convertEffects(talentName, this.getEffectsForRank(talent, rank)));
+        }
+
+        const talentEffects: AddonTalentData[] = [];
+        const effectCount = perRank[0].length;
+
+        for (let effIndex = 0; effIndex < effectCount; effIndex++)
+        {
+            const first = perRank[0][effIndex];
+            if (!first) continue;
 
             const values: number[] = [];
+            let usable = true;
 
-            for (let rankEffects of spellEffects)
+            for (let rank = 0; rank < perRank.length; rank++)
             {
-                const v = rankEffects[effIndex].value;
-                if (v) values.push(v);
+                const rankEffect = perRank[rank][effIndex];
+                if (!rankEffect || rankEffect.type !== first.type)
+                {
+                    report(`${talentName} (${talent.spellId}) effect ${effIndex}: rank ${rank + 1} converts differently than rank 1, effect skipped`);
+                    usable = false;
+                    break;
+                }
+                values.push(rankEffect.value ?? 0);
             }
 
-            const maxValue = values[values.length - 1];
-            const ranks = spellEffects.length;
+            if (!usable) continue;
+            if (values.every(v => v === 0)) continue;
 
-            if (maxValue % ranks === 0)
+            if (talent.maxRanks > 1 && !talent.rankValues.has(effIndex))
             {
-                talentEffects[effIndex].perPoint = maxValue / ranks;
+                report(`${talentName} (${talent.spellId}) effect ${effIndex}: no rank curve, value ${values[0]} is used for all ${talent.maxRanks} ranks (check the tooltip)`);
             }
-            else
-            {
-                talentEffects[effIndex].values = values;
-            }
+
+            const talentEffect: AddonTalentData = first;
+            TalentsCreator.applyRankValues(talentEffect, values);
+            talentEffects.push(talentEffect);
         }
 
         return talentEffects;
     }
 
     /**
+     * Build effect list for a talent with a hand-written definition.
+     */
+    private getDummyTalentEffects(talent: TraitTalent, dummies: TalentDummyDef[]): AddonTalentData[]
+    {
+        const result: AddonTalentData[] = [];
+
+        for (const dummy of dummies)
+        {
+            const values: number[] = [];
+            for (let rank = 1; rank <= talent.maxRanks; rank++)
+            {
+                const effectValues = this.getEffectsForRank(talent, rank).map(getEffectBase);
+                values.push(dummy.valueForRank(effectValues, rank, talent.spellId));
+            }
+
+            const effect: AddonTalentData = {
+                type: dummy.type,
+                affectSpell: dummy.affectSpell,
+                affectMask: dummy.affectMask,
+            };
+            TalentsCreator.applyRankValues(effect, values);
+            result.push(effect);
+        }
+
+        return result;
+    }
+
+    /**
      * Build talent list for player class.
-     * @param pclass 
-     * @returns 
      */
     private getTalentList(pclass: PlayerClass)
     {
-        const classMask = getClassMaskFromName(pclass);
-        const list: [TalentTreeDef, TalentTreeDef, TalentTreeDef] = [
-            { name: "", talents: [] },
-            { name: "", talents: [] },
-            { name: "", talents: [] },
-        ];
+        const treeId = this.traitData.getClassTreeId(pclass);
+        const traitTalents = this.traitData.getTalents(treeId);
+        const list: TalentDef[] = [];
+        const seenSpells = new Set<number>();
 
-        const talentsToDo: string[] = JSON.parse(readFileSync(cfg.dataDir + "class_talents/" + pclass + ".json", "utf-8"));
+        console.log(`${pclass}: trait tree ${treeId} with ${traitTalents.length} node entries`);
 
-        for (const talent of this.talents.values())
+        for (const talent of traitTalents)
         {
-            const tab = this.talentTabs.get(talent.TabID);
-            const talentName = this.spellData.getSpellName(talent.SpellRank_0).Name_lang;
+            if (!talent.spellId)
+            {
+                report(`node ${talent.nodeId}: entry ${talent.entryId} has no spell, skipped`);
+                continue;
+            }
 
-            if (!tab) throw new Error("Talent tab ID is invalid?!");
-            if (tab.ClassMask != classMask) continue;
-            if (talentsToDo.indexOf(talentName) === -1) continue;
+            if (seenSpells.has(talent.spellId))
+            {
+                report(`node ${talent.nodeId}: spell ${talent.spellId} already handled by another node, skipped`);
+                continue;
+            }
+            seenSpells.add(talent.spellId);
 
-            if (!list[tab.OrderIndex].name) list[tab.OrderIndex].name = tab.Name_lang;
+            if (!this.spellData.spellExists(talent.spellId))
+            {
+                report(`node ${talent.nodeId}: spell ${talent.spellId} does not exist in the client data, skipped`);
+                continue;
+            }
+
+            const talentName = this.spellData.getSpellName(talent.spellId).Name_lang;
+
+            // Active abilities granted by talents are handled as regular spells (see ClassSpellLists).
+            if (this.spellData.getSpellPowerCosts(talent.spellId).length !== 0) continue;
+
+            if (!this.spellData.getSpellEffects(talent.spellId, true)) continue;
 
             let talentEffects: AddonTalentData[];
-            if (this.dummyTalents[talentName])
-                talentEffects = this.dummyTalents[talentName];
-            else
-                talentEffects = this.getTalentEffects(talent);
+            try
+            {
+                if (this.dummyTalents[talentName])
+                {
+                    talentEffects = this.getDummyTalentEffects(talent, this.dummyTalents[talentName]);
+                    report(`${talentName} (${talent.spellId}) uses a hand-written definition: ${talentEffects.map(e => `${e.type.replace("_addon.CONST.EFFECT_TYPE.", "")}=${e.values ? "{" + e.values.join(",") + "}" : e.perPoint + "/pt"}`).join(", ")}`);
+                }
+                else
+                {
+                    talentEffects = this.getTalentEffects(talentName, talent);
+                }
+            }
+            catch (error)
+            {
+                report(`${talentName} (${talent.spellId}) skipped: ${error}`);
+                continue;
+            }
 
             if (talentEffects.length === 0) continue;
 
-            list[tab.OrderIndex].talents.push({
+            list.push({
                 name: talentName,
-                spellId: talent.SpellRank_0,
-                tree: tab.OrderIndex + 1,
-                tier: talent.TierID + 1,
-                column: talent.ColumnIndex + 1,
+                spellId: talent.spellId,
+                maxRanks: talent.maxRanks,
+                nodeId: talent.nodeId,
+                posX: talent.posX,
+                posY: talent.posY,
                 effects: talentEffects
             });
         }
 
-        for (const tree of list)
+        list.sort((a, b) =>
         {
-            tree.talents.sort((a, b) => (a.tier * 100 + a.column) - (b.tier * 100 + b.column));
-        }
+            const ga = Math.floor(a.posX / COLUMN_GROUP_WIDTH);
+            const gb = Math.floor(b.posX / COLUMN_GROUP_WIDTH);
+            if (ga !== gb) return ga - gb;
+            if (a.posY !== b.posY) return a.posY - b.posY;
+            return a.posX - b.posX;
+        });
 
         return list;
     }
 
     buildTalentLua(pclass: PlayerClass)
     {
-        console.log("Bulding talents for " + pclass);
+        console.log("Building talents for " + pclass);
+        reportSection(`Talents: ${pclass}`);
 
         const list = this.getTalentList(pclass);
 
-        let lua = `-- GENERATED, DO NOT EDIT DIRECTLY!
-
----@class AddonEnv
-local _addon = select(2, ...);
-local _, playerClass = UnitClass("player");
-if playerClass ~= "${pclass.toUpperCase()}" then
-    return;
-end
+        let lua = createFileHead(pclass);
+        lua += `-- Talents are keyed by their spell ID (C_Traits definition spell). Multi-rank talents are one spell;
+-- perPoint/values give the effect value per rank (from the client's rank curves).
 
 ---@type TalentDataRawEntry[]
 _addon.talentDataRaw = {`;
 
-        for (const tree of list)
+        let lastGroup = -1;
+        for (const talent of list)
         {
-            lua += `
-    -----------------------------
-    -- ${tree.name}
-    -----------------------------`;
-
-            for (const talent of tree.talents)
+            const group = Math.floor(talent.posX / COLUMN_GROUP_WIDTH);
+            if (group !== lastGroup)
             {
                 lua += `
-    { -- ${talent.name} (tree ${talent.tree}, tier ${talent.tier}, column ${talent.column})
+    -----------------------------
+    -- Column group ${group + 1}
+    -----------------------------`;
+                lastGroup = group;
+            }
+
+            lua += `
+    { -- ${talent.name} (node ${talent.nodeId}, ${talent.maxRanks} rank${talent.maxRanks > 1 ? "s" : ""})
         name = ${JSON.stringify(talent.name)},
         spellId = ${talent.spellId},
+        maxRanks = ${talent.maxRanks},
         effects = {\n`;
-                for (const eff of talent.effects)
-                {
-                    const valKey = eff.values ? "values" : "perPoint";
-                    const value = eff.values ? `{${eff.values.join(", ")}}` : eff.perPoint;
-                    lua += createEffectLua("            ", eff, { [valKey]: value });
-                }
-                lua += `        }
-    },`;
+            for (const eff of talent.effects)
+            {
+                const valKey = eff.values ? "values" : "perPoint";
+                const value = eff.values ? `{${eff.values.join(", ")}}` : eff.perPoint;
+                lua += createEffectLua("            ", eff, { [valKey]: value });
             }
+            lua += `        }
+    },`;
         }
 
         lua += "\n}\n";
+
+        console.log(`${pclass}: ${list.length} talents with addon effects`);
 
         return lua;
     }

@@ -1,6 +1,7 @@
 import { AuraHandlers } from "./../ItemAuraHandlers";
 import { createEffectLua, createFileHead } from "./../itemFunctions";
 import { SpellData, SpellEffect } from "./../SpellData";
+import { report } from "../report";
 
 const DO_AURAS: { [index: number]: true | undefined } = {
     [AURA_TYPE.SPELL_AURA_PERIODIC_ENERGIZE]: true,
@@ -51,15 +52,20 @@ export class PlayerAuras
                 && spellEffect.Effect !== EFFECT_TYPE.SPELL_EFFECT_PERSISTENT_AREA_AURA
                 && spellEffect.Effect !== EFFECT_TYPE.SPELL_EFFECT_APPLY_AREA_AURA_PARTY) continue;
             if (!DO_AURAS[spellEffect.EffectAura]) continue;
-            if (!this.auraHandlers.handlers[spellEffect.EffectAura]) 
+            if (!this.auraHandlers.handlers[spellEffect.EffectAura])
             {
-                //console.log("Aura type " + spellEffect.EffectAura + " not handled! spellId: " + spellEffect.SpellID);
                 throw new Error("Aura type " + spellEffect.EffectAura + " not handled! spellId: " + spellEffect.SpellID);
-                continue;
             }
-            
-            const aed = this.auraHandlers.handlers[spellEffect.EffectAura](spellEffect);
-            if (aed) aedarr.push(aed);
+
+            try
+            {
+                const aed = this.auraHandlers.handlers[spellEffect.EffectAura](spellEffect);
+                if (aed) aedarr.push(aed);
+            }
+            catch (error)
+            {
+                report(`${this.spellData.getSpellNameWithRank(spellEffect.SpellID)} [${spellEffect.SpellID}] effect ${spellEffect.EffectIndex} skipped: ${error}`);
+            }
         }
 
         return aedarr;

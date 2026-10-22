@@ -8,11 +8,10 @@ current spell power, crit and hit chance, average resisted damage, DPS/HPS, dama
 This is NOT a combat simulation tool. Values are for the current stats and buffs of your character and
 target. Not all effects in the game are implemented, numbers won't be correct in all situations.
 
-**Status: pre-release, not yet tested in-game.** The addon API port to the Forever client is done, but the
-spell, talent, item and aura tables under `data/forever` are still the Classic Era data the original addon
-shipped with. Forever retuned most spells and reworked talents, so numbers will be off until the data is
-regenerated from the Forever client (see *Regenerating data*). Warrior, hunter and rogue are not supported,
-same as upstream.
+**Status: pre-release, not yet tested in-game.** The addon API port to the Forever client is done and the
+spell, talent, item and aura tables under `data/forever` are generated from the Forever client database
+(build 1.60.1.70532, the last beta build before launch; see *Regenerating data*). Warrior, hunter and rogue
+are not supported, same as upstream.
 
 ## Installing
 
@@ -54,21 +53,49 @@ Nothing here has run on a live Forever client (the beta closed before this port 
 4. Downranking: compare low-rank tooltips with the addon's numbers.
 5. Events: unknown events are skipped with a warning in chat; check for warnings after login.
 6. Action bar support: stock bars use `MainActionBar` paging; Bartender4, Dominos and ElvUI need their Forever builds.
+7. Mana regen from gear: Forever stores mp5 and similar bonuses as item stats instead of equip auras, so
+   `system/stats.lua` has to take them from the API (`GetManaRegen`) rather than from `itemEffects.lua`.
+8. Talents listed in `generation_report.txt` as "SPELL_AURA_DUMMY spell not handled" (Fire Power, Shadow
+   Weaving, Eclipse, Maelstrom Weapon, ...) have no effect in the calculator until someone writes handlers.
 
 ## Regenerating data
 
-`tools/spelldata_creator` builds everything under `data/forever` from wago.tools CSV exports of the client
-database. `npm run update-tables-forever` downloads the tables for the Forever client (wago.tools product
-`wowf`). Before `npm start` works against Forever data the generator still needs porting:
+`tools/spelldata_creator` builds everything under `data/forever` (and the variable sets at the end of
+`system/variableScaling.lua`) from wago.tools CSV exports of the Forever client database. It needs Node.js
+18 or newer:
 
-- `SpellEffect` on Forever has `EffectBasePointsF` + `Variance` instead of `EffectBasePoints` + `EffectDieSides`
-  (low = base·(1−v/2), high = base·(1+v/2)); `SpellDuration` renamed `DurationPerLevel`.
-- Talents must come from the trait tables (`TraitTree`, `TraitNode`, `TraitNodeXTraitNodeEntry`,
-  `TraitNodeEntry`, `TraitDefinition`); the legacy `Talent`/`TalentTab` tables in the Forever client are a
-  stale Classic Era copy without Forever's new talents.
-- The per-class spell and talent name lists under `tools/spelldata_creator/data/forever` still contain Season of
-  Discovery entries and lack Forever's new abilities; `spellDataFixes.ts`, `ItemAuraHandlers.ts`,
-  `talentDummies.ts` and `missingCoef.json` need a review against Forever.
+```bash
+cd tools/spelldata_creator
+npm install
+npm run update-tables-forever   # downloads the tables of the newest wago.tools "wowf" build into data/forever/dbc
+npm start                       # writes data/forever/* and data/forever/generation_report.txt
+```
+
+`npm run update-tables-forever -- 1.60.1.70532` pins a build. Every generated file carries the build it was
+made from in its first line.
+
+What the generator does differently from upstream, because of the Forever (Mainline-style) database:
+
+- **Spell values** come from `SpellEffect.EffectBasePointsF` and `Variance` (low = base·(1−v/2),
+  high = base·(1+v/2)) instead of base points + die sides.
+- **Class spell lists** are no longer hand-maintained: a class gets every learnable spell of its skill lines
+  (`SkillLineAbility`, acquire method 3 = unobtainable Season of Discovery runes excluded), plus the spells of
+  its talent tree, plus the few extras in `data/forever/class_spells/<class>.json`. Hundreds of skill line
+  entries point at spells Forever removed (old ranks, Fire Nova Totem, racial priest spells); they are skipped.
+- **Talents** come from the trait tables. Each talent is one spell (`TraitDefinition.SpellID`) whose effects hold
+  the max-rank values; `TraitDefinitionEffectPoints` → `Curve` → `CurvePoint` give the value per rank. The
+  generator runs the aura handlers once per rank and emits `perPoint` when the values are linear, otherwise a
+  `values` list. All talents of a tree are processed; the handful that need hand-written definitions
+  (Ignite, Illumination, Master of Elements, Arcane Concentration, Elemental Focus) live in
+  `modules/talentDummies.ts` and now take their numbers from the client data.
+- **Item effects** are linked through `ItemXItemEffect`. Forever turned most "Equip: +X" spell bonuses into
+  plain item stats (which the addon reads from the API), so `itemEffects.lua` only lists the remaining spell
+  modifiers and procs.
+- **Level scaling variables** (`$<power>` style formulas) are only attached to a spell whose description
+  really references them. No learnable Forever spell does; the sets still get emitted for completeness.
+- Nothing aborts the run any more: everything the generator cannot interpret (dummy auras of new talents and
+  set bonuses, removed spells, unhandled spell modifier types) is listed in
+  `tools/spelldata_creator/data/forever/generation_report.txt` for review.
 
 ## Debug commands
 

@@ -3,12 +3,8 @@ import { SpellEffect } from "./SpellData";
 import { cfg } from "./config";
 
 export enum SealType {
-    SOR = "SOR", 
+    SOR = "SOR",
     SOC = "SOC",
-    SoCor = "SoCor",
-    SoV = "SoV",
-    SoW = "SoW",
-    SoL = "SoL"
 }
 
 interface SealInfo {
@@ -26,38 +22,22 @@ const SEALDATA: SealData = JSON.parse(fs.readFileSync(cfg.dataDir + "sealData.js
 
 /**
  * Is spell a seal
- * @param id 
+ * @param id
  * @param specific Filter for specific seal
  */
 export function isSeal(id: number, specific?: SealType) {
-    if ((!specific || specific == SealType.SOR) && SEALDATA.seals.SOR.spells.indexOf(id) != -1) {
-        return SealType.SOR;
-    }
-    if ((!specific || specific == SealType.SOC) && SEALDATA.seals.SOC.spells.indexOf(id) != -1) {
-        return SealType.SOC;
-    }
-
-    if (cfg.expansion == "CLASSIC") return false;
-
-    if ((!specific || specific == SealType.SoCor) && SEALDATA.seals.SoCor.spells.indexOf(id) != -1) {
-        return SealType.SoCor;
-    }
-    if ((!specific || specific == SealType.SoV) && SEALDATA.seals.SoV.spells.indexOf(id) != -1) {
-        return SealType.SoV;
-    }
-    if ((!specific || specific == SealType.SoW) && SEALDATA.seals.SoW.spells.indexOf(id) != -1) {
-        return SealType.SoW;
-    }
-    if ((!specific || specific == SealType.SoL) && SEALDATA.seals.SoL.spells.indexOf(id) != -1) {
-        return SealType.SoL;
+    for (const sealType in SEALDATA.seals)
+    {
+        if (specific && specific != sealType) continue;
+        if (SEALDATA.seals[sealType as SealType].spells.indexOf(id) != -1) return <SealType>sealType;
     }
     return false;
 }
 
 /**
  * Get array of seal spells for seal type or all seals.
- * @param type 
- * @returns 
+ * @param type
+ * @returns
  */
 export function getSeals(type?: SealType)
 {
@@ -66,7 +46,7 @@ export function getSeals(type?: SealType)
         if (!SEALDATA.seals[type]) throw new Error("No seals for this type!");
         return SEALDATA.seals[type].spells;
     }
-    
+
     const seals: number[] = [];
     for (const sealType in SEALDATA.seals)
     {
@@ -78,20 +58,16 @@ export function getSeals(type?: SealType)
 
 /**
  * Is effect a judgement dummy
- * @param eff 
- * @param seal 
+ * @param eff
+ * @param seal
  */
 export function isJudgeDummy(eff: SpellEffect, seal?: SealType) {
-    if (seal) {
-        if (isSeal(eff.SpellID, seal) && eff.EffectIndex == SEALDATA.seals[seal].judgeDummyIndex) {
-            return seal;
-        }
-    } else {
-        for (let k in SealType) {
-            //@ts-ignore
-            if (isSeal(eff.SpellID, k) && eff.EffectIndex == SEALDATA.seals[k].judgeDummyIndex) {
-                return <SealType>k;;
-            }
+    for (const sealType in SEALDATA.seals)
+    {
+        if (seal && seal != sealType) continue;
+        if (isSeal(eff.SpellID, <SealType>sealType) && eff.EffectIndex == SEALDATA.seals[sealType as SealType].judgeDummyIndex)
+        {
+            return <SealType>sealType;
         }
     }
 

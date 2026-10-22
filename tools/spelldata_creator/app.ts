@@ -1,13 +1,12 @@
-import { SpellData, SpellEffect, SpellMisc, SpellLevel, Spell, SpellCategory, SpellCooldown, SpellPower, SpellEquippedItems, SpellAuraOptions } from "./SpellData";
+import { SpellData, SpellEffect, SpellMisc, SpellLevel, SpellCategory, SpellCooldown, SpellPower, SpellEquippedItems, SpellAuraOptions } from "./SpellData";
 import * as fs from "fs";
 import { isSeal, SealType } from "./paladinCrap";
 import { ItemSetCreator } from "./ItemSetCreator";
 import { ClassSpellLists } from "./ClassSpellLists";
 import { ClassSpellSets } from "./ClassSpellSets";
 import { ItemEffectsCreator } from "./ItemEffectsCreator";
-import { getHandledClassGlyphs } from "./glyphs";
 import { createMechanicLists } from "./mechanicList";
-import { cfg } from "./config";
+import { cfg, getBuildInfo } from "./config";
 import { TalentsCreator } from "./modules/TalentCreator";
 import { AuraHandlers } from "./ItemAuraHandlers";
 import { isPlayerClass } from "./helper";
@@ -15,9 +14,14 @@ import { SpellLevelScaling } from "./modules/SpellLevelScaling/SpellLevelScaling
 import { applyHotfixes } from "./modules/hotFix";
 import { PlayerAuras } from "./modules/PlayerAuras";
 import { TargetAuras } from "./modules/TargetAuras";
+import { SkillData } from "./modules/SkillData";
+import { TraitData } from "./modules/TraitData";
+import { fillBaseAndRange, getEffectBase, getEffectLowHigh, getSpellIdFromEffect } from "./effectValues";
+import { createFileHead } from "./itemFunctions";
+import { report, reportSection, writeReport } from "./report";
 import path from "path";
 
-console.log("clusterfuck gooooooo!");
+console.log(`SpellCalc Forever data generator, client build ${getBuildInfo().product} ${getBuildInfo().version}`);
 
 const DO_CLASSES: PlayerClass[] = [
     PlayerClass.DRUID,
@@ -49,11 +53,13 @@ const USEFUL_SPELL_MECHANICS: {[sm: number]: boolean} = {
 
 const spellData = new SpellData();
 applyHotfixes(spellData);
-const classSpellLists = new ClassSpellLists(spellData, DO_CLASSES);
+const skillData = new SkillData();
+const traitData = new TraitData(skillData);
+const classSpellLists = new ClassSpellLists(spellData, skillData, traitData, DO_CLASSES);
 const classSpellSets = new ClassSpellSets(spellData);
 const auraHandlers = new AuraHandlers(spellData, classSpellLists, classSpellSets);
-const talentCreator = new TalentsCreator(spellData, auraHandlers, classSpellSets);
-const spellLevelScaling = new SpellLevelScaling(spellData);
+const talentCreator = new TalentsCreator(spellData, auraHandlers, classSpellSets, traitData);
+const spellLevelScaling = new SpellLevelScaling(spellData, classSpellLists);
 const playerAuras = new PlayerAuras(spellData, auraHandlers);
 const targetAuras = new TargetAuras(spellData);
 
@@ -71,30 +77,12 @@ const SpellClassSet = {
 
 /**
  * Should class be handled?
- * @param pclass 
- * @returns 
+ * @param pclass
+ * @returns
  */
 function shouldDoClass(pclass: string)
 {
     return isPlayerClass(pclass) && DO_CLASSES.indexOf(pclass) !== -1;
-}
-
-function getCorectBase(effect: SpellEffect)
-{
-    if (effect.EffectDieSides == 0) return effect.EffectBasePoints;
-    return effect.EffectBasePoints + 1;
-}
-
-function fillBaseAndRange(ei: EffectInfo, effect: SpellEffect)
-{
-    if (effect.EffectDieSides == 0)
-    {
-        ei.valueBase = effect.EffectBasePoints;
-        ei.valueRange = 0;
-        return;
-    }
-    ei.valueBase = effect.EffectBasePoints + 1;
-    ei.valueRange = effect.EffectDieSides - 1;
 }
 
 function handleDummyAura(effect: SpellEffect, ei: EffectInfo, ri: RankInfo) {
@@ -103,11 +91,6 @@ function handleDummyAura(effect: SpellEffect, ei: EffectInfo, ri: RankInfo) {
     {
         if (sealType == SealType.SOR) {
             fillBaseAndRange(ei, effect);
-            return;
-        }
-
-        if (sealType == SealType.SoCor || sealType == SealType.SoV) {
-            ei.weaponCoef = 0.33;
             return;
         }
     }
@@ -149,7 +132,7 @@ function handleDummyAura(effect: SpellEffect, ei: EffectInfo, ri: RankInfo) {
     throw new Error("Dummy aura effect not supported!");
 }
 
-function handleDummyEffect(rankInfo: RankInfo, effect: SpellEffect, effectNum: number, spellName: string) 
+function handleDummyEffect(rankInfo: RankInfo, effect: SpellEffect, effectNum: number, spellName: string)
 {
     // Starfall
     if (spellName == "Starfall")
@@ -173,7 +156,7 @@ function handleDummyEffect(rankInfo: RankInfo, effect: SpellEffect, effectNum: n
             triggeredSpell: 0,
         };
         const triggeredDummy = spellData.getSpellEffects(effect.EffectTriggerSpell);
-        const startTrigger = spellData.getSpellEffects(getCorectBase(triggeredDummy[0]));
+        const startTrigger = spellData.getSpellEffects(getSpellIdFromEffect(triggeredDummy[0]));
         if (startTrigger.length == 0) throw new Error("Failed to get spell effects for Starfall trigger!");
         for (const teff2 of startTrigger)
         {
@@ -192,7 +175,7 @@ function handleDummyEffect(rankInfo: RankInfo, effect: SpellEffect, effectNum: n
                     auraType: AURA_TYPE.SPELL_AURA_DUMMY,
                     coef: 0.127, // AoE effect
                     coefAP: 0,
-                    valueBase: aoeTrigger[0].EffectBasePoints + 1,
+                    valueBase: getEffectLowHigh(aoeTrigger[0]).low,
                     valueRange: 0,
                     valuePerLevel: 0,
                     forceScaleWithHeal: false,
@@ -228,10 +211,7 @@ function handleDummyEffect(rankInfo: RankInfo, effect: SpellEffect, effectNum: n
         return;
     }
 
-    if (cfg.expansion == "CLASSIC")
-    {
-        if (spellName == "Judgement of Righteousness") return;
-    }
+    if (spellName == "Judgement of Righteousness") return;
 
     throw new Error("Dummy effect not handled!");
 }
@@ -241,7 +221,7 @@ function handleDummyEffect(rankInfo: RankInfo, effect: SpellEffect, effectNum: n
  */
 function applyAuraAreaAura(rankInfo: RankInfo, effect: SpellEffect, effectNum: number, spellName: string) {
     const saopts = spellData.getSpellAuraOptions(effect.SpellID);
-    
+
     rankInfo.effects[effectNum] = {
         effectType: effect.Effect,
         auraType: effect.EffectAura,
@@ -275,7 +255,7 @@ function applyAuraAreaAura(rankInfo: RankInfo, effect: SpellEffect, effectNum: n
             break;
         case AURA_TYPE.SPELL_AURA_DAMAGE_SHIELD:
             break;
-        case AURA_TYPE.SPELL_AURA_PROC_TRIGGER_SPELL: 
+        case AURA_TYPE.SPELL_AURA_PROC_TRIGGER_SPELL:
             {
                 rankInfo.effects[effectNum].triggeredSpell = effect.EffectTriggerSpell;
             } break;
@@ -440,7 +420,7 @@ const effectInfoHandler: {[index: number]: (rankInfo: RankInfo, effect: SpellEff
     },
 
     [EFFECT_TYPE.SPELL_EFFECT_WEAPON_PERCENT_DAMAGE]: (rankInfo, effect, effectNum, spellName) => {
-        const weaponCoef = getCorectBase(effect) / 100;
+        const weaponCoef = getEffectBase(effect) / 100;
 
         if (effectNum > 0) {
             if (rankInfo.effects[0].effectType != EFFECT_TYPE.SPELL_EFFECT_WEAPON_DAMAGE
@@ -540,135 +520,133 @@ function schoolMaskToLegacyEnum(mask: number)
 }
 
 /**
+ * Build the rank info of one spell. Throws when the data is incomplete or not handled.
+ */
+function buildRankInfo(spellId: number, effects: SpellEffect[]): RankInfo
+{
+    const spellMisc: SpellMisc = spellData.getSpellMisc(spellId);
+    const spellName: string = spellData.getSpellName(spellId).Name_lang;
+    const spellcd: SpellCooldown = spellData.getSpellCooldown(spellId);
+    const spellCosts: SpellPower[] = spellData.getSpellPowerCosts(spellId);
+    const spellEquippedItems: SpellEquippedItems | undefined = spellData.getSpellEquipeedItems(spellId);
+    const spellAuraOptions: SpellAuraOptions | undefined = spellData.getSpellAuraOptions(spellId);
+    const nameWithRank = spellData.getSpellNameWithRank(spellId);
+
+    let spellLevel: SpellLevel | undefined = spellData.getSpellLevel(spellId, true);
+    if (!spellLevel)
+    {
+        report(`${nameWithRank} [${spellId}]: no SpellLevels entry, using level 0 (no per-level scaling)`);
+        spellLevel = SpellData.emptySpellLevel(spellId);
+    }
+
+    let spellcat: SpellCategory | undefined = spellData.getSpellCategory(spellId);
+    if (!spellcat)
+    {
+        report(`${nameWithRank} [${spellId}]: no SpellCategories entry, defense type set to none`);
+        spellcat = { DefenseType: DEFENSE_TYPE.NONE, DifficultyID: 0, Mechanic: 0 };
+    }
+
+    let dur = (spellMisc.DurationIndex) ? spellData.getSpellDuration(spellMisc.DurationIndex).Duration / 1000 : 0;
+    if (dur < 1 ) dur = 0;
+
+    const rankInfo: RankInfo = {
+        school: schoolMaskToLegacyEnum(spellMisc.SchoolMask),
+        schoolMask: spellMisc.SchoolMask,
+        isChannel: ((spellMisc["Attributes_1"] & SPELL_ATTR1.SPELL_ATTR_EX_CHANNELED_ANY) > 0),
+        isBinary: false,
+        gcd: spellcd.StartRecoveryTime / 1000,
+        defenseType: spellcat.DefenseType,
+        cantDogeParryBlock: ((spellMisc["Attributes_0"] & SPELL_ATTR0.SPELL_ATTR_IMPOSSIBLE_DODGE_PARRY_BLOCK) > 0),
+        equippedWeaponMask: (spellEquippedItems && spellEquippedItems.EquippedItemClass === ItemClass.ITEM_CLASS_WEAPON) ? spellEquippedItems.EquippedItemSubclass : 0,
+        noCrit: (spellMisc["Attributes_2"] & SPELL_ATTR2.SPELL_ATTR_EX2_CANT_CRIT) === SPELL_ATTR2.SPELL_ATTR_EX2_CANT_CRIT,
+        forceHeal: false,
+        charges: (spellAuraOptions && spellAuraOptions.ProcCharges > 0) ? spellAuraOptions.ProcCharges : 0,
+        spellnamecomment: nameWithRank,
+        spellLevel: spellLevel.SpellLevel,
+        maxLevel: spellLevel.MaxLevel,
+        duration: dur,
+        baseCost: 0,
+        baseCostPct: 0,
+        usePeriodicHaste: (spellMisc["Attributes_5"] & SPELL_ATTR5.SPELL_ATTR_SPELL_HASTE_AFFECTS_PERIODIC) === SPELL_ATTR5.SPELL_ATTR_SPELL_HASTE_AFFECTS_PERIODIC,
+        extraTickAtApplication: (spellMisc["Attributes_5"] & SPELL_ATTR5.EXTRA_INITIAL_PERIOD) > 0,
+        onNextAttack: (spellMisc["Attributes_0"] & SPELL_ATTR0.SPELL_ATTR_ON_NEXT_SWING_NO_DAMAGE) > 0,
+        isOffhandAttack: (spellMisc["Attributes_3"] & SPELL_ATTR3.SPELL_ATTR_EX3_REQUIRES_OFFHAND_WEAPON) > 0,
+        useScalingFormula: spellLevelScaling.getVariableKeyForSpell(spellId),
+        effects: []
+    };
+
+    for (const cinfo of spellCosts) {
+        if (cinfo.PowerType == PowerType.MANA || cinfo.PowerType == PowerType.RAGE || cinfo.PowerType == PowerType.ENERGY) {
+            rankInfo.baseCost = cinfo.ManaCost;
+            rankInfo.baseCostPct = cinfo.PowerCostPct;
+            break;
+        }
+    }
+
+    // Handle effects
+    for (let i = 0; i < effects.length; i++) {
+        const handler = effectInfoHandler[effects[i].Effect];
+        if (!handler) throw new Error(`No handler for effect type ${effects[i].Effect} (effect index ${effects[i].EffectIndex})`);
+        handler(rankInfo, effects[i], i, spellName);
+
+        // Make sure maxlevel is defined for spells with level scaling
+        if (rankInfo.effects[i]
+            && rankInfo.effects[i].valuePerLevel != 0
+            && rankInfo.maxLevel == 0) report(`${rankInfo.spellnamecomment} [${spellId}]: effect ${i} has per-level scaling but the spell's max level is 0`);
+    }
+
+    // Fix empty 2nd effect slot due to stupid SPELL_EFFECT_WEAPON_PERCENT_DAMAGE implementation...
+    if (rankInfo.effects.length == 3 && !rankInfo.effects[1])
+    {
+        rankInfo.effects.splice(1, 1);
+    }
+
+    for (const effect of rankInfo.effects)
+    {
+        if (!effect) throw new Error("Effect list has a hole!");
+        if (effect.effectType === EFFECT_TYPE.SPELL_EFFECT_WEAPON_DAMAGE
+            && effect.weaponCoef === 0) throw new Error("Effect is SPELL_EFFECT_WEAPON_DAMAGE but no weapon coef is defined!");
+    }
+
+    return rankInfo;
+}
+
+/**
  * Build spell info data for class
- * @param pclass 
+ * @param pclass
  */
 function buildSpellInfo(pclass: string) {
     console.log("Building spell data for class " + pclass);
+    reportSection(`Spell data: ${pclass}`);
     const list = classSpellLists.getListForClass(pclass);
     let classInfo: ClassInfo = {
         rankInfo: {},
     };
 
-    let effects: SpellEffect[];
-    let spellMisc: SpellMisc;
-    let spellName: string;
-    let spellLevel: SpellLevel;
-    let spellspell: Spell;
-    let spellcat: SpellCategory | undefined;
-    let spellcd: SpellCooldown;
-    let spellCosts: SpellPower[];
-    let spellEquippedItems: SpellEquippedItems | undefined;
-    let spellAuraOptions: SpellAuraOptions | undefined;
-
     for (const [spellId, spellEffects] of list) {
-        effects = spellEffects;
-        spellMisc = spellData.getSpellMisc(spellId);
-        spellName = spellData.getSpellName(spellId).Name_lang;
-        spellLevel = spellData.getSpellLevel(spellId);
-        spellspell = spellData.getSpell(spellId);
-        spellcat = spellData.getSpellCategory(spellId);
-        spellcd = spellData.getSpellCooldown(spellId);
-        spellCosts = spellData.getSpellPowerCosts(spellId);
-        spellEquippedItems = spellData.getSpellEquipeedItems(spellId);
-        spellAuraOptions = spellData.getSpellAuraOptions(spellId);
-
-        if (!spellcat) throw new Error("Sspell category not found!");
-
-        // Skip physical spells except auto attack and SOtC for now
-        //if (spellMisc.SchoolMask == 1 && spellName != "Attack" && !isSeal(spellMisc.SpellID) && spellId != 35395 && spellId != 53385) continue;
-
-        // Create rank info if needed
-        if (!classInfo.rankInfo[spellId]) {
-            let dur = (spellMisc.DurationIndex) ? spellData.getSpellDuration(spellMisc.DurationIndex).Duration / 1000 : 0;
-            if (dur < 1 ) dur = 0;
-            classInfo.rankInfo[spellId] = {
-                school: schoolMaskToLegacyEnum(spellMisc.SchoolMask),
-                schoolMask: spellMisc.SchoolMask,
-                isChannel: ((spellMisc["Attributes_1"] & SPELL_ATTR1.SPELL_ATTR_EX_CHANNELED_ANY) > 0),
-                isBinary: false,
-                gcd: spellcd.StartRecoveryTime / 1000,
-                defenseType: spellcat.DefenseType,
-                cantDogeParryBlock: ((spellMisc["Attributes_0"] & SPELL_ATTR0.SPELL_ATTR_IMPOSSIBLE_DODGE_PARRY_BLOCK) > 0),
-                equippedWeaponMask: (spellEquippedItems && spellEquippedItems.EquippedItemClass === ItemClass.ITEM_CLASS_WEAPON) ? spellEquippedItems.EquippedItemSubclass : 0,
-                noCrit: (spellMisc["Attributes_2"] & SPELL_ATTR2.SPELL_ATTR_EX2_CANT_CRIT) === SPELL_ATTR2.SPELL_ATTR_EX2_CANT_CRIT,
-                forceHeal: false,
-                charges: (spellAuraOptions && spellAuraOptions.ProcCharges > 0) ? spellAuraOptions.ProcCharges : 0,
-                spellnamecomment: spellName + ( (spellspell.NameSubtext_lang.length) ? `(${spellspell.NameSubtext_lang})` : "" ),
-                spellLevel: spellLevel.SpellLevel,
-                maxLevel: spellLevel.MaxLevel,
-                duration: dur,
-                baseCost: 0,
-                baseCostPct: 0,
-                usePeriodicHaste: (spellMisc["Attributes_5"] & SPELL_ATTR5.SPELL_ATTR_SPELL_HASTE_AFFECTS_PERIODIC) === SPELL_ATTR5.SPELL_ATTR_SPELL_HASTE_AFFECTS_PERIODIC,
-                extraTickAtApplication: (spellMisc["Attributes_5"] & SPELL_ATTR5.EXTRA_INITIAL_PERIOD) > 0,
-                onNextAttack: (spellMisc["Attributes_0"] & SPELL_ATTR0.SPELL_ATTR_ON_NEXT_SWING_NO_DAMAGE) > 0,
-                isOffhandAttack: (spellMisc["Attributes_3"] & SPELL_ATTR3.SPELL_ATTR_EX3_REQUIRES_OFFHAND_WEAPON) > 0,
-                useScalingFormula: spellLevelScaling.getVariableKeyForSpell(spellId),
-                effects: []
-            };
-
-            if (spellCosts.length === 1) {
-                if (spellCosts[0].PowerType == PowerType.MANA || spellCosts[0].PowerType == PowerType.RAGE || spellCosts[0].PowerType == PowerType.ENERGY) {
-                    classInfo.rankInfo[spellId].baseCost = spellCosts[0].ManaCost;
-                    classInfo.rankInfo[spellId].baseCostPct = spellCosts[0].PowerCostPct;
-                }
-            } else if (spellCosts.length > 1) {
-                for (let cinfo of spellCosts) {
-                    if (cinfo.PowerType == PowerType.MANA || cinfo.PowerType == PowerType.RAGE || cinfo.PowerType == PowerType.ENERGY) {
-                        classInfo.rankInfo[spellId].baseCost = cinfo.ManaCost;
-                        classInfo.rankInfo[spellId].baseCostPct = cinfo.PowerCostPct;
-                        break;
-                    }
-                }
-            }
-        }
-
-        // Handle effects
-        for (let i = 0; i < effects.length; i++) {
-            effectInfoHandler[effects[i].Effect](classInfo.rankInfo[effects[i].SpellID], effects[i], i, spellName);
-
-            // Make sure maxlevel is defined for spells with level scaling
-            if (classInfo.rankInfo[spellId].effects[i] 
-                && classInfo.rankInfo[spellId].effects[i].valuePerLevel != 0 
-                && classInfo.rankInfo[spellId].maxLevel == 0) console.error("Effect has perlevel scaling but maxlevel of the spell is 0! " + spellId);
-        }
-
-        // Fix empty 2nd effect slot due to stupid SPELL_EFFECT_WEAPON_PERCENT_DAMAGE implementation...
-        if (classInfo.rankInfo[spellId].effects.length == 3 && !classInfo.rankInfo[spellId].effects[1])
+        try
         {
-            classInfo.rankInfo[spellId].effects.splice(1, 1);
+            classInfo.rankInfo[spellId] = buildRankInfo(spellId, spellEffects);
+        }
+        catch (error)
+        {
+            const msg = error instanceof Error ? error.message : String(error);
+            report(`${spellData.getSpellNameWithRank(spellId)} [${spellId}] skipped: ${msg}`);
         }
     }
 
-    for (const spellId in classInfo.rankInfo)
-    {
-        for (const effect of classInfo.rankInfo[spellId].effects)
-        {
-            if (effect.effectType === EFFECT_TYPE.SPELL_EFFECT_WEAPON_DAMAGE
-                && effect.weaponCoef === 0) throw new Error("Effect is SPELL_EFFECT_WEAPON_DAMAGE but no weapon coef is defined! " + spellId)
-        }
-    }
+    console.log(`${pclass}: ${Object.keys(classInfo.rankInfo).length} spells written`);
 
     return classInfo;
 }
 
 /**
  * Create lua file with data for class
- * @param pclass 
+ * @param pclass
  */
 function createLua(pclass: string) {
     console.log("Creating Lua for " + pclass);
-    let str = `-- GENERATED
-
----@class AddonEnv
-local _addon = select(2, ...);
-local _, playerClass = UnitClass("player");
-if playerClass ~= "${pclass.toUpperCase()}" then
-    return;
-end
-
-`;
+    let str = createFileHead(pclass);
     let classInfo = buildSpellInfo(pclass);
 
     str += "---@type SpellInfoTable\n_addon.spellInfo = {\n";
@@ -714,14 +692,13 @@ end
             if (eff.triggeredSpell) str += `\t\t\t\ttriggeredSpell = ${eff.triggeredSpell},\n`;
             str += `\t\t\t\tcoef = ${eff.coef},\n`;
             str += `\t\t\t\tcoefAP = ${eff.coefAP},\n`;
-            if (eff.chainInfo) 
+            if (eff.chainInfo)
             {
                 str += `\t\t\t\tchains = ${eff.chainInfo.chains},\n`;
                 str += `\t\t\t\tchainMult = ${eff.chainInfo.mult},\n`;
             }
             if (eff.auraStacks) str += `\t\t\t\tauraStacks = ${eff.auraStacks},\n`;
             if (USEFUL_SPELL_MECHANICS[eff.mechanic]) str += `\t\t\t\tmechanic = ${eff.mechanic},\n`;
-            //if (eff.triggeredSpell) str += `\t\t\t\ttriggeredSpell = ${eff.triggeredSpell},\n`;
             str += `\t\t\t},\n`;
         }
 
@@ -731,13 +708,8 @@ end
     str += "};\n\n";
 
     if (pclass == "paladin") {
-        let spellName: string;
-        let spellspell: Spell;
         for (const [sealId, remapId] of classSpellLists.getJudgementRemap()) {
-            spellName = spellData.getSpellName(sealId).Name_lang;
-            spellspell = spellData.getSpell(sealId);
-            const name = spellName + ( (spellspell.NameSubtext_lang.length) ? `(${spellspell.NameSubtext_lang})` : "" );
-            str += `_addon.aurasPlayer[${sealId}] = { -- ${name}\n`;
+            str += `_addon.aurasPlayer[${sealId}] = { -- ${spellData.getSpellNameWithRank(sealId)}\n`;
             str += "\t{\n";
             str += "\t\ttype = _addon.CONST.EFFECT_TYPE.JUDGEMENT_SPELL,\n";
             str += `\t\tvalue = ${remapId}\n`;
@@ -754,30 +726,23 @@ end
     for (let i = 0; i < 4; i++) {
         let sset = classSpellSet[i];
         str += `\t[${i + 1}] = {\n`;
-        
+
         for (let bit in sset) {
             let setEntry = sset[bit];
             // Lua 1 << 31 is 2147483648 and not -2147483648
             str += `\t\t[${Math.abs(parseInt(bit))}] = {\n`;
-            
+
             for (let spellId in setEntry) {
                 const spellIdNum = parseInt(spellId);
-                const spellName = spellData.getSpellName(spellIdNum).Name_lang;
-                const spellspell = spellData.getSpell(spellIdNum);
-                str += `\t\t\t${spellId}, -- ${spellName + ( (spellspell.NameSubtext_lang.length) ? `(${spellspell.NameSubtext_lang})` : "" )}\n`;
+                str += `\t\t\t${spellId}, -- ${spellData.getSpellNameWithRank(spellIdNum)}\n`;
             }
-            
+
             str += `\t\t},\n`;
         }
 
         str += `\t},\n`;
     }
     str += "};\n\n";
-
-    if (cfg.expansion == "WOTLK")
-    {
-        str += getHandledClassGlyphs(spellData, classSetNum, classSpellLists, classSpellSets);
-    }
 
     str = str.replace(/\t/gm, "    ");
 
@@ -788,6 +753,7 @@ end
  * Create lua files for item effect and set data
  */
 async function createItemLua() {
+    reportSection("Item sets");
     const isc = new ItemSetCreator(spellData, classSpellLists, classSpellSets);
     const setLua = await isc.getItemSetLua();
     fs.writeFileSync(cfg.outputDir + "itemSetData.lua", setLua.GENERAL);
@@ -797,6 +763,7 @@ async function createItemLua() {
         fs.writeFileSync(cfg.outputDir + "classes/" + classname + "_itemSetData.lua", setLua[classname as keyof typeof setLua]);
     }
 
+    reportSection("Item effects");
     const iec = new ItemEffectsCreator(spellData, classSpellLists, classSpellSets);
     const itemLua = await iec.getItemEffectLua();
     fs.writeFileSync(cfg.outputDir + "itemEffects.lua", itemLua.GENERAL);
@@ -807,28 +774,42 @@ async function createItemLua() {
     }
 }
 
-for (let i = 0; i < DO_CLASSES.length; i++) {
-    createLua(DO_CLASSES[i]);
-
-    const ctlua = talentCreator.buildTalentLua(DO_CLASSES[i]);
-    fs.writeFileSync(cfg.outputDir + "classes/" + DO_CLASSES[i] + "_talents.lua", ctlua);
-}
-
-// now do stupid shit
+async function main()
 {
-    const pathToLua = path.join(cfg.outputDir, "../../system/variableScaling.lua");
-    const origcontent = fs.readFileSync(pathToLua, "utf-8");
-    let magicStart = origcontent.indexOf("-- MAGIC LINE WEEEEEEEEEEEEEEEEEEEE");
-    if (magicStart === -1) throw new Error("Magic failed.");
-    magicStart = origcontent.indexOf("\n", magicStart);
-    if (magicStart === -1) throw new Error("Magic failed #2.");
-    let newContent = origcontent.substring(0, magicStart + 1);
-    newContent += "\n" + spellLevelScaling.getVarSetsLua("spellScalingVariables");
-    fs.writeFileSync(pathToLua, newContent);
+    for (let i = 0; i < DO_CLASSES.length; i++) {
+        createLua(DO_CLASSES[i]);
+
+        const ctlua = talentCreator.buildTalentLua(DO_CLASSES[i]);
+        fs.writeFileSync(cfg.outputDir + "classes/" + DO_CLASSES[i] + "_talents.lua", ctlua);
+    }
+
+    // Level scaling variable sets, written into system/variableScaling.lua below its magic line
+    {
+        const pathToLua = path.join(cfg.outputDir, "../../system/variableScaling.lua");
+        const origcontent = fs.readFileSync(pathToLua, "utf-8");
+        let magicStart = origcontent.indexOf("-- MAGIC LINE WEEEEEEEEEEEEEEEEEEEE");
+        if (magicStart === -1) throw new Error("Magic failed.");
+        magicStart = origcontent.indexOf("\n", magicStart);
+        if (magicStart === -1) throw new Error("Magic failed #2.");
+        let newContent = origcontent.substring(0, magicStart + 1);
+        newContent += "\n" + spellLevelScaling.getVarSetsLua("spellScalingVariables");
+        fs.writeFileSync(pathToLua, newContent);
+    }
+
+    createMechanicLists([SpellMechanic.BLEED], spellData);
+    await createItemLua();
+
+    reportSection("Player auras");
+    fs.writeFileSync(cfg.outputDir + "auras.lua", playerAuras.getAuraLua());
+    reportSection("Target auras");
+    fs.writeFileSync(cfg.outputDir + "aurasTarget.lua", targetAuras.getAuraLua());
+
+    writeReport();
+    console.log("Done.");
 }
 
-createMechanicLists([SpellMechanic.BLEED], spellData);
-createItemLua();
-
-fs.writeFileSync(cfg.outputDir + "auras.lua", playerAuras.getAuraLua());
-fs.writeFileSync(cfg.outputDir + "aurasTarget.lua", targetAuras.getAuraLua());
+main().catch(error =>
+{
+    console.error(error);
+    process.exit(1);
+});

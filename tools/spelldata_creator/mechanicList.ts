@@ -1,6 +1,7 @@
 import { SpellData, SpellEffect } from "./SpellData";
 import * as fs from "fs";
 import { cfg } from "./config";
+import { createFileHead } from "./itemFunctions";
 
 function getMechanicSpellList(s: SpellData, m: SpellMechanic)
 {
@@ -52,12 +53,8 @@ function getMechanicSpellList(s: SpellData, m: SpellMechanic)
 export function createMechanicLists(m: SpellMechanic[], s: SpellData)
 {
     console.log("Creating lists for auras with mechanics");
-    let str = `-- GENERATED
-
----@class AddonEnv
-local _addon = select(2, ...);
-
----@type table<integer, SpellMechanic>
+    let str = createFileHead();
+    str += `---@type table<integer, SpellMechanic>
 _addon.mechanicAuras = {
 `;
 
@@ -70,7 +67,7 @@ _addon.mechanicAuras = {
         str += `    --------------------------------\n`;
         for (const spellId of l.keys())
         {
-            const name = s.getSpellName(spellId).Name_lang;
+            const name = s.getSpellName(spellId, true)?.Name_lang ?? "";
             str += `    [${spellId}] = ${mech}, -- ${name}\n`;
         }
     }
