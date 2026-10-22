@@ -1,5 +1,6 @@
 ---@class AddonEnv
 local _addon = select(2, ...);
+local GetItemInfo = _addon.api.GetItemInfo;
 
 local ITEM_SLOTS = {
     [1] = "head",
@@ -133,7 +134,7 @@ local function EquipItem(itemId, slotId)
     end
 
     if slotId >= 16 and slotId <= 18 then
-        if classID == LE_ITEM_CLASS_WEAPON then
+        if classID == Enum.ItemClass.Weapon then
             _addon.util.PrintDebug(ITEM_SLOTS[slotId] .. " is now " .. itemSubTypeName);
             if slotId == 16 then
                 weaponSubClass.mainhand = subclassID;

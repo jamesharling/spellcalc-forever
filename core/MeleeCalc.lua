@@ -5,7 +5,6 @@ local _, race = UnitRace("player");
 local _, class = UnitClass("player");
 local stats = _addon.stats;
 local SCHOOL_PHYSICAL = _addon.CONST.SCHOOL.PHYSICAL;
-local IS_CLASSIC = _addon.IS_CLASSIC;
 
 ---@class MeleeCalc
 local MeleeCalc = {};
@@ -108,7 +107,7 @@ function MeleeCalc:GetCrit()
         if _addon:GetWeaponType("mainhand") ~= _addon:GetWeaponType("offhand") then
             local addCrit = 0;
             if class == "WARRIOR" then
-                local curRank = _addon:GetTalentRank(1, 5, 1); -- axe spec
+                local curRank = _addon:GetTalentRankBySpellId(12165); -- Axe Specialization (rank 1 spell ID)
                 if curRank > 0 then
                     if _addon:IsWeaponTypeEquipped(_addon.CONST.WEAPON_SUBCLASS.AXE_1H, "mainhand") then
                         addCrit = -curRank;
@@ -117,7 +116,7 @@ function MeleeCalc:GetCrit()
                     end
                 end
             elseif class == "ROGUE" then
-                local curRank = _addon:GetTalentRank(2, 4, 2); -- dagger spec
+                local curRank = _addon:GetTalentRankBySpellId(13706); -- Dagger Specialization (rank 1 spell ID)
                 if curRank > 0 then
                     if _addon:IsWeaponTypeEquipped(_addon.CONST.WEAPON_SUBCLASS.DAGGER, "mainhand") then
                         addCrit = -curRank;
@@ -126,7 +125,7 @@ function MeleeCalc:GetCrit()
                     end
                 end
 
-                curRank = _addon:GetTalentRank(2, 5, 4); -- fisting spec
+                curRank = _addon:GetTalentRankBySpellId(13707); -- Fist Weapon Specialization (rank 1 spell ID)
                 if curRank > 0 then
                     if _addon:IsWeaponTypeEquipped(_addon.CONST.WEAPON_SUBCLASS.FIST, "mainhand") then
                         addCrit = -curRank;
@@ -259,20 +258,9 @@ local function GetGlancingChanceAndDamage(ldef, baseAtk, atk)
     ---@type number, number, number
     local glancing, minReduction, maxRedcution;
 
-    if IS_CLASSIC then
-        glancing = 10 + (ldef - math.min(baseAtk, atk)) * 2;
-        minReduction = math.max(0.01, math.min(0.91, 1.3 - 0.05 * skillDiff));
-        maxRedcution = math.max(0.2, math.min(0.99, 1.2 - 0.03 * skillDiff));
-    else
-        glancing = math.max(0, 6 + skillDiff * 1.2);
-        if skillDiff > 10 then
-            minReduction = math.max(0.01, math.min(0.91, 1.3 - 0.05 * skillDiff));
-            maxRedcution = math.max(0.2, math.min(0.99, 1.2 - 0.03 * skillDiff));
-        else
-            minReduction = math.max(0.01, math.min(1.4 - 0.05 * skillDiff, 0.91));
-            maxRedcution = math.max(0.2, math.min(1.3 - 0.03 * skillDiff, 0.99));
-        end
-    end
+    glancing = 10 + (ldef - math.min(baseAtk, atk)) * 2;
+    minReduction = math.max(0.01, math.min(0.91, 1.3 - 0.05 * skillDiff));
+    maxRedcution = math.max(0.2, math.min(0.99, 1.2 - 0.03 * skillDiff));
 
     local glancingDamage = (minReduction + maxRedcution) / 2;
     return glancing, glancingDamage;
@@ -309,11 +297,9 @@ function MeleeCalc:GetMDPGB()
         self.calcedSpell:AddToBuffList(stats.targetSchoolModHit[SCHOOL_PHYSICAL].buffs);
     end
 
-    if IS_CLASSIC then
-        if skillDiff > 10 then
-            local hitSuppression = (skillDiff - 10) * 0.2;
-            hitBonus = math.max(0, hitBonus - hitSuppression);
-        end
+    if skillDiff > 10 then
+        local hitSuppression = (skillDiff - 10) * 0.2;
+        hitBonus = math.max(0, hitBonus - hitSuppression);
     end
 
     local total = 100;
@@ -367,16 +353,7 @@ function MeleeCalc:GetArmorDR()
 
     armor = armor - stats.schoolModSpellPen[SCHOOL_PHYSICAL].val;
 
-    if not IS_CLASSIC then
-        local arpCap = (935 / 6) * _addon.Target.level + armor / 3 - 44335 / 6;
-        armor = armor - (GetArmorPenetration() / 100) * math.min(armor, arpCap);
-    end
-
-    if IS_CLASSIC or pLevel < 60 then
-        mitigation = armor / (armor + 400 + pLevel * 85);
-    else
-        mitigation = armor / (armor + 400 + 85 * (pLevel + 4.5 * (pLevel - 59)));
-    end
+    mitigation = armor / (armor + 400 + pLevel * 85);
 
     return math.min(mitigation, 0.75), armor;
 end

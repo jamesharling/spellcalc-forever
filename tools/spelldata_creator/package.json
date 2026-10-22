@@ -4,8 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "update-tables-classic": "tsc && node ./build/DataUpdater.js classic",
-    "update-tables-wotlk": "tsc && node ./build/DataUpdater.js wotlk",
+    "update-tables-forever": "tsc && node ./build/DataUpdater.js forever",
     "start": "tsc && node ./build/app.js"
   },
   "author": "coolmodi",

@@ -1,5 +1,6 @@
 *.zip
 *.txt
+!libs/Ace3/LICENSE.txt
 *.code-workspace
 /.vscode/
 /extractor/

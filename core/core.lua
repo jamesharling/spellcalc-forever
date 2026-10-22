@@ -1,7 +1,9 @@
 ---@class AddonEnv
 local _addon = select(2, ...);
 
-local IS_CLASSIC = _addon.IS_CLASSIC;
+local GetSpellInfo = _addon.api.GetSpellInfo;
+local GetSpellPowerCost = _addon.api.GetSpellPowerCost;
+local IsSecret = _addon.api.IsSecret;
 local ADDON_EFFECT_FLAGS = _addon.CONST.ADDON_EFFECT_FLAGS;
 local NewCalcedSpell = _addon.NewCalcedSpell;
 local SCHOOL = _addon.CONST.SCHOOL;
@@ -144,11 +146,7 @@ local function SetBaseModifiers(isDmg, isHeal, spellId, calcedSpell, isDuration,
         end
     else
         if stats.spellModPctEffect[spellId] ~= nil then
-            if IS_CLASSIC then
-                baseMod = baseMod * (100 + stats.spellModPctEffect[spellId].val) / 100;
-            else
-                bonusMod = bonusMod * (100 + stats.spellModPctEffect[spellId].val) / 100;
-            end
+            baseMod = baseMod * (100 + stats.spellModPctEffect[spellId].val) / 100;
             calcedSpell:AddToBuffList(stats.spellModPctEffect[spellId].buffs);
         end
 
@@ -185,7 +183,14 @@ end
 
 --- Get effective mana pool
 function _addon:GetEffectiveManaPool()
-    local mana = SpellCalc_settings.useCurrentPowerLevel and UnitPower("player", 0) or stats.manaMax;
+    local mana = stats.manaMax;
+    if SpellCalc_settings.useCurrentPowerLevel then
+        -- Current power may be a secret value in combat; fall back to max mana then.
+        local current = UnitPower("player", 0);
+        if current ~= nil and not IsSecret(current) then
+            mana = current;
+        end
+    end
 
     if SpellCalc_settings.calcEffManaRune then
         mana = mana + 1200;
@@ -210,14 +215,8 @@ function _addon:GetEffectiveManaPool()
     end
 
     if SpellCalc_settings.calcEffManaInnervate then
-        if IS_CLASSIC then
-            -- Regen in 5sec rule is already accounted for in effective mana cost, we can't add it again here!
-            mana = mana + stats.manaRegBase * 100 - stats.manaRegCasting * 20;
-        else
-            -- lvl 80 druid base mana * 225%
-            local druidMana = _addon.GetBaseMana("DRUID", UnitLevel("player"));
-            mana = mana + druidMana * 2.25;
-        end
+        -- Regen in 5sec rule is already accounted for in effective mana cost, we can't add it again here!
+        mana = mana + stats.manaRegBase * 100 - stats.manaRegCasting * 20;
     end
 
     return mana;
@@ -231,6 +230,8 @@ end
 ---@return CalcedSpell
 local function CalcSpell(spellId, calcedSpell, parentSpellData, parentValue)
     local spellName, _, _, castTime = GetSpellInfo(spellId);
+    spellName = spellName or ("spell " .. spellId);
+    castTime = castTime or 0;
     _addon.util.PrintDebug("Calculating spell " .. spellId .. " " .. spellName);
     local spellInfo = _addon.spellInfo[spellId];
 
@@ -326,7 +327,7 @@ local function CalcSpell(spellId, calcedSpell, parentSpellData, parentValue)
     local hasteMult;
     do
         local _, _, _, cast2000msBase = GetSpellInfo(31);
-        hasteMult = cast2000msBase / 2000;
+        hasteMult = cast2000msBase and cast2000msBase / 2000 or 1;
     end
 
     ----------------------------------------------------------------------------------------------------------------------
@@ -361,10 +362,6 @@ local function CalcSpell(spellId, calcedSpell, parentSpellData, parentValue)
         if stats.spellModGCDms[spellId] ~= nil then
             GCD = GCD + stats.spellModGCDms[spellId].val / 1000;
             calcedSpell:AddToBuffList(stats.spellModGCDms[spellId].buffs);
-        end
-
-        if not IS_CLASSIC then
-            GCD = GCD * hasteMult;
         end
 
         if spellInfo.onNextSwing then
@@ -762,14 +759,8 @@ local function CalcSpell(spellId, calcedSpell, parentSpellData, parentValue)
                     calcedSpell:AddToBuffList(stats.spellModPctSpellScale[spellId].buffs);
                 end
 
-                if not IS_CLASSIC then
-                    if spellInfo.maxLevel > 0 and bit.band(calcedEffect.effectFlags, ADDON_EFFECT_FLAGS.DUMMY_AURA) == 0 then
-                        local downrank = math.max(0, (22 + spellInfo.maxLevel - UnitLevel("player")) / 20);
-                        if downrank < 1 then
-                            coef = coef * downrank;
-                        end
-                    end
-                end
+                -- No client-side downranking penalty: Forever's spell data carries the full
+                -- coefficient on every rank. Verify against in-game tooltips (see README).
 
                 calcedEffect.effectiveSpCoef = coef * calcedEffect.modBonus;
                 calcedEffect.effectivePower = calcedEffect.spellPower * calcedEffect.effectiveSpCoef;

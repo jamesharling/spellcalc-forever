@@ -200,21 +200,24 @@ function Target:GetEffectiveResistance(school)
 end
 
 --- Update currently selected target.
+-- Unit identity (name, GUID, creature type, class) can be a secret value inside instances and in
+-- combat; such values are treated as unknown rather than compared or used as table keys.
 function Target:Update()
-    local tName = UnitName("target");
+    local Unsecret = _addon.api.Unsecret;
+    local rawName = UnitName("target");
     local pLevel = UnitLevel("player");
     local _, class = UnitClass("target");
 
-    self.class = class;
-    self.isSelf = UnitIsUnit("player", "target");
-    self.isPlayer = UnitIsPlayer("target");
-    self.exists = tName ~= nil;
+    self.class = Unsecret(class);
+    self.isSelf = Unsecret(UnitIsUnit("player", "target"), false) == true;
+    self.isPlayer = Unsecret(UnitIsPlayer("target"), false) == true;
+    self.exists = rawName ~= nil;
 
-    if tName == nil or not SpellCalc_settings.useCurrentTarget then
+    if not self.exists or not SpellCalc_settings.useCurrentTarget then
         self.level = pLevel + SpellCalc_settings.defaultTargetLvlOffset;
         self.levelDiff = SpellCalc_settings.defaultTargetLvlOffset;
     else
-        local tLevel = UnitLevel("target");
+        local tLevel = Unsecret(UnitLevel("target"), -1);
         if tLevel == -1 then
             tLevel = pLevel + 3;
         end
@@ -229,17 +232,22 @@ function Target:Update()
         self.levelDiff = self.levelDiff - diffToOne;
     end
 
-    if tName then
+    if self.exists then
         if not self.isPlayer then
-            local unitType, _, _, _, _, npcID = strsplit("-", UnitGUID("target"));
-            local idnum = tonumber(npcID);
+            local guid = Unsecret(UnitGUID("target"));
+            local idnum;
+            if guid then
+                local _, _, _, _, _, npcID = strsplit("-", guid);
+                idnum = tonumber(npcID);
+            end
             if idnum then
                 self.npcId = idnum;
             else
                 self.npcId = -1;
             end
 
-            self.creatureType = CREATURE_TYPE_LOC_TO_ID[UnitCreatureType("target")];
+            local creatureType = Unsecret(UnitCreatureType("target"));
+            self.creatureType = creatureType and CREATURE_TYPE_LOC_TO_ID[creatureType] or nil;
         else
             self.npcId = -1;
             self.creatureType = 7;
@@ -249,7 +257,7 @@ function Target:Update()
         self.creatureType = nil;
     end
 
-    Target.comboPoints = GetComboPoints("player", "target");
+    Target.comboPoints = _addon.api.Unsecret(GetComboPoints("player", "target"), 0);
 
     UpdateResistances();
     _addon:UpdateAurasForUnit("target");
@@ -271,7 +279,7 @@ local _, class = UnitClass("player");
 if class == "ROGUE" or class == "DRUID" then
     _addon.events.Register("UNIT_POWER_UPDATE", function (unit, powerType)
         if unit == "player" and powerType == "COMBO_POINTS" then
-            Target.comboPoints = GetComboPoints("player", "target");
+            Target.comboPoints = _addon.api.Unsecret(GetComboPoints("player", "target"), 0);
             _addon:TriggerUpdate();
         end
     end);

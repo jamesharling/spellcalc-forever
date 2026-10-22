@@ -1,5 +1,7 @@
 ---@class AddonEnv
 local _addon = select(2, ...);
+local combat = _addon.combat;
+local IsSecret = _addon.api.IsSecret;
 
 ---@return UniformStat
 local function UniformStat()
@@ -249,6 +251,32 @@ local stats = {
     modCriticalHealing = UniformStat(),
 };
 
+---------------------------------------------------------------------------------------------
+-- Helpers
+---------------------------------------------------------------------------------------------
+
+---Skip a read while combat restrictions are active and remember to redo it afterwards.
+---@return boolean skipped
+local function SkipIfRestricted()
+    if combat.IsRestricted() then
+        combat.MarkStale();
+        return true;
+    end
+    return false;
+end
+
+---Return the value, or 0 if the API handed back nil or a secret value.
+---@param v number|nil
+---@return number
+local function Num(v)
+    if v == nil or IsSecret(v) then return 0 end
+    return v;
+end
+
+---------------------------------------------------------------------------------------------
+-- Updates
+---------------------------------------------------------------------------------------------
+
 ---Update base mana for current level.
 ---@param level integer
 local function UpdateBaseMana(level)
@@ -262,10 +290,11 @@ end
 
 --- Update spell power stats from API
 local function UpdateSpellPower()
+    if SkipIfRestricted() then return end
     _addon.util.PrintDebug("Updating spell power");
 
     for i = 1, 7, 1 do
-        _addon.stats.spellPower[i] = GetSpellBonusDamage(i);
+        stats.spellPower[i] = Num(GetSpellBonusDamage(i));
     end
 
     _addon:TriggerUpdate();
@@ -273,21 +302,24 @@ end
 
 ---Update attack power.
 local function UpdateAttackPower()
+    if SkipIfRestricted() then return end
     local base, posBuff, negBuff = UnitAttackPower("player");
-    stats.attackPower = base + posBuff + negBuff;
+    stats.attackPower = Num(base) + Num(posBuff) + Num(negBuff);
     _addon:TriggerUpdate();
 end
 
 ---Update ranged attack power.
 local function UpdateRangedAttackPower()
+    if SkipIfRestricted() then return end
     local base, posBuff, negBuff = UnitRangedAttackPower("player");
-    stats.attackPowerRanged = base + posBuff + negBuff;
+    stats.attackPowerRanged = Num(base) + Num(posBuff) + Num(negBuff);
     _addon:TriggerUpdate();
 end
 
 --- Update dmg done mods
 local function UpdateDmgDoneMods()
-    local spellHealing = GetSpellBonusHealing();
+    if SkipIfRestricted() then return end
+    local spellHealing = Num(GetSpellBonusHealing());
     if spellHealing ~= stats.spellHealing then
         _addon.util.PrintDebug("Updating healing");
         stats.spellHealing = spellHealing;
@@ -295,92 +327,138 @@ local function UpdateDmgDoneMods()
 
     _addon.util.PrintDebug("Updating dmg done mods");
     for i = 1, 7, 1 do
-        stats.spellCrit[i] = GetSpellCritChance(i);
+        stats.spellCrit[i] = Num(GetSpellCritChance(i));
     end
 
-    stats.attackCrit.mainhand = GetCritChance();
-    stats.attackCrit.ranged = GetRangedCritChance();
+    stats.attackCrit.mainhand = Num(GetCritChance());
+    stats.attackCrit.ranged = Num(GetRangedCritChance());
 
     _addon:TriggerUpdate();
 end
 
-do
-    local LEVEL_REGEN_MULT = {
-        0.034965, 0.034191, 0.033465, 0.032526, 0.031661, 0.031076, 0.030523, 0.029994, 0.029307, 0.028661,
-        0.027584, 0.026215, 0.025381, 0.024300, 0.023345, 0.022748, 0.021958, 0.021386, 0.020790, 0.020121,
-        0.019733, 0.019155, 0.018819, 0.018316, 0.017936, 0.017576, 0.017201, 0.016919, 0.016581, 0.016233,
-        0.015994, 0.015707, 0.015464, 0.015204, 0.014956, 0.014744, 0.014495, 0.014302, 0.014094, 0.013895,
-        0.013724, 0.013522, 0.013363, 0.013175, 0.012996, 0.012853, 0.012687, 0.012539, 0.012384, 0.012233,
-        0.012113, 0.011973, 0.011859, 0.011714, 0.011575, 0.011473, 0.011342, 0.011245, 0.011110, 0.010999,
-        0.010700, 0.010522, 0.010290, 0.010119, 0.009968, 0.009808, 0.009651, 0.009553, 0.009445, 0.009327,
-        0.008859, 0.008415, 0.007993, 0.007592, 0.007211, 0.006849, 0.006506, 0.006179, 0.005869, 0.005575
-    }
+---Update spirit based and MP5 regen values (classic rules: spirit only, no intellect term).
+function _addon:UpdateManaRegen()
+    if SkipIfRestricted() then return end
+    local _, spirit = UnitStat("player", 5);
+    spirit = Num(spirit);
 
-    ---Update spirit+int based and MP5 regen values
-    function _addon:UpdateManaRegen()
-        local _, spirit = UnitStat("player", 5);
-        local spiritIntRegen = 0;
+    local _, class = UnitClass("player");
+    local spiritRegen;
+    if class == "PRIEST" or class == "MAGE" then
+        spiritRegen = (12.5 + spirit / 4) / 2;
+    else
+        spiritRegen = (15 + spirit / 5) / 2;
+    end
 
-        if _addon.IS_CLASSIC then
-            local _, class = UnitClass("player");
-            if class == "PRIEST" or class == "MAGE" then
-                spiritIntRegen = (12.5 + spirit / 4) / 2;
-            else
-                spiritIntRegen = (15 + spirit / 5) / 2;
-            end
-        else
-            local level = UnitLevel("player");
-            local _, int = UnitStat("player", 4);
-            spiritIntRegen = (math.sqrt(int) * spirit * LEVEL_REGEN_MULT[level]) * 0.6;
+    local newmanaRegCasting = spiritRegen * (stats.fsrRegenMult.val / 100);
+    local newmanaRegAura = math.max(0, Num(GetManaRegen()) - spiritRegen);
+    -- Remove minor errors in spirit regen calculation if mp5 should be 0.
+    if newmanaRegAura < 0.1 then newmanaRegAura = 0 end
 
-            -- Low levels have increased regen until lvl 15.
-            if level < 15 then
-                local mult = 3.2446 * math.exp(-0.078 * level);
-                spiritIntRegen = spiritIntRegen * mult;
-            end
-        end
-
-        local newmanaRegCasting = spiritIntRegen * (stats.fsrRegenMult.val / 100);
-        local newmanaRegAura = math.max(0, GetManaRegen() - spiritIntRegen);
-        -- Remove minor errors in spirit regen calculation if mp5 should be 0.
-        if newmanaRegAura < 0.1 then newmanaRegAura = 0 end
-
-        if stats.manaRegBase ~= spiritIntRegen
-            or stats.manaRegCasting ~= newmanaRegCasting
-            or stats.manaRegAura ~= newmanaRegAura then
-            stats.manaRegBase = spiritIntRegen;
-            stats.manaRegCasting = newmanaRegCasting;
-            stats.manaRegAura = newmanaRegAura;
-            self:TriggerUpdate();
-        end
+    if stats.manaRegBase ~= spiritRegen
+        or stats.manaRegCasting ~= newmanaRegCasting
+        or stats.manaRegAura ~= newmanaRegAura then
+        stats.manaRegBase = spiritRegen;
+        stats.manaRegCasting = newmanaRegCasting;
+        stats.manaRegAura = newmanaRegAura;
+        self:TriggerUpdate();
     end
 end
 
 --- Update general stats from API
 local function UpdateStats()
+    if SkipIfRestricted() then return end
     _addon.util.PrintDebug("Updating stats");
-    stats.manaMax = UnitPowerMax("player", 0);
+    stats.manaMax = Num(UnitPowerMax("player", 0));
     _addon:TriggerUpdate();
 end
 
 --- Update weapon attack speeds
 local function UpdateAttackSpeeds()
-    local m,o = UnitAttackSpeed("player");
+    if SkipIfRestricted() then return end
+    local m, o = UnitAttackSpeed("player");
     local r = UnitRangedDamage("player");
 
-    stats.attackSpeed.mainhand = m and m or 0;
-    stats.attackSpeed.offhand = o and o or 0;
-    stats.attackSpeed.ranged = r and r or 0;
+    stats.attackSpeed.mainhand = Num(m);
+    stats.attackSpeed.offhand = Num(o);
+    stats.attackSpeed.ranged = Num(r);
 
     _addon.util.PrintDebug(("Updated attack speeds: %s, %s, %s"):format(stats.attackSpeed.mainhand, stats.attackSpeed.offhand, stats.attackSpeed.ranged));
 
     _addon:TriggerUpdate();
 end
 
+---------------------------------------------------------------------------------------------
+-- Weapon skill
+-- The classic UnitAttackBothHands/UnitRangedAttack functions don't exist on the Mainline client.
+-- Forever's own character sheet resolves the equipped weapon's skill line and reads it through
+-- C_SkillInfo; this mirrors Blizzard_UIPanels_Game/Camelot/PaperDollFrameStats.lua.
+---------------------------------------------------------------------------------------------
+
+local SLOT_MAINHAND, SLOT_OFFHAND, SLOT_RANGED = 16, 17, 18;
+local SKILL_LINE_UNARMED = 162;
+local SKILL_LINE_FERAL = 3014;
+---@type table<integer, integer> Enum.ItemWeaponSubclass -> skill line ID
+local WEAPON_SUBCLASS_TO_SKILL_LINE = {};
+do
+    local ws = Enum.ItemWeaponSubclass or {};
+    local map = {
+        { "Sword1H", 43 }, { "Axe1H", 44 }, { "Bows", 45 }, { "Guns", 46 }, { "Mace1H", 54 },
+        { "Sword2H", 55 }, { "Staff", 136 }, { "Mace2H", 160 }, { "Axe2H", 172 }, { "Dagger", 173 },
+        { "Thrown", 176 }, { "Crossbow", 226 }, { "Wand", 228 }, { "Polearm", 229 }, { "Unarmed", 162 },
+    };
+    for _, entry in ipairs(map) do
+        local subclass = ws[entry[1]];
+        if subclass ~= nil then
+            WEAPON_SUBCLASS_TO_SKILL_LINE[subclass] = entry[2];
+        end
+    end
+end
+
+---Skill line ID of the weapon in the given inventory slot, nil if there is nothing to attack with.
+---@param slotID integer
+---@return integer|nil
+local function GetEquippedWeaponSkillLine(slotID)
+    local _, class = UnitClass("player");
+    if class == "DRUID" and GetShapeshiftForm() ~= 0 then
+        return SKILL_LINE_FERAL;
+    end
+
+    local itemID = GetInventoryItemID("player", slotID);
+    if not itemID then
+        return slotID ~= SLOT_RANGED and SKILL_LINE_UNARMED or nil;
+    end
+
+    local _, _, _, _, _, classID, subclassID = C_Item.GetItemInfoInstant(itemID);
+    if classID ~= Enum.ItemClass.Weapon then
+        return nil;
+    end
+
+    return WEAPON_SUBCLASS_TO_SKILL_LINE[subclassID];
+end
+
+---Weapon skill rank and modifier for an inventory slot.
+---@param slotID integer
+---@return number rank
+---@return number modifier
+local function GetWeaponSkill(slotID)
+    local skillLine = GetEquippedWeaponSkillLine(slotID);
+    if not skillLine or not C_SkillInfo or not C_SkillInfo.GetSkillLineInfoByID then
+        return 0, 0;
+    end
+    local info = C_SkillInfo.GetSkillLineInfoByID(skillLine);
+    if not info then
+        return 0, 0;
+    end
+    return Num(info.rank), Num(info.modifier);
+end
+
 --- Update weapon attack skill
 local function UpdateWeaponAttack()
-    local mh, mhMod, oh, ohMod = UnitAttackBothHands("player");
-    local r, rMod = UnitRangedAttack("player");
+    if SkipIfRestricted() then return end
+    local mh, mhMod = GetWeaponSkill(SLOT_MAINHAND);
+    local oh, ohMod = GetWeaponSkill(SLOT_OFFHAND);
+    local r, rMod = GetWeaponSkill(SLOT_RANGED);
 
     stats.attack.mainhand = mh + mhMod;
     stats.attack.offhand = oh + ohMod;
@@ -393,43 +471,42 @@ end
 
 --- Update melee attack damage
 local function UpdateAttackDmg()
+    if SkipIfRestricted() then return end
     _addon.util.PrintDebug("Updated melee dmg");
     local low, high, offLow, offHigh, _, _, pctMod = UnitDamage("player");
-    stats.attackDmg.mainhand.min = low / pctMod;
-    stats.attackDmg.mainhand.max = high / pctMod;
-    stats.attackDmg.offhand.min = offLow / pctMod;
-    stats.attackDmg.offhand.max = offHigh / pctMod;
+    pctMod = Num(pctMod);
+    if pctMod == 0 then pctMod = 1 end
+    stats.attackDmg.mainhand.min = Num(low) / pctMod;
+    stats.attackDmg.mainhand.max = Num(high) / pctMod;
+    stats.attackDmg.offhand.min = Num(offLow) / pctMod;
+    stats.attackDmg.offhand.max = Num(offHigh) / pctMod;
     _addon:TriggerUpdate();
 end
 
 --- Update ranged attack damage
 local function UpdateRangedAttackDmg()
+    if SkipIfRestricted() then return end
     _addon.util.PrintDebug("Updated ranged dmg");
     local _, lowDmg, hiDmg, _, _, pctMod = UnitRangedDamage("player");
-    stats.attackDmg.ranged.min = lowDmg / pctMod;
-    stats.attackDmg.ranged.max = hiDmg / pctMod;
+    pctMod = Num(pctMod);
+    if pctMod == 0 then pctMod = 1 end
+    stats.attackDmg.ranged.min = Num(lowDmg) / pctMod;
+    stats.attackDmg.ranged.max = Num(hiDmg) / pctMod;
     _addon:TriggerUpdate();
 end
 
 local oldApiHitBonus = 0;
 local oldApiHitBonusSpell = 0;
 
---- Combat ratings updated (seems to be hit modifier in classic)
+--- Combat ratings updated.
+-- Classic rules: hit from gear is tracked through item effect data, the API hit modifiers are
+-- not used (GetHitModifier only updates with a weapon equipped, GetSpellHitModifier is unreliable).
 local function CombatRatingUpdate()
+    if SkipIfRestricted() then return end
     _addon.util.PrintDebug("Combat rating update");
 
-    ---@type number
-    local meleeHitBonus;
-    ---@type number
-    local spellHitBonus;
-
-    if _addon.IS_CLASSIC then
-        meleeHitBonus = 0; -- GetHitModifier(); -- TODO: Only updates if weapon is equipped, not if it's removed
-        spellHitBonus = 0; -- GetSpellHitModifier(); -- TODO: Broken? Returns stupid numbers for no reason
-    else
-        meleeHitBonus = GetCombatRatingBonus(CR_HIT_MELEE) -- + GetHitModifier(); -- TODO: Only updates if weapon is equipped, not if it's removed
-        spellHitBonus = GetCombatRatingBonus(CR_HIT_SPELL) -- + GetSpellHitModifier(); -- TODO: Broken? Returns stupid numbers for no reason
-    end
+    local meleeHitBonus = 0;
+    local spellHitBonus = 0;
 
     local changed = false;
 
@@ -451,19 +528,9 @@ local function CombatRatingUpdate()
     end
 end
 
-_addon.stats = stats;
-
-_addon.events.Register("UNIT_ATTACK_POWER", function (unit) if unit == "player" then UpdateAttackPower() end end);
-_addon.events.Register("UNIT_RANGED_ATTACK_POWER", function (unit) if unit == "player" then UpdateRangedAttackPower() end end);
-_addon.events.Register("UNIT_RANGEDDAMAGE", function (unit) if unit == "player" then UpdateRangedAttackDmg() end end);
-_addon.events.Register("UNIT_DAMAGE", function (unit) if unit == "player" then UpdateAttackDmg() end end);
-_addon.events.Register("UNIT_ATTACK", function (unit) if unit == "player" then UpdateWeaponAttack() end end);
-_addon.events.Register("UNIT_ATTACK_SPEED", function (unit) if unit == "player" then UpdateAttackSpeeds() end end);
-_addon.events.Register("COMBAT_RATING_UPDATE", function () CombatRatingUpdate() end);
-_addon.events.Register("PLAYER_DAMAGE_DONE_MODS", function (unit) if unit == "player" then UpdateDmgDoneMods() end end);
-_addon.events.Register("SPELL_POWER_CHANGED", function () UpdateSpellPower() end);
-_addon.events.Register("PLAYER_LEVEL_UP", function (level) UpdateBaseMana(level) end);
-_addon.events.Register("PLAYER_ENTERING_WORLD", function()
+---Re-read everything.
+local function UpdateAll()
+    if SkipIfRestricted() then return end
     UpdateStats();
     UpdateSpellPower();
     UpdateDmgDoneMods();
@@ -476,7 +543,25 @@ _addon.events.Register("PLAYER_ENTERING_WORLD", function()
     UpdateAttackPower();
     UpdateRangedAttackPower();
     UpdateBaseMana(UnitLevel("player"));
-end);
+end
+
+_addon.stats = stats;
+
+_addon.events.Register("UNIT_ATTACK_POWER", function (unit) if unit == "player" then UpdateAttackPower() end end);
+_addon.events.Register("UNIT_RANGED_ATTACK_POWER", function (unit) if unit == "player" then UpdateRangedAttackPower() end end);
+_addon.events.Register("UNIT_RANGEDDAMAGE", function (unit) if unit == "player" then UpdateRangedAttackDmg() end end);
+_addon.events.Register("UNIT_DAMAGE", function (unit) if unit == "player" then UpdateAttackDmg() end end);
+_addon.events.Register("UNIT_ATTACK", function (unit) if unit == "player" then UpdateWeaponAttack() end end);
+_addon.events.Register("SKILL_LINES_CHANGED", function () UpdateWeaponAttack() end);
+_addon.events.Register("UNIT_INVENTORY_CHANGED", function (unit) if unit == "player" then UpdateWeaponAttack() end end);
+_addon.events.Register("UPDATE_SHAPESHIFT_FORM", function () UpdateWeaponAttack() end);
+_addon.events.Register("UNIT_ATTACK_SPEED", function (unit) if unit == "player" then UpdateAttackSpeeds() end end);
+_addon.events.Register("COMBAT_RATING_UPDATE", function () CombatRatingUpdate() end);
+_addon.events.Register("PLAYER_DAMAGE_DONE_MODS", function (unit) if unit == "player" then UpdateDmgDoneMods() end end);
+_addon.events.Register("SPELL_POWER_CHANGED", function () UpdateSpellPower() end);
+_addon.events.Register("PLAYER_LEVEL_UP", function (level) UpdateBaseMana(level) end);
+_addon.events.Register("PLAYER_ENTERING_WORLD", function() UpdateAll() end);
+combat.OnResync(UpdateAll);
 
 _addon.events.Register("UNIT_STATS", function (unit)
     if unit == "player" then

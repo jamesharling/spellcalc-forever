@@ -4,20 +4,19 @@ local L = _addon:GetLocalization();
 ---@class SCTooltip
 local SCT = _addon.SCTooltip;
 
----@type table<string, boolean>
-local Righteous_Vengeance_Spells = {};
-if _addon.IS_WRATH then
-    Righteous_Vengeance_Spells[GetSpellInfo(35395)] = true; -- CS
-    Righteous_Vengeance_Spells[GetSpellInfo(53385)] = true; -- DS
-    Righteous_Vengeance_Spells[GetSpellInfo(53408)] = true; -- Wisdom
-    Righteous_Vengeance_Spells[GetSpellInfo(53407)] = true; -- Justice
-    Righteous_Vengeance_Spells[GetSpellInfo(20271)] = true; -- Light
-end
+local GetSpellInfo = _addon.api.GetSpellInfo;
 
-local Sheath_of_Light_Spells = {
-    [GetSpellInfo(19940)] = true, -- FoL
-    [GetSpellInfo(1042)] = true, -- HL
-}
+---@type table<string, boolean>
+local Righteous_Vengeance_Spells = {}; -- Wrath talent, nothing to track on Forever.
+
+---@type table<string, boolean>
+local Sheath_of_Light_Spells = {};
+for _, spellId in ipairs({ 19940, 1042 }) do -- FoL, HL
+    local name = GetSpellInfo(spellId);
+    if name then
+        Sheath_of_Light_Spells[name] = true;
+    end
+end
 
 ---Append line describing the extra value on crit.
 ---@param spellId number

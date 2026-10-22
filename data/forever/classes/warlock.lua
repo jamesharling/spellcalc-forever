@@ -1,0 +1,87 @@
+---@class AddonEnv
+local _addon = select(2, ...);
+local _, playerClass = UnitClass("player");
+if playerClass ~= "WARLOCK" then
+    return;
+end
+
+--------------------------------------------------------------------------
+-- Player auras
+--------------------------------------------------------------------------
+
+-- Master Demonologist dmg done
+_addon.aurasPlayer[23761] = {
+    {
+        effect = _addon.CONST.EFFECT_TYPE.SCHOOLMOD_PCT_DAMAGE,
+        affectMask = _addon.CONST.SCHOOL_MASK.ALL,
+        value = 2,
+    }
+};
+_addon.aurasPlayer[23833] = {
+    {
+        effect = _addon.CONST.EFFECT_TYPE.SCHOOLMOD_PCT_DAMAGE,
+        affectMask = _addon.CONST.SCHOOL_MASK.ALL,
+        value = 4,
+    }
+};
+_addon.aurasPlayer[23834] = {
+    {
+        effect = _addon.CONST.EFFECT_TYPE.SCHOOLMOD_PCT_DAMAGE,
+        affectMask = _addon.CONST.SCHOOL_MASK.ALL,
+        value = 6,
+    }
+};
+_addon.aurasPlayer[23835] = {
+    {
+        effect = _addon.CONST.EFFECT_TYPE.SCHOOLMOD_PCT_DAMAGE,
+        affectMask = _addon.CONST.SCHOOL_MASK.ALL,
+        value = 8,
+    }
+};
+_addon.aurasPlayer[23836] = {
+    {
+        effect = _addon.CONST.EFFECT_TYPE.SCHOOLMOD_PCT_DAMAGE,
+        affectMask = _addon.CONST.SCHOOL_MASK.ALL,
+        value = 10,
+    }
+};
+
+-- Soul Link
+_addon.aurasPlayer[25228] = {
+    {
+        effect = _addon.CONST.EFFECT_TYPE.SCHOOLMOD_PCT_DAMAGE,
+        affectMask = _addon.CONST.SCHOOL_MASK.ALL,
+        value = 3,
+    }
+};
+
+--------------------------------------------------------------------------
+-- Target auras
+--------------------------------------------------------------------------
+
+-- Haunt
+_addon.aurasTarget[403501] = {
+    {
+        type = _addon.CONST.EFFECT_TYPE.TARGET_SPELLMOD_DMG_TAKEN_FROM_CASTER,
+        value = 20,
+        affectSpell = { 17418 },
+        onlyPersonal = true
+    }
+};
+
+-- Lake of Fire Debuff
+_addon.aurasTarget[403650] = {
+    {
+        type = _addon.CONST.EFFECT_TYPE.TARGET_SPELLMOD_DMG_TAKEN_FROM_CASTER,
+        value = 40,
+        affectSpell = { 2097508, 8519872, 268435458 },
+        onlyPersonal = true
+    }
+};
+
+--------------------------------------------------------------------------
+-- Scripts
+--------------------------------------------------------------------------
+
+-- (The Season of Discovery Soul Siphon rune script was removed for the Forever port. Forever has a
+-- Soul Siphon talent instead; model it when the Forever talent data is generated.)

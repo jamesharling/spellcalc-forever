@@ -18,8 +18,12 @@ SlashCmdList["SPELLCALC"] = function(arg)
         return;
     end
 
-    InterfaceOptionsFrame_OpenToCategory(_addonName);
-    InterfaceOptionsFrame_OpenToCategory(_addonName);
+    if Settings and Settings.OpenToCategory and _addon.settingsCategoryID then
+        Settings.OpenToCategory(_addon.settingsCategoryID);
+    elseif InterfaceOptionsFrame_OpenToCategory then
+        InterfaceOptionsFrame_OpenToCategory(_addonName);
+        InterfaceOptionsFrame_OpenToCategory(_addonName);
+    end
 
     --[[ if arg == "ub" then
         _addon:UpdateAurasForUnit("player", true);

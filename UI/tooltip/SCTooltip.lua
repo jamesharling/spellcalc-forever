@@ -1,6 +1,7 @@
 ---@class AddonEnv
 local _addon = select(2, ...);
 local L = _addon:GetLocalization();
+local GetSpellInfo = _addon.api.GetSpellInfo;
 
 local TTC_LABEL = "|cFFAAAAFF";
 local TTC_DEFAULT = "|cFFEEEEEE";
@@ -30,6 +31,8 @@ end
 ---@param spellName string
 ---@param func TooltipDummyFunction
 function SCTooltip:AddDummyHandler(spellName, func)
+    -- Spells that don't exist on this client resolve to nil; ignore those instead of erroring.
+    if not spellName then return end
     dummyHandler[spellName] = func;
 end
 
@@ -269,8 +272,9 @@ function SCTooltip:CritStr(critChance)
 end
 
 --- Append data to tooltip if spell is known to the addon.
-local function TooltipHandler(toolTipFrame)
-    local spellID = select(2, toolTipFrame:GetSpell())--[[@as integer]] ;
+---@param toolTipFrame GameTooltip
+---@param spellID integer
+local function TooltipHandler(toolTipFrame, spellID)
     local calcedSpell = _addon:GetCalcedSpell(spellID);
 
     if calcedSpell == nil then return end
@@ -290,7 +294,7 @@ local function TooltipHandler(toolTipFrame)
 
         local isHeal = bit.band(effectFlags, ADDON_EFFECT_FLAGS.HEAL) > 0;
         local isHandled = false;
-        local sname = GetSpellInfo(spellID);
+        local sname = GetSpellInfo(spellID) or tostring(spellID);
 
         if not dummyHandler[sname] and #calcedSpell.effects > 1 and (i == 2 or calcedSpell.combined == nil) then
             SCTooltip:HeaderLine(GetEffectTitle(effectFlags) .. ":");
@@ -340,7 +344,27 @@ local function TooltipHandler(toolTipFrame)
     end
 end
 
-GameTooltip:HookScript("OnTooltipSetSpell", TooltipHandler);
-if ElvUISpellBookTooltip then
-    ElvUISpellBookTooltip:HookScript("OnTooltipSetSpell", TooltipHandler);
+-- The Mainline client (and therefore Forever) has no OnTooltipSetSpell script: spell tooltips
+-- arrive through the tooltip data system. The post call fires for every GameTooltip-derived
+-- frame, which covers the default tooltip, chat links and ElvUI's spellbook tooltip.
+---@param tooltip GameTooltip
+---@param data table TooltipData
+local function OnSpellTooltip(tooltip, data)
+    if not tooltip or (tooltip.IsForbidden and tooltip:IsForbidden()) then return end
+    if not tooltip.AddLine or not tooltip.AddDoubleLine then return end
+
+    local spellID = data and data.id;
+    if not spellID and TooltipUtil and TooltipUtil.GetDisplayedSpell then
+        local _, id = TooltipUtil.GetDisplayedSpell(tooltip);
+        spellID = id;
+    end
+    if type(spellID) ~= "number" or _addon.api.IsSecret(spellID) then return end
+
+    TooltipHandler(tooltip, spellID);
+end
+
+if TooltipDataProcessor and Enum.TooltipDataType then
+    TooltipDataProcessor.AddTooltipPostCall(Enum.TooltipDataType.Spell, OnSpellTooltip);
+else
+    _addon.util.PrintError("TooltipDataProcessor is missing, spell tooltips can't be extended.");
 end

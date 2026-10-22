@@ -1,5 +1,6 @@
 ---@class AddonEnv
 local _addon = select(2, ...);
+local GetSpellInfo = _addon.api.GetSpellInfo;
 local effHandler = _addon.effectHandler;
 local stats = _addon.stats;
 local EFFECT_TYPES = _addon.CONST.SPELL_EFFECT_TYPES;
@@ -360,7 +361,7 @@ end
 ---@param spellName string
 ---@param spellId integer
 local function Conflagrate(calcedSpell, effNum, spellInfo, spellName, spellId)
-    local _, immoId = GetSpellBookItemInfo(GetSpellInfo(47811));
+    local immoId = _addon.api.GetSpellBookSpellID(GetSpellInfo(47811));
     local immolate = _addon:GetCalcedSpell(immoId);
     assert(immolate and immolate.effects[2], "Wrong Immolate Id? Immolate DoT effect not found for this spell!");
     local immoDoTDamage = immolate.effects[2].avg * immolate.effects[2].ticks;
@@ -403,27 +404,26 @@ local function Evocation(calcedSpell, effNum, spellInfo, spellName)
     calcedEffect.avgAfterMitigation = calcedEffect.avg * calcedEffect.ticks;
 end
 
-dummyAuraHandlers[GetSpellInfo(20154)] = SealOfRighteousness;
-dummyAuraHandlers[GetSpellInfo(20375)] = SealOfCommand;
-dummyAuraHandlers[GetSpellInfo(974)] = PoM_ES; -- Earth Shield
-dummyAuraHandlers[GetSpellInfo(29166)] = Innervate;
-dummyAuraHandlers[GetSpellInfo(20166)] = SealOfWisdomMelee;
-dummyAuraHandlers[GetSpellInfo(12051)] = Evocation;
-
-if _addon.IS_CLASSIC then
-    dummyAuraHandlers[GetSpellInfo(401859)] = PoM_ES; -- Prayer of Mending
-    dummyAuraHandlers[GetSpellInfo(407676)] = ArcaneTorrent; -- Crusader Strike mana restore
-    dummyAuraHandlers[GetSpellInfo(425294)] = PctManaPeriodic;
-else
-    dummyAuraHandlers[GetSpellInfo(33076)] = PoM_ES; -- Prayer of Mending
-    dummyAuraHandlers[GetSpellInfo(48505)] = Starfall;
-    dummyAuraHandlers[GetSpellInfo(54428)] = PctManaPeriodic;
-    dummyAuraHandlers[GetSpellInfo(51490)] = Thunderstorm;
-    dummyAuraHandlers[GetSpellInfo(17962)] = Conflagrate;
-    dummyAuraHandlers[GetSpellInfo(28730)] = ArcaneTorrent;
-    dummyAuraHandlers[GetSpellInfo(31801)] = SealOfVengeance;
-    dummyAuraHandlers[GetSpellInfo(348704)] = SealOfVengeance; -- Seal of Corruption
+---Register a dummy aura handler by spell ID. Spells missing on this client are skipped.
+---@param spellId integer
+---@param handler function
+local function RegisterDummyAuraHandler(spellId, handler)
+    local name = GetSpellInfo(spellId);
+    if name then
+        dummyAuraHandlers[name] = handler;
+    end
 end
+
+RegisterDummyAuraHandler(20154, SealOfRighteousness);
+RegisterDummyAuraHandler(20375, SealOfCommand);
+RegisterDummyAuraHandler(974, PoM_ES); -- Earth Shield
+RegisterDummyAuraHandler(29166, Innervate);
+RegisterDummyAuraHandler(20166, SealOfWisdomMelee);
+RegisterDummyAuraHandler(12051, Evocation);
+RegisterDummyAuraHandler(401859, PoM_ES); -- Prayer of Mending (Season of Discovery ID)
+RegisterDummyAuraHandler(33076, PoM_ES); -- Prayer of Mending (TBC ID)
+-- Wrath-only handlers (Starfall, Thunderstorm, Conflagrate, Arcane Torrent, Seal of Vengeance/Corruption)
+-- are not registered: those spells don't exist on Forever in that form.
 
 
 ----------------------------------------------------------------------------------------------------------------------------------------
@@ -622,7 +622,6 @@ end
 ---@param effNum integer
 ---@param spellInfo SpellInfo
 local function PowerRegenPercent(calcedSpell, effNum, spellInfo)
-    assert(_addon.IS_CLASSIC, "PowerRegenPercent only supports classic!");
     local calcedEffect = calcedSpell.effects[effNum];
     local effectData = spellInfo.effects[effNum];
 

@@ -4,7 +4,7 @@ local _addon = select(2, ...);
 local stats = _addon.stats;
 local _, class = UnitClass("player");
 local AEF = _addon.CONST.ADDON_EFFECT_FLAGS;
-local IS_CLASSIC = _addon.IS_CLASSIC;
+local GetSpellInfo = _addon.api.GetSpellInfo;
 
 local HEALING_TOUCH = GetSpellInfo(5186);
 local HEALING_WAVE = GetSpellInfo(332);
@@ -123,15 +123,8 @@ function CostHandler.Rage(calcedSpell, spellInfo, spellName, spellId)
         avgHitDmg = avgHitDmg * stats.schoolModPctDamageMult[_addon.CONST.SCHOOL_MASK.PHYSICAL].currentMult;
         avgHitDmg = (1 + critChance) * avgHitDmg;
 
-        if IS_CLASSIC then
-            local rangeGainedFromAA = (avgHitDmg / levelFactor) * 7.5;
-            calcedSpell.effectiveCost = calcedSpell.baseCost + rangeGainedFromAA;
-        else
-            local s = stats.attackSpeed.mainhand;
-            local f = 3.5 + 3.5 * critChance;
-            local rangeGainedFromAA = (15 * avgHitDmg) / (4 * levelFactor) + (f * s) / 2;
-            calcedSpell.effectiveCost = calcedSpell.baseCost + rangeGainedFromAA;
-        end
+        local rangeGainedFromAA = (avgHitDmg / levelFactor) * 7.5;
+        calcedSpell.effectiveCost = calcedSpell.baseCost + rangeGainedFromAA;
     end
 end
 

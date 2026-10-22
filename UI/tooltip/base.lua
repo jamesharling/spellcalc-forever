@@ -3,6 +3,7 @@ local _addon = select(2, ...);
 local L = _addon:GetLocalization();
 local SCT = _addon.SCTooltip;
 local ADDON_EFFECT_FLAGS = _addon.CONST.ADDON_EFFECT_FLAGS;
+local GetSpellInfo = _addon.api.GetSpellInfo;
 
 --- Append mitigation data
 ---@param calcedSpell CalcedSpell

@@ -1,149 +1,177 @@
 ---@class AddonEnv
 local _addon = select(2, ...);
+local combat = _addon.combat;
+local GetSpellName = _addon.api.GetSpellName;
 
----@type table<string, integer|nil>
-local activeRelevantTalents = {};
--- ---@type TalentDataEntry[]|nil
---[[ local talentData; ]]
+-- Forever's class talent trees are regular trait trees (the Mainline talent system), so
+-- they are read through C_ClassTalents / C_Traits. Addon talent data is keyed by the rank-1
+-- spell ID of the talent (TraitDefinition.SpellID), which survives Blizzard moving talents
+-- around the tree.
 
 ---@class InternalTalentData
----@field index integer
----@field name string
----@field currentRank integer
----@field addonData TalentDataRawEntry|nil
+---@field spellId integer rank-1 spell ID of the talent
+---@field name string identifier used for the applied effects
+---@field addonData TalentDataRawEntry
 
----@type table<integer, table<integer, table<integer, InternalTalentData>>>
-local talentAPIData = {};
+---@type table<integer, InternalTalentData> tracked talents by rank-1 spell ID
+local trackedTalents = {};
+---@type table<integer, integer> rank currently applied per tracked spell ID
+local appliedRanks = {};
+---@type table<integer, integer> last read rank for every talent in the active config
+local currentRanks = {};
 local talentDataCreated = false;
+local retriesLeft = 20;
 
----Setup talent data.
----With wrath GetTalentInfo() changed and talents are no longer in order.
----This function gets and stores the "correct" talent index for tracked talents.
+---Build the lookup from the generated talent data.
 local function SetupTalentData()
-    _addon.util.PrintDebug("Creating talent data.");
-
-    talentAPIData = {};
-    talentDataCreated = false;
-
-    for tree = 1, 3 do
-        local talentIndex = 1;
-        local name, _, tier, column = GetTalentInfo(tree, talentIndex);
-
-        -- Check if talent data is not yet available.
-        if tree == 1 and talentIndex == 1 and name == nil then
-            return;
-        end
-
-        while name do
-            talentAPIData[tree] = talentAPIData[tree] or {};
-            talentAPIData[tree][tier] = talentAPIData[tree][tier] or {};
-            talentAPIData[tree][tier][column] = { index = talentIndex, currentRank = 0, name = name, addonData = nil };
-            talentIndex = talentIndex + 1;
-            name, _, tier, column = GetTalentInfo(tree, talentIndex);
-        end
+    trackedTalents = {};
+    for _, v in ipairs(_addon.talentDataRaw or {}) do
+        assert(v.spellId, "Talent data entry without spellId!");
+        local name = v.name or GetSpellName(v.spellId) or ("Talent" .. v.spellId);
+        trackedTalents[v.spellId] = { spellId = v.spellId, name = name, addonData = v };
     end
-
-    _addon.util.PrintDebug("Setting up " .. #_addon.talentDataRaw .. " talents");
-
-    for _, v in ipairs(_addon.talentDataRaw) do
-        assert(talentAPIData[v.tree] and talentAPIData[v.tree][v.tier] and talentAPIData[v.tree][v.tier][v.column],
-            "No talent data for " .. v.tree .. " " .. v.tier .. " " .. v.column);
-        talentAPIData[v.tree][v.tier][v.column].addonData = v;
-    end
-
     talentDataCreated = true;
+    _addon.util.PrintDebug("Tracking " .. #(_addon.talentDataRaw or {}) .. " talents");
 end
 
---- Update player talents.
----@param forceTalents nil|{tree:integer, tier:integer, column:integer, rank:integer}[]
-local function UpdateTalents(forceTalents)
-    _addon.util.PrintDebug("Updating talents");
+---Read rank per rank-1 spell ID from the active trait config.
+---@return table<integer, integer>|nil ranks nil if the talent API isn't ready yet
+local function ReadTraitRanks()
+    if not C_ClassTalents or not C_Traits then return nil end
 
-    if not talentDataCreated then
-        SetupTalentData();
-        if not talentDataCreated then
-            C_Timer.After(3000, UpdateTalents);
-            return;
-        end
-    end
+    local configID = C_ClassTalents.GetActiveConfigID();
+    if not configID then return nil end
 
-    for tree, treeData in ipairs(talentAPIData) do
-        for tier, tierData in ipairs(treeData) do
-            for column, talentData in ipairs(tierData) do
-                local name, _, _, _, curRank, maxRank = GetTalentInfo(tree, talentData.index);
+    local configInfo = C_Traits.GetConfigInfo(configID);
+    if not configInfo or not configInfo.treeIDs then return nil end
 
-                if forceTalents ~= nil then
-                    for _, ftal in ipairs(forceTalents) do
-                        if ftal.tree == tree and ftal.tier == tier and ftal.column == column then
-                            curRank = ftal.rank;
-                        end
+    local ranks = {};
+    for _, treeID in ipairs(configInfo.treeIDs) do
+        local nodeIDs = C_Traits.GetTreeNodes(treeID);
+        if nodeIDs then
+            for _, nodeID in ipairs(nodeIDs) do
+                local nodeInfo = C_Traits.GetNodeInfo(configID, nodeID);
+                if nodeInfo then
+                    local entryID, rank;
+                    if nodeInfo.activeEntry then
+                        entryID = nodeInfo.activeEntry.entryID;
+                        rank = nodeInfo.activeEntry.rank;
+                    elseif nodeInfo.entryIDs and nodeInfo.entryIDs[1] then
+                        entryID = nodeInfo.entryIDs[1];
+                        rank = nodeInfo.activeRank or nodeInfo.ranksPurchased;
                     end
-                end
+                    rank = rank or 0;
 
-                talentData.currentRank = curRank;
-
-                _addon.util.PrintDebug(("%s %d/%d"):format(name, curRank, maxRank));
-
-                local data = talentData.addonData;
-                if data then
-                    -- remove old rank if we have another rank of the talent active
-                    if activeRelevantTalents[name] ~= nil and curRank ~= activeRelevantTalents[name] then
-                        _addon.util.PrintDebug("Remove old talent rank " .. name .. activeRelevantTalents[name]);
-                        local oldIdName = name .. activeRelevantTalents[name];
-                        for k, effect in ipairs(data.effects) do
-                            ---@type integer
-                            local value;
-                            if effect.values then
-                                value = effect.values[activeRelevantTalents[name]];
-                            else
-                                value = effect.perPoint * activeRelevantTalents[name];
-                            end
-                            local useName = (k > 1) and oldIdName .. "-" .. k or oldIdName;
-                            _addon:RemoveAuraEffect(useName, effect, value, -1, true);
+                    if entryID and rank > 0 then
+                        local entryInfo = C_Traits.GetEntryInfo(configID, entryID);
+                        local defID = entryInfo and entryInfo.definitionID;
+                        local defInfo = defID and C_Traits.GetDefinitionInfo(defID);
+                        local spellID = defInfo and defInfo.spellID;
+                        if spellID then
+                            ranks[spellID] = rank;
                         end
-                        activeRelevantTalents[name] = nil;
-                    end
-
-                    -- add new rank if we don't have the talent already
-                    if curRank > 0 and activeRelevantTalents[name] == nil then
-                        _addon.util.PrintDebug("Add talent rank " .. name .. curRank);
-                        local idName = name .. curRank;
-                        for k, effect in ipairs(data.effects) do
-                            ---@type integer
-                            local value;
-                            if effect.values then
-                                value = effect.values[curRank];
-                            else
-                                value = effect.perPoint * curRank;
-                            end
-                            assert(value, "Talent def for " .. idName .. " has no value!");
-                            local useName = (k > 1) and idName .. "-" .. k or idName;
-                            _addon:ApplyAuraEffect(useName, effect, value, -1, true);
-                        end
-                        activeRelevantTalents[name] = curRank;
                     end
                 end
             end
         end
     end
 
+    return ranks;
+end
+
+---Value of a talent effect at a given rank.
+---@param effect table
+---@param rank integer
+---@return number|nil
+local function TalentEffectValue(effect, rank)
+    if effect.values then
+        -- Rank counts can differ from the data the addon was generated with; clamp instead of erroring.
+        return effect.values[math.min(rank, #effect.values)];
+    end
+    return effect.perPoint * rank;
+end
+
+---Apply or remove the effects of a talent at a rank.
+---@param talent InternalTalentData
+---@param rank integer
+---@param apply boolean
+local function SetTalentEffects(talent, rank, apply)
+    local idName = talent.name .. rank;
+    _addon.util.PrintDebug((apply and "Add talent rank " or "Remove talent rank ") .. idName);
+    for k, effect in ipairs(talent.addonData.effects) do
+        local value = TalentEffectValue(effect, rank);
+        if value == nil then
+            _addon.util.PrintError("Talent def for " .. idName .. " has no value!");
+        else
+            local useName = (k > 1) and idName .. "-" .. k or idName;
+            if apply then
+                _addon:ApplyAuraEffect(useName, effect, value, -1, true);
+            else
+                _addon:RemoveAuraEffect(useName, effect, value, -1, true);
+            end
+        end
+    end
+end
+
+--- Update player talents.
+local function UpdateTalents()
+    if combat.IsRestricted() then
+        combat.MarkStale();
+        return;
+    end
+
+    if not talentDataCreated then
+        SetupTalentData();
+    end
+
+    local ranks = ReadTraitRanks();
+    if not ranks then
+        if retriesLeft > 0 then
+            retriesLeft = retriesLeft - 1;
+            _addon.util.PrintDebug("Talent data not available yet, retrying.");
+            C_Timer.After(3, UpdateTalents);
+        else
+            _addon.util.PrintError("Could not read talents from the talent API.");
+        end
+        return;
+    end
+    retriesLeft = 20;
+    currentRanks = ranks;
+
+    _addon.util.PrintDebug("Updating talents");
+
+    for spellId, talent in pairs(trackedTalents) do
+        local newRank = ranks[spellId] or 0;
+        local oldRank = appliedRanks[spellId];
+
+        if oldRank ~= nil and oldRank ~= newRank then
+            SetTalentEffects(talent, oldRank, false);
+            appliedRanks[spellId] = nil;
+        end
+
+        if newRank > 0 and appliedRanks[spellId] == nil then
+            SetTalentEffects(talent, newRank, true);
+            appliedRanks[spellId] = newRank;
+        end
+    end
+
     _addon:TriggerUpdate();
 end
 
----Return current rank for given talent.
----@param tree integer
----@param tier integer
----@param column integer
+---Return current rank for a talent given its rank-1 spell ID (0 if not taken or unknown).
+---@param spellId integer
 ---@return integer
-function _addon:GetTalentRank(tree, tier, column)
-    assert(talentAPIData[tree] and talentAPIData[tree][tier] and talentAPIData[tree][tier][column],
-        "No talent data for " .. tree .. " " .. tier .. " " .. column);
-    return talentAPIData[tree][tier][column].currentRank;
+function _addon:GetTalentRankBySpellId(spellId)
+    return currentRanks[spellId] or 0;
 end
 
-_addon.events.Register("CHARACTER_POINTS_CHANGED", function(gain) if gain <= -1 then UpdateTalents() end end);
 _addon.events.Register("PLAYER_ENTERING_WORLD", function() UpdateTalents() end);
+_addon.events.Register("TRAIT_CONFIG_UPDATED", function() UpdateTalents() end);
+_addon.events.Register("TRAIT_CONFIG_LIST_UPDATED", function() UpdateTalents() end);
+_addon.events.Register("ACTIVE_COMBAT_CONFIG_CHANGED", function() UpdateTalents() end);
+_addon.events.Register("PLAYER_TALENT_UPDATE", function() UpdateTalents() end);
 _addon.events.Register("ACTIVE_TALENT_GROUP_CHANGED", function() UpdateTalents() end);
+combat.OnResync(UpdateTalents);
 
 _addon:RegisterSlashCommand("debugtalents", function()
     _addon.util.PrintWarn("Updating talents with debug output!");
@@ -151,5 +179,8 @@ _addon:RegisterSlashCommand("debugtalents", function()
     SpellCalc_settings.debug = true;
     SetupTalentData();
     UpdateTalents();
+    for spellId, talent in pairs(trackedTalents) do
+        print(("  %s (%d): rank %d"):format(talent.name, spellId, currentRanks[spellId] or 0));
+    end
     SpellCalc_settings.debug = debugSetting;
 end);

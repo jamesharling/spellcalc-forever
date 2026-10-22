@@ -2,6 +2,7 @@
 local _addon = select(2, ...);
 local L = _addon:GetLocalization();
 local SCT = _addon.SCTooltip;
+local GetSpellInfo = _addon.api.GetSpellInfo;
 
 ---@param calcedSpell CalcedSpell
 ---@param effectNum number
@@ -96,7 +97,4 @@ end
 
 SCT:AddDummyHandler(GetSpellInfo(20375), SoC);
 SCT:AddDummyHandler(GetSpellInfo(21084), SoR);
-if _addon.IS_WRATH then
-    SCT:AddDummyHandler(GetSpellInfo(31801), SoV_SoCor);
-    SCT:AddDummyHandler(GetSpellInfo(348704), SoV_SoCor);
-end
+-- Seal of Vengeance/Corruption (Wrath) are not registered on Forever.

@@ -2,9 +2,10 @@
 local _addon = select(2, ...);
 
 local ADDON_EFFECT_FLAGS = _addon.CONST.ADDON_EFFECT_FLAGS;
+local GetSpellInfo = _addon.api.GetSpellInfo;
 local SEAL_OF_RIGHTEOUSNESS = GetSpellInfo(20154);
 local SEAL_OF_COMMAND = GetSpellInfo(20375);
-local PRAYER_OF_MENDING = _addon.IS_CLASSIC and GetSpellInfo(401859) or GetSpellInfo(33076);
+local PRAYER_OF_MENDING = GetSpellInfo(401859) or GetSpellInfo(33076);
 local EARTH_SHIELD = GetSpellInfo(974);
 local SEAL_OF_VENGEANCE = GetSpellInfo(31801);
 local SEAL_OF_CORRUPTION = GetSpellInfo(348704);
@@ -292,7 +293,12 @@ do
     SetupPagingSupport = function()
         if actionbarSupport == "STOCK" then
             pageAttribute = "actionpage";
-            AddPagingBar("MainMenuBarArtFrame", 1);
+            -- Mainline (Forever) names the main bar MainActionBar; classic clients used MainMenuBarArtFrame.
+            local mainBar = (_G["MainActionBar"] and "MainActionBar") or (_G["MainMenuBarArtFrame"] and "MainMenuBarArtFrame");
+            if not mainBar then
+                return false;
+            end
+            AddPagingBar(mainBar, 1);
             return true;
         elseif actionbarSupport == "ELVUI" then
             pageAttribute = "state-page";
@@ -382,14 +388,16 @@ _addon.events.Register("PLAYER_LOGIN", function ()
     _addon.util.PrintDebug("Action bar setup complete");
 end)
 
-_addon.events.Register("ACTIVE_TALENT_GROUP_CHANGED", function ()
+local function DelayedFullSlotUpdate()
     -- There's no slot update event and slots still have wrong value at this point.
     C_Timer.After(2, function ()
         for i=1, 120 do
             SlotUpdate(i);
         end
     end);
-end);
+end
+_addon.events.Register("ACTIVE_TALENT_GROUP_CHANGED", DelayedFullSlotUpdate);
+_addon.events.Register("TRAIT_CONFIG_UPDATED", DelayedFullSlotUpdate);
 
 _addon.events.Register("PLAYER_ENTERING_WORLD", function (isLogin, isReload)
     if isLogin or isReload then

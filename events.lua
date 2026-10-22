@@ -37,7 +37,15 @@ local function Register(event, callback)
 
     handlers[event] = handlers[event] or {};
     table.insert(handlers[event], callback);
-    if #handlers[event] == 1 then frame:RegisterEvent(event) end
+    if #handlers[event] == 1 then
+        -- Registering an event the client doesn't know raises an error; tolerate it so one
+        -- renamed event can't take the whole addon down.
+        local ok = pcall(frame.RegisterEvent, frame, event);
+        if not ok then
+            handlers[event] = nil;
+            _A.util.PrintWarn("Event " .. tostring(event) .. " is unknown to this client, handler not registered.");
+        end
+    end
 end
 
 ---Remove event callback.

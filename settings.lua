@@ -654,5 +654,6 @@ _addon.events.OnAddonLoaded(function ()
 	end
 
 	AceConfigRegistry:RegisterOptionsTable(_addonName, SETTINGS_TABLE);
-	AceConfigDialog:AddToBlizOptions(_addonName, _addonName);
+	local _, categoryID = AceConfigDialog:AddToBlizOptions(_addonName, _addonName);
+	_addon.settingsCategoryID = categoryID;
 end);

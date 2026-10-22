@@ -27,7 +27,12 @@ const dataTables = [
     "TalentTab",
 ];
 
-type Expansion = "classic" | "wotlk";
+type Expansion = "forever";
+
+// wago.tools product names. "wowf" is the World of Warcraft: Forever client (builds 1.60.1.x).
+const WAGO_BRANCH: { [exp in Expansion]: string } = {
+    forever: "wowf",
+};
 
 function getDataDir(exp: Expansion)
 {
@@ -107,7 +112,7 @@ async function updateDataFiles(expansion: Expansion, branch: string)
 
 const expArg: string | undefined = process.argv[2];
 
-if (!expArg || expArg != "classic" && expArg != "wotlk")
-    throw new Error("Expansion argument missing or invalid!");
+if (expArg != "forever")
+    throw new Error("Expansion argument missing or invalid (expected: forever)!");
 
-updateDataFiles(expArg, (expArg == "classic") ? "wow_classic_era" : "wow_classic");
+updateDataFiles(expArg, WAGO_BRANCH[expArg]);

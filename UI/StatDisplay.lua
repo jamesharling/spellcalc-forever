@@ -1,5 +1,7 @@
 ---@class AddonEnv
 local _addon = select(2, ...);
+local GetSpellInfo = _addon.api.GetSpellInfo;
+local GetSpellSubtext = _addon.api.GetSpellSubtext;
 
 local VALUE_COLOR = "|cFFAAFFAA";
 local UNIT_COLOR = "|cFFFFFFCC";
@@ -283,7 +285,7 @@ local function UpdateDisplay(self, passed)
             if type(spellIdOrName) == "number" then
                 local name = GetSpellInfo(spellIdOrName);
                 local subTextOrRank = GetSpellSubtext(spellIdOrName);
-                label = name;
+                label = name or tostring(spellIdOrName);
                 if subTextOrRank then
                     label = label.." |cFFaaaaaa"..subTextOrRank.."|r";
                 end

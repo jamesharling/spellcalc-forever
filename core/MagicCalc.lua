@@ -2,7 +2,6 @@
 local _addon = select(2, ...);
 
 local stats = _addon.stats;
-local IS_CLASSIC = _addon.IS_CLASSIC;
 
 ---@class MagicCalc
 local MagicCalc = {};
@@ -125,7 +124,7 @@ function MagicCalc:GetHitChances(avgResist)
         full = full - binaryLoss;
     end
 
-    if full > 99 and IS_CLASSIC then
+    if full > 99 then
         full = 99;
     elseif full > 100 then
         full = 100;

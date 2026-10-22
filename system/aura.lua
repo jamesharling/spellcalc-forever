@@ -621,7 +621,7 @@ _addon.events.Register("PLAYER_LOGIN", function ()
     -- Beast Slaying (Troll Racial)
     local _, raceEn = UnitRace("player");
     if raceEn == "Troll" then
-        _addon:ApplyAuraEffect(GetSpellInfo(20557), { type = EFFECT_TYPE.VERSUSMOD_PCT_DAMAGE, affectMask = _addon.CONST.CREATURE_TYPE_MASK.BEAST }, 5, 1234567, true);
+        _addon:ApplyAuraEffect(_addon.api.GetSpellName(20557) or "Beast Slaying", { type = EFFECT_TYPE.VERSUSMOD_PCT_DAMAGE, affectMask = _addon.CONST.CREATURE_TYPE_MASK.BEAST }, 5, 1234567, true);
     end
 
     -- Class passives

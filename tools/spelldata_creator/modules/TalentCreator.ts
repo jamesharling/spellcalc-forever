@@ -45,6 +45,8 @@ interface DBCTalentTab
 interface TalentDef
 {
     name: string,
+    /** Rank-1 spell ID of the talent; the addon keys talents by it (see system/talents.lua). */
+    spellId: number,
     tree: number,
     tier: number,
     column: number,
@@ -183,6 +185,7 @@ export class TalentsCreator
 
             list[tab.OrderIndex].talents.push({
                 name: talentName,
+                spellId: talent.SpellRank_0,
                 tree: tab.OrderIndex + 1,
                 tier: talent.TierID + 1,
                 column: talent.ColumnIndex + 1,
@@ -226,10 +229,9 @@ _addon.talentDataRaw = {`;
             for (const talent of tree.talents)
             {
                 lua += `
-    { -- ${talent.name}
-        tree = ${talent.tree},
-        tier = ${talent.tier},
-        column = ${talent.column},
+    { -- ${talent.name} (tree ${talent.tree}, tier ${talent.tier}, column ${talent.column})
+        name = ${JSON.stringify(talent.name)},
+        spellId = ${talent.spellId},
         effects = {\n`;
                 for (const eff of talent.effects)
                 {

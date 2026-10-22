@@ -3,9 +3,12 @@ local _addonName = select(1, ...);
 ---@class AddonEnv
 local _A = select(2, ...);
 
-_A.IS_CLASSIC = WOW_PROJECT_ID == WOW_PROJECT_CLASSIC;
-_A.IS_CLASSIC_SOD = _A.IS_CLASSIC and C_Engraving and C_Engraving.IsEngravingEnabled();
-_A.IS_WRATH = WOW_PROJECT_ID == WOW_PROJECT_WRATH_CLASSIC;
+-- This fork targets World of Warcraft: Forever only. Forever runs on the Mainline (retail-style)
+-- client with project ID WOW_PROJECT_CAMELOT (18); classic-era combat rules are assumed throughout.
+_A.IS_FOREVER = WOW_PROJECT_CAMELOT ~= nil and WOW_PROJECT_ID == WOW_PROJECT_CAMELOT;
+if not _A.IS_FOREVER then
+    print("|cFFFF3333" .. _addonName .. ": this build only supports World of Warcraft: Forever (project ID " .. tostring(WOW_PROJECT_ID) .. " detected), expect errors.|r");
+end
 
 local util = {};
 

@@ -16,6 +16,11 @@ Missing target auras
 local _addon = select(2, ...);
 local ScriptingAuraChanged = _addon.scripting.AuraChanged;
 local ScriptingMechanicChanged = _addon.scripting.MechanicChanged;
+local combat = _addon.combat;
+local IsSecret = _addon.api.IsSecret;
+local GetSpellName = _addon.api.GetSpellName;
+-- Mainline aura API; UnitAura/UnitBuff/UnitDebuff don't exist on the Forever client.
+local GetAuraDataByIndex = C_UnitAuras.GetAuraDataByIndex;
 
 ---True => active, false => should be removed, nil => not active
 ---@type table<"target"|"player", table<integer, boolean>>
@@ -98,10 +103,10 @@ local function RemoveUnitAuraEffect(spellId, auraEffect, name, stacks, effectSlo
 
     if value == nil then
         name = name.."-"..spellId;
-        if not auraEffect.scriptValue then 
+        if not auraEffect.scriptValue then
             error("Aura effect " .. name .. " has no value or scriptValue defined!");
         end
-        if scriptedValueCache[name] == nil then 
+        if scriptedValueCache[name] == nil then
             error("Removed "..name.." with scriptValue without having cached value!");
         end
         value = scriptedValueCache[name];
@@ -118,7 +123,8 @@ end
 ---Update aura type for unit.
 ---@param unit "player"|"target"
 ---@param filter "HARMFUL"|"HELPFUL"
----@return boolean
+---@return boolean aurasChanged
+---@return boolean aborted True if aura data turned out to be restricted (secret) mid-scan.
 local function UpdateAuratype(unit, filter)
     local aurasChanged = false;
     local auraTable = unit == "target" and _addon.aurasTarget or _addon.aurasPlayer;
@@ -131,8 +137,17 @@ local function UpdateAuratype(unit, filter)
     local mechanicAuras = _addon.mechanicAuras;
 
     for i = 1, 255 do
-        local name, _, count, _, _, _, source, _, _, spellId = UnitAura(unit, i, filter);
-        if not name then break end
+        local aura = GetAuraDataByIndex(unit, i, filter);
+        if not aura then break end
+
+        local name, count, source, spellId = aura.name, aura.applications, aura.sourceUnit, aura.spellId;
+        if IsSecret(name) or IsSecret(spellId) or IsSecret(count) or IsSecret(source) then
+            -- Aura data is restricted right now (combat/encounter); redo the scan when it's allowed again.
+            combat.MarkStale();
+            return aurasChanged, true;
+        end
+        if not name or not spellId then break end
+        count = count or 0;
         local isPersonal = source == "player";
 
         if auraNameList[name] == nil then ScriptingAuraChanged(name, unit) end
@@ -176,13 +191,19 @@ local function UpdateAuratype(unit, filter)
         end
     end
 
-    return aurasChanged;
+    return aurasChanged, false;
 end
 
 ---Update buffs and debuffs for unit.
 ---@param unit "player"|"target"
 ---@param clearOnly boolean|nil
 function _addon:UpdateAurasForUnit(unit, clearOnly)
+    if not clearOnly and combat.IsRestricted() then
+        -- Aura data is secret in combat; keep the last known state and resync afterwards.
+        combat.MarkStale();
+        return;
+    end
+
     local aurasChanged = false;
     local auraTable = unit == "target" and self.aurasTarget or self.aurasPlayer;
     local activeAuraList = activeAuraIds[unit];
@@ -206,15 +227,19 @@ function _addon:UpdateAurasForUnit(unit, clearOnly)
     end
 
     if not clearOnly then
-        aurasChanged = UpdateAuratype(unit, "HELPFUL") or aurasChanged;
-        aurasChanged = UpdateAuratype(unit, "HARMFUL") or aurasChanged;
+        local changed, aborted = UpdateAuratype(unit, "HELPFUL");
+        aurasChanged = changed or aurasChanged;
+        if aborted then return end
+        changed, aborted = UpdateAuratype(unit, "HARMFUL");
+        aurasChanged = changed or aurasChanged;
+        if aborted then return end
     end
 
     -- Remove effects from missing auras.
     for spellId, isActive in pairs(activeAuraList) do
         if isActive == false then
             local auraEffects = auraTable[spellId];
-            local name = GetSpellInfo(spellId);
+            local name = GetSpellName(spellId) or tostring(spellId);
             self.util.PrintDebug("Remove " .. unit .. " aura " .. name .. " " .. spellId);
             for k, effect in ipairs(auraEffects) do
                 aurasChanged = RemoveUnitAuraEffect(spellId, effect, name, auraStacksList[spellId], k, auraNamePersonalList[name] ~= nil) or
@@ -269,7 +294,7 @@ end);
 ---@param spellId integer
 function _addon:DebugApplyBuff(spellId)
     local buffdata = self.aurasPlayer[spellId];
-    local name = GetSpellInfo(spellId);
+    local name = GetSpellName(spellId) or tostring(spellId);
 
     if buffdata == nil then
         self.util.PrintError("No data for ID " .. spellId);
@@ -286,6 +311,10 @@ function _addon:DebugApplyBuff(spellId)
 end
 
 _addon.events.Register("PLAYER_ENTERING_WORLD", function() _addon:UpdateAurasForUnit("player") end);
+combat.OnResync(function()
+    _addon:UpdateAurasForUnit("player");
+    _addon:UpdateAurasForUnit("target");
+end);
 
 -----------------------------------------------
 -- Target
@@ -313,15 +342,22 @@ function Target.GetAuraApplications(auraName, personalOnly, debuff)
         return aurasByNamePersonalStacks["target"][auraName];
     end
 
+    if combat.IsRestricted() then
+        return nil;
+    end
+
     local filter = debuff and "HARMFUL" or "HELPFUL";
-    local i = 1;
-    local name, _, count = UnitAura("target", i, filter);
-    while name do
+    for i = 1, 255 do
+        local aura = GetAuraDataByIndex("target", i, filter);
+        if not aura then break end
+        local name, count = aura.name, aura.applications;
+        if IsSecret(name) or IsSecret(count) then
+            return nil;
+        end
         if name == auraName then
+            count = count or 0;
             return count > 0 and count or 1;
         end
-        i = i + 1;
-        name, _, count = UnitAura("target", i, filter);
     end
 end
 
