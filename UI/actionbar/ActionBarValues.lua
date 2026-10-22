@@ -6,9 +6,6 @@ local GetSpellInfo = _addon.api.GetSpellInfo;
 local SEAL_OF_RIGHTEOUSNESS = GetSpellInfo(20154);
 local SEAL_OF_COMMAND = GetSpellInfo(20375);
 local PRAYER_OF_MENDING = GetSpellInfo(401859);
-local EARTH_SHIELD = GetSpellInfo(974);
-local SEAL_OF_VENGEANCE = GetSpellInfo(31801);
-local SEAL_OF_CORRUPTION = GetSpellInfo(348704);
 
 local ActionBarValues = {};
 ---@type table<integer, integer>
@@ -37,14 +34,12 @@ end
 ---@param calcedEffect CalcedEffect
 ---@param spellName string
 local function GetDummyValue(calcedEffect, spellName)
-    if spellName == SEAL_OF_RIGHTEOUSNESS
-        or spellName == SEAL_OF_COMMAND
-        or spellName == SEAL_OF_VENGEANCE or spellName == SEAL_OF_CORRUPTION then
+    if spellName == SEAL_OF_RIGHTEOUSNESS or spellName == SEAL_OF_COMMAND then
         local k = "avg" -- SpellCalc_settings.abSealValue;
         if calcedEffect[k] then
             return calcedEffect[k];
         end
-    elseif spellName == PRAYER_OF_MENDING or spellName == EARTH_SHIELD then
+    elseif spellName == PRAYER_OF_MENDING then
         local k = SpellCalc_settings.abDirectValue;
         if calcedEffect[k] then
             return calcedEffect[k];

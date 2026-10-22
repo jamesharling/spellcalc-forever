@@ -1,37 +1,7 @@
 ---@class AddonEnv
 local _addon = select(2, ...);
 
-local SSM = _addon.CONST.SCHOOL;
-
-_addon.npcResistances = {
-    [12118] = { -- Lucifron
-        [SSM.FIRE] = 93,
-        [SSM.SHADOW] = 186
-    },
-    [12259] = { -- Gehennas
-        [SSM.FIRE] = 186,
-        [SSM.SHADOW] = 93
-    },
-    [12264] = { -- Shazzrah
-        [SSM.FIRE] = 93,
-        [SSM.ARCANE] = 186
-    },
-    [12098] = { -- Sulfuron Harbinger
-        [SSM.FIRE] = 93
-    },
-    [11988] = { -- Golemagg
-        [SSM.FIRE] = 186
-    },
-    [12018] = { -- Majordomo Executus
-        [SSM.FIRE] = 95
-    },
-    [15990] = { -- Kel'Thuzad
-        [SSM.SHADOW] = 100,
-        [SSM.FROST] = 200
-    },
-}
-
---Default armor values for a "warrior" class NPC
+-- Base armor of NPCs by level, used when no custom armor value is set (Settings > Target).
 _addon.levelDefaultArmor = {
     20,
     21,

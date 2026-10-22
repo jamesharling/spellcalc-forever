@@ -504,6 +504,12 @@ C_Item = namespace("C_Item", {
     RequestLoadItemDataByID = noop,
     IsItemDataCachedByID = function() return false end,
 })
+C_TooltipInfo = namespace("C_TooltipInfo", {
+    GetItemByID = function() return { lines = { { leftText = "Two-Hand", rightText = "Staff" }, { leftText = "100 - 150 Damage", rightText = "Speed 3.00" } } } end,
+    GetSpellByID = function() return { lines = {} } end,
+})
+LOCALIZED_CLASS_NAMES_MALE = { DRUID = "Druid", HUNTER = "Hunter", MAGE = "Mage", PALADIN = "Paladin", PRIEST = "Priest",
+    ROGUE = "Rogue", SHAMAN = "Shaman", WARLOCK = "Warlock", WARRIOR = "Warrior" }
 GetInventoryItemLink = function() return nil end
 GetInventoryItemID = function() return nil end
 GetInventoryItemDurability = function() return nil end

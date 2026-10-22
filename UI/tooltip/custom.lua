@@ -7,9 +7,6 @@ local SCT = _addon.SCTooltip;
 local GetSpellInfo = _addon.api.GetSpellInfo;
 
 ---@type table<string, boolean>
-local Righteous_Vengeance_Spells = {}; -- Wrath talent, nothing to track on Forever.
-
----@type table<string, boolean>
 local Sheath_of_Light_Spells = {};
 for _, spellId in ipairs({ 19940, 1042 }) do -- FoL, HL
     local name = GetSpellInfo(spellId);
@@ -29,9 +26,7 @@ function SCT:AppendCritExtra(spellId, calcedEffect)
     local _, class = UnitClass("player");
 
     if class == "PALADIN" then
-        if Righteous_Vengeance_Spells[spellName] then
-            text = self:FormatNoTrailing0(L["~%.1f (4x %.f over 8s)"], calcedEffect.critExtraAvg, calcedEffect.critExtraAvg/4);
-        elseif Sheath_of_Light_Spells[spellName] then
+        if Sheath_of_Light_Spells[spellName] then
             text = self:FormatNoTrailing0(L["~%.1f (4x %.f over 12s)"], calcedEffect.critExtraAvg, calcedEffect.critExtraAvg/4);
         end
     elseif class == "PRIEST" then
@@ -67,8 +62,6 @@ function SCT:AppendHitExtra(spellId, calcedEffect)
         -- Devouring Plague
         if spellName == GetSpellInfo(2944) then
             text = self:FormatNoTrailing0("%.1f (%.1f %s)", hitData.avgHit, hitData.avgCrit, L["crit"]);
-        elseif spellName == GetSpellInfo(48066) then -- PWS glyph heal
-            text = self:FormatNoTrailing0("%.1f %s", hitData.avgHit, L["healing"]);
         end
     end
 

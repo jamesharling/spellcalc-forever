@@ -56,14 +56,14 @@ local DEFAULTSETTINGS = {
 	["meleeFromFront"] = false,
 
 	["useRealToOom"] = false,
-	useCurrentPowerLevel = false,
 	calcEffManaInnervate = false,
 	calcEffManaPotionTypeNew = "NONE",
 	calcEffManaRune = false,
 
-    auraEffectToggleSactifiedRetribution = false,
+	assumedComboPoints = 5,
+	assumedTargetAuras = {},
 
-	["version"] = 2
+	["version"] = 3
 };
 
 ---@param info string[]
@@ -105,6 +105,16 @@ local SETTINGS_TABLE = {
 					type = "toggle",
 					name = L["Use current target"],
 					desc = L["If possible use target's level instead."]
+				},
+				assumedComboPoints = {
+					order = 3,
+					type = "range",
+					name = L["Assumed combo points"],
+					desc = L["Combo points used for finishing moves. Combo points are hidden from addons in combat."],
+					min = 1,
+					max = 5,
+					step = 1,
+					hidden = function() return class ~= "DRUID" and class ~= "ROGUE" end,
 				},
 
 				resHead = {
@@ -470,16 +480,6 @@ local SETTINGS_TABLE = {
 							name = L["Real until OOM"],
 							desc = L["Consider mana below spellcost as 0 mana instead of calculating with theoretical partial casts."]
 						},
-						useCurrentPowerLevel = {
-							order = 2,
-							type = "toggle",
-							name = L["Remaining Casts"],
-							desc = L["Calculate possible casts with current mana value instead of always assuming full mana."],
-							set = function(info, value)
-								SpellCalc_settings.useCurrentPowerLevel = value;
-								_addon:TriggerUpdate();
-							end
-						},
 					}
 				},
 				effManaGroup = {
@@ -497,7 +497,7 @@ local SETTINGS_TABLE = {
 							order = 2,
 							type = "toggle",
 							name = L["Innervate"],
-                            desc = L["Innervate from a lvl 80 druid."]
+                            desc = L["Innervate cast on yourself: 400% mana regeneration for 20 seconds."]
 						},
 						calcEffManaRune = {
 							order = 3,
@@ -520,33 +520,6 @@ local SETTINGS_TABLE = {
 						}
 					}
 				}
-			}
-		},
-
-        auraToggleGroup = {
-			order = 9,
-			type = "group",
-			name = L["Aura Toggles"],
-
-			args = {
-                desc = {
-                    order = 1,
-                    type = "description",
-                    name = L["Some auras can have additional effects, e.g. from talents, that have no indication on the aura about whether they are there or not. You can toggle them on/off here."]
-                },
-                auraEffectToggleSactifiedRetribution = {
-					order = 2,
-					type = "toggle",
-					name = L["Sanctified Retribution"],
-                    desc = L["+3% damage when affected by a paladin's aura."],
-                    set = function(i, val)
-                        _addon:UpdateAurasForUnit("player", true);
-                        _addon:UpdateAurasForUnit("target", true);
-						SpellCalc_settings.auraEffectToggleSactifiedRetribution = val;
-                        _addon:UpdateAurasForUnit("player");
-                        _addon:UpdateAurasForUnit("target");
-					end
-				},
 			}
 		},
 
@@ -616,6 +589,16 @@ local function CheckUpdates()
 		if sv.abSealValue == "hitAvg" then sv.abSealValue = "avg" end
 		sv.version = 2;
 	end
+
+	if oldSettingsVer < 3 then
+		-- Forever: current mana is secret in combat, target auras are assumed instead of scanned,
+		-- and the Wrath-only Sanctified Retribution toggle is gone.
+        ---@diagnostic disable-next-line: no-unknown
+		sv.useCurrentPowerLevel = nil;
+        ---@diagnostic disable-next-line: no-unknown
+		sv.auraEffectToggleSactifiedRetribution = nil;
+		sv.version = 3;
+	end
 end
 
 --- Setup SV tables, check settings and setup settings menu
@@ -634,6 +617,19 @@ _addon.events.OnAddonLoaded(function ()
 	end
 
 	CheckUpdates();
+
+	if type(SpellCalc_settings.assumedTargetAuras) ~= "table" then
+		SpellCalc_settings.assumedTargetAuras = {};
+	end
+
+	if _addon.AssumedTargetAuraSettings ~= nil then
+		SETTINGS_TABLE.args.targetAuraGroup = {
+			order = 3,
+			type = "group",
+			name = L["Target Auras"],
+			args = _addon.AssumedTargetAuraSettings()
+		}
+	end
 
 	if _addon.ClassSettings ~= nil then
 		SETTINGS_TABLE.args.classGroup = {

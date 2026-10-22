@@ -65,11 +65,10 @@ const PTSA_IGNORES = [
  * The addon calculates SPELL_AURA_PERIODIC_ENERGIZE, SPELL_AURA_OBS_MOD_MANA and SPELL_EFFECT_ENERGIZE_PCT
  * effects only through per-spell dummy handlers (core/effectHandlers.lua). Forever uses these on many more spells
  * (Blessing of Wisdom, Dark Sacrifice, Enrage, Water Shield's mana proc); without a handler the addon
- * errors, so only spells with a handler keep these effects.
+ * errors, so only spells with a handler keep these effects. None has one at the moment: Innervate and
+ * Evocation are mana regen percent auras on Forever.
  */
-const MANA_GAIN_AURAS_WITH_HANDLER: { [spellName: string]: boolean } = {
-    "Innervate": true,
-};
+const MANA_GAIN_AURAS_WITH_HANDLER: { [spellName: string]: boolean } = {};
 
 export class ClassSpellLists
 {
@@ -196,8 +195,6 @@ export class ClassSpellLists
                     if (
                         !(effect.EffectIndex == 0 && isSeal(effect.SpellID)) // SoR or SoC attack effect
                         && spellName != "Prayer of Mending"
-                        && spellName != "Earth Shield"
-                        && !(spellName == "Sacred Shield" && effect.EffectIndex == 0)
                     ) continue;
                 }
             }
@@ -243,17 +240,8 @@ export class ClassSpellLists
                 if (!this.addTriggeredSpellIfValid(effect.EffectTriggerSpell, binaryCache, list)) throw new Error("Triggered spell has no valid effects!");
             }
 
-            if (effect.Effect == EFFECT_TYPE.SPELL_EFFECT_DUMMY)
-            {
-                switch (spellName)
-                {
-                    case "Starfall":
-                    case "Conflagrate":
-                        break;
-                    default:
-                        continue;
-                }
-            }
+            // The addon has no handlers for spell dummy effects on Forever spells.
+            if (effect.Effect == EFFECT_TYPE.SPELL_EFFECT_DUMMY) continue;
 
             validEffects.push(effect);
         }

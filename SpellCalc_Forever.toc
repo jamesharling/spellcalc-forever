@@ -28,59 +28,43 @@ system/scriptEffects.lua
 data/forever/auras.lua
 data/forever/aurasTarget.lua
 data/forever/auraScripts.lua
-data/forever/mechanicAuras.lua
 data/forever/enchants.lua
-data/npcResistances.lua
 
 data/forever/itemEffects.lua
 data/forever/itemSetData.lua
+data/levelDefaultArmor.lua
 data/basemana.lua
 
 data/forever/classes/druid_spell.lua
-data/forever/classes/hunter_spell.lua
 data/forever/classes/mage_spell.lua
 data/forever/classes/paladin_spell.lua
 data/forever/classes/priest_spell.lua
-data/forever/classes/rogue_spell.lua
 data/forever/classes/shaman_spell.lua
 data/forever/classes/warlock_spell.lua
-data/forever/classes/warrior_spell.lua
 data/forever/classes/druid_itemEffects.lua
-data/forever/classes/hunter_itemEffects.lua
 data/forever/classes/mage_itemEffects.lua
 data/forever/classes/paladin_itemEffects.lua
 data/forever/classes/priest_itemEffects.lua
-data/forever/classes/rogue_itemEffects.lua
 data/forever/classes/shaman_itemEffects.lua
 data/forever/classes/warlock_itemEffects.lua
-data/forever/classes/warrior_itemEffects.lua
 data/forever/classes/druid_itemSetData.lua
-data/forever/classes/hunter_itemSetData.lua
 data/forever/classes/mage_itemSetData.lua
 data/forever/classes/paladin_itemSetData.lua
 data/forever/classes/priest_itemSetData.lua
-data/forever/classes/rogue_itemSetData.lua
 data/forever/classes/shaman_itemSetData.lua
 data/forever/classes/warlock_itemSetData.lua
-data/forever/classes/warrior_itemSetData.lua
 data/forever/classes/druid_talents.lua
-data/forever/classes/hunter_talents.lua
 data/forever/classes/mage_talents.lua
 data/forever/classes/paladin_talents.lua
 data/forever/classes/priest_talents.lua
-data/forever/classes/rogue_talents.lua
 data/forever/classes/shaman_talents.lua
 data/forever/classes/warlock_talents.lua
-data/forever/classes/warrior_talents.lua
 data/forever/classes/druid.lua
-data/forever/classes/hunter.lua
 data/forever/classes/mage.lua
 data/forever/classes/paladin.lua
 data/forever/classes/priest.lua
-data/forever/classes/rogue.lua
 data/forever/classes/shaman.lua
 data/forever/classes/warlock.lua
-data/forever/classes/warrior.lua
 
 data/forever/racials.lua
 
@@ -95,6 +79,7 @@ system/talents.lua
 system/items.lua
 system/target.lua
 system/unitAuras.lua
+system/assumedTargetAuras.lua
 system/variableScaling.lua
 
 core/CostHandler.lua

@@ -1,7 +1,7 @@
 import { SpellEffect, SpellData } from "./SpellData";
 import { cfg } from "./config";
 import { isJudgeDummy, SealType, getSeals } from "./paladinCrap";
-import { getEffectBase, getSpellIdFromEffect } from "./effectValues";
+import { getSpellIdFromEffect } from "./effectValues";
 import { report, reportSection } from "./report";
 import * as fs from "fs";
 
@@ -303,26 +303,6 @@ function paladinFix(sd: SpellData)
     }
 }
 
-function mageFix(sd: SpellData)
-{
-    console.log("Fixing mage coefs and effects");
-
-    const lbSpells = sd.getSpellsByName("Living Bomb", true) ?? [];
-    for (const spellId of lbSpells)
-    {
-        const effects = sd.getSpellEffects(spellId, true);
-        if (!effects) continue;
-        for (const effect of effects)
-        {
-            if (effect.EffectAura == AURA_TYPE.SPELL_AURA_DUMMY && getEffectBase(effect) > 10000)
-            {
-                effect.EffectAura = AURA_TYPE.SPELL_AURA_PROC_TRIGGER_SPELL;
-                effect.EffectTriggerSpell = getSpellIdFromEffect(effect);
-            }
-        }
-    }
-}
-
 function druidFixes(sd: SpellData)
 {
     console.log("Fixing druid coefs and effects");
@@ -333,22 +313,6 @@ function druidFixes(sd: SpellData)
         const effects = effectsOf(sd, ripId, "Rip");
         if (!effects) continue;
         effects[0].EffectMechanic = SpellMechanic.BLEED;
-    }
-
-    // Lifebloom: the bloom is a dummy effect, treat it as a heal
-    const LB = [408124];
-    for (const spellId of LB)
-    {
-        const effects = sd.getSpellEffects(spellId, true);
-        if (!effects) continue;
-        for (const effect of effects)
-        {
-            if (effect.EffectIndex === 1)
-            {
-                effect.Effect = EFFECT_TYPE.SPELL_EFFECT_HEAL;
-                effect.EffectAura = 0;
-            }
-        }
     }
 
     const mauls = sd.getSpellsByName("Maul", true) ?? [];
@@ -535,7 +499,6 @@ export function fixSpellEffects(sd: SpellData)
     reportSection("Spell data fixes");
     paladinFix(sd);
     priestFix(sd);
-    mageFix(sd);
     druidFixes(sd);
     warlockFixes(sd);
     shamanFix(sd);

@@ -1,6 +1,5 @@
 ---@class AddonEnv
 local _addon = select(2, ...);
-local npcResistances = _addon.npcResistances;
 local SCHOOL = _addon.CONST.SCHOOL;
 
 local CREATURE_TYPE_LOC_TO_ID = {
@@ -125,8 +124,6 @@ local Target = {
     isPlayer = false,
     isSelf = false,
     exists = false,
-    npcId = -1,
-    comboPoints = 0,
     resistanceBase = {
         [SCHOOL.PHYSICAL] = 0,
         [SCHOOL.HOLY] = 0,
@@ -139,7 +136,8 @@ local Target = {
 };
 
 --- Update resistance values for current target.
--- Use override values or known values for some NPCs.
+-- Custom values from the settings, otherwise armor by level. (A table of raid boss resistances by NPC ID
+-- was removed: unit identity is secret inside instances on Forever, where those bosses are.)
 local function UpdateResistances()
     for _, schoolNum in pairs(SCHOOL) do
         Target.resistanceBase[schoolNum] = 0;
@@ -166,14 +164,6 @@ local function UpdateResistances()
 
     if Target.isPlayer then
         return;
-    end
-
-    if npcResistances[Target.npcId] then
-        for _, schoolNum in pairs(SCHOOL) do
-            if Target.resistanceBase[schoolNum] == 0 and npcResistances[Target.npcId][schoolNum] then
-                Target.resistanceBase[schoolNum] = npcResistances[Target.npcId][schoolNum];
-            end
-        end
     end
 
     if Target.resistanceBase[SCHOOL.PHYSICAL] == 0 then
@@ -234,35 +224,18 @@ function Target:Update()
 
     if self.exists then
         if not self.isPlayer then
-            local guid = Unsecret(UnitGUID("target"));
-            local idnum;
-            if guid then
-                local _, _, _, _, _, npcID = strsplit("-", guid);
-                idnum = tonumber(npcID);
-            end
-            if idnum then
-                self.npcId = idnum;
-            else
-                self.npcId = -1;
-            end
-
             local creatureType = Unsecret(UnitCreatureType("target"));
             self.creatureType = creatureType and CREATURE_TYPE_LOC_TO_ID[creatureType] or nil;
         else
-            self.npcId = -1;
             self.creatureType = 7;
         end
     else
-        self.npcId = -1;
         self.creatureType = nil;
     end
 
-    Target.comboPoints = _addon.api.Unsecret(GetComboPoints("player", "target"), 0);
-
     UpdateResistances();
-    _addon:UpdateAurasForUnit("target");
 
-    _addon.util.PrintDebug(("New target: %d (%d), Player: %s, ID: %d"):format(self.level, self.levelDiff, tostring(self.isPlayer), self.npcId));
+    _addon.util.PrintDebug(("New target: %d (%d), Player: %s"):format(self.level, self.levelDiff, tostring(self.isPlayer)));
     _addon.util.PrintDebug(("P: %d, H: %d, Fi: %d, N: %d, Fr: %d, S: %d, A: %d"):format(self.resistanceBase[SCHOOL.PHYSICAL], self.resistanceBase[SCHOOL.HOLY], self.resistanceBase[SCHOOL.FIRE],
         self.resistanceBase[SCHOOL.NATURE], self.resistanceBase[SCHOOL.FROST], self.resistanceBase[SCHOOL.SHADOW], self.resistanceBase[SCHOOL.ARCANE]));
 
@@ -274,13 +247,3 @@ _addon.Target = Target;
 _addon.events.Register("PLAYER_ENTERING_WORLD", function() Target:Update() end);
 _addon.events.Register("PLAYER_TARGET_CHANGED", function () Target:Update() end);
 
--- Druid + Rogue
-local _, class = UnitClass("player");
-if class == "ROGUE" or class == "DRUID" then
-    _addon.events.Register("UNIT_POWER_UPDATE", function (unit, powerType)
-        if unit == "player" and powerType == "COMBO_POINTS" then
-            Target.comboPoints = _addon.api.Unsecret(GetComboPoints("player", "target"), 0);
-            _addon:TriggerUpdate();
-        end
-    end);
-end

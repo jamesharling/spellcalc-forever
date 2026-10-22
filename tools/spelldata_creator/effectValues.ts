@@ -7,7 +7,7 @@ import { SpellEffect } from "./SpellData";
  * Forever stores EffectBasePointsF (the mean value, a float) and Variance:
  *   low  = base * (1 - Variance / 2)
  *   high = base * (1 + Variance / 2)
- * Spell IDs stored inside effects (judgement dummies, Starfall triggers, ...) are
+ * Spell IDs stored inside effects (judgement dummies) are
  * stored directly in EffectBasePointsF with Variance 0.
  */
 
@@ -62,7 +62,7 @@ export function fillBaseAndRange(target: { valueBase: number, valueRange: number
 }
 
 /**
- * Spell ID stored in an effect's base points (judgement dummies, Starfall, Living Bomb).
+ * Spell ID stored in an effect's base points (judgement dummies).
  */
 export function getSpellIdFromEffect(effect: SpellEffect)
 {

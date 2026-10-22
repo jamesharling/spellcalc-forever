@@ -89,7 +89,6 @@ function MeleeCalc:Init(calcedSpell, isOffhand, isWhitehit, isRanged, cantDodgeP
     self.isWhitehit = isWhitehit;
     self.cantDodgeParryBlock = cantDodgeParryBlock;
     self.isRanged = isRanged;
-    self.expertiseReduction = select(isOffhand and 2 or 1, GetExpertise()) --[[@as number]] * 0.25;
 end
 
 --- Get crit chance
@@ -199,7 +198,7 @@ local function GetParryChance(calc)
     else
         pchance = 5 + (calc.ldef - calc.ratk) * 0.1;
     end
-    return math.max(0, pchance - calc.expertiseReduction);
+    return math.max(0, pchance);
 end
 
 --- Get dodge chance against target
@@ -214,7 +213,7 @@ local function GetDodgeChance(calc, skillDiff)
         return 0; -- dodge + skillDiff * 0.04;
     end
 
-    return math.max(0, 5 + skillDiff * 0.1 - calc.expertiseReduction);
+    return math.max(0, 5 + skillDiff * 0.1);
 end
 
 --- Get miss chance against target

@@ -210,13 +210,13 @@ local function SealOfCommand(calcedSpell, effNum, spellInfo, spellName)
     calcedEffect.avgCrit = (calcedEffect.minCrit + calcedEffect.maxCrit) / 2;
 end
 
----Dummy handler for Prayer of Mending and Earth Shield
+---Dummy handler for Prayer of Mending
 ---@param calcedSpell CalcedSpell
 ---@param effNum integer
 ---@param spellInfo SpellInfo
 ---@param spellName string
 ---@param spellId integer
-local function PoM_ES(calcedSpell, effNum, spellInfo, spellName, spellId)
+local function PrayerOfMending(calcedSpell, effNum, spellInfo, spellName, spellId)
     -- Do normal heal effect
     HealEffect(nil, calcedSpell, effNum, spellInfo, spellName, spellId);
     -- Multiply by charge count
@@ -225,183 +225,6 @@ local function PoM_ES(calcedSpell, effNum, spellInfo, spellName, spellId)
     calcedEffect.perSec = calcedEffect.avgAfterMitigation / calcedSpell.effCastTime;
     calcedEffect.doneToOom = calcedSpell.castingData.castsToOom * calcedEffect.avgAfterMitigation;
     calcedEffect.perResource = calcedEffect.avgAfterMitigation / calcedSpell.effectiveCost;
-end
-
----@param calcedSpell CalcedSpell
----@param effNum integer
----@param spellInfo SpellInfo
----@param spellName string
-local function SealOfVengeance(calcedSpell, effNum, spellInfo, spellName)
-    local calcedEffect = calcedSpell.effects[effNum];
-    local effectData = spellInfo.effects[effNum];
-    assert(effectData, "Effect data in SoV handler missing!");
-
-    local dotSpell = _addon:GetCalcedSpell(53742);
-    if not dotSpell then
-        error("SoV: Blood Corruption spell not handled?");
-        return;
-    end
-    calcedEffect.spellData = dotSpell;
-
-    local weaponCoef = effectData.weaponCoef * calcedEffect.modBase;
-
-    calcedEffect.min = stats.attackDmg.mainhand.min * weaponCoef;
-    calcedEffect.max = stats.attackDmg.mainhand.max * weaponCoef;
-    calcedEffect.avg = 0.5 * (calcedEffect.min + calcedEffect.max);
-    calcedEffect.minCrit = calcedEffect.min * calcedSpell.critMult;
-    calcedEffect.maxCrit = calcedEffect.max * calcedSpell.critMult;
-    calcedEffect.avgCrit = calcedEffect.avg * calcedSpell.critMult;
-    calcedEffect.avgCombined = calcedEffect.avg + (calcedEffect.avgCrit - calcedEffect.avg) * calcedSpell.critChance/100;
-end
-
----@param calcedSpell CalcedSpell
----@param effNum integer
----@param spellInfo SpellInfo
----@param spellName string
----@param spellId integer
-local function Starfall(calcedSpell, effNum, spellInfo, spellName, spellId)
-    local stars = 20;
-    local effectData = spellInfo.effects[effNum];
-    local calcedEffect = calcedSpell.effects[effNum];
-
-    assert(effectData, "Effect data in Starfall handler missing!");
-
-    FillBaseValues(calcedSpell, calcedEffect, spellId, spellInfo, spellName, effectData, calcedEffect.flatMod, calcedEffect.modBase, calcedEffect.effectivePower);
-    FillCritValues(calcedSpell, calcedEffect, spellId);
-    Mitigate(spellName, calcedSpell, calcedEffect);
-
-    calcedEffect.avgAfterMitigation = calcedEffect.avgAfterMitigation * stars;
-
-    calcedEffect.perSec = calcedEffect.avgAfterMitigation / calcedSpell.effCastTime;
-    calcedEffect.doneToOom = calcedSpell.castingData.castsToOom * calcedEffect.avgAfterMitigation;
-    calcedEffect.perResource = calcedEffect.avgAfterMitigation / calcedSpell.effectiveCost;
-end
-
----@param calcedSpell CalcedSpell
----@param effNum integer
----@param spellInfo SpellInfo
----@param spellName string
-local function PctManaPeriodic(calcedSpell, effNum, spellInfo, spellName)
-    local calcedEffect = calcedSpell.effects[effNum];
-    local effectData = spellInfo.effects[effNum];
-
-    local pct = effectData.valueBase / 100;
-    local duration = spellInfo.duration;
-    local period = duration > 10 and 3 or 1;
-    local ticks = math.floor(duration / period)
-
-    calcedEffect.min = stats.manaMax * pct;
-    calcedEffect.max = calcedEffect.min;
-    calcedEffect.avg = calcedEffect.min;
-    calcedEffect.avgCombined = calcedEffect.min;
-    calcedEffect.ticks = ticks;
-    calcedEffect.tickPeriod = period;
-    calcedSpell.duration = duration;
-    calcedEffect.avgAfterMitigation = calcedEffect.avg * calcedEffect.ticks;
-end
-
----@param calcedSpell CalcedSpell
----@param effNum integer
----@param spellInfo SpellInfo
----@param spellName string
-local function Innervate(calcedSpell, effNum, spellInfo, spellName)
-    local calcedEffect = calcedSpell.effects[effNum];
-    calcedEffect.min = stats.baseMana * 2.25 / 10;
-    if (not _addon.Target.exists or _addon.Target.isSelf)
-    and _addon.scripting.GetValue("Glyph_of_Innervate") > 0 then
-        calcedEffect.min = calcedEffect.min + stats.baseMana * 0.45 / 10;
-    end
-    calcedEffect.max = calcedEffect.min;
-    calcedEffect.avg = calcedEffect.min;
-    calcedEffect.avgCombined = calcedEffect.min;
-    calcedEffect.ticks = 10;
-    calcedEffect.tickPeriod = 1;
-    calcedSpell.duration = 10;
-    calcedEffect.avgAfterMitigation = calcedEffect.avg * calcedEffect.ticks;
-end
-
----@param calcedSpell CalcedSpell
----@param effNum integer
----@param spellInfo SpellInfo
----@param spellName string
-local function ArcaneTorrent(calcedSpell, effNum, spellInfo, spellName)
-    local calcedEffect = calcedSpell.effects[effNum];
-    calcedEffect.min = stats.manaMax * spellInfo.effects[effNum].valueBase/100;
-    calcedEffect.max = calcedEffect.min;
-    calcedEffect.avg = calcedEffect.min;
-    calcedEffect.avgCombined = calcedEffect.min;
-    calcedEffect.avgAfterMitigation = calcedEffect.avgCombined;
-end
-
----@param calcedSpell CalcedSpell
----@param effNum integer
----@param spellInfo SpellInfo
----@param spellName string
-local function Thunderstorm(calcedSpell, effNum, spellInfo, spellName)
-    local calcedEffect = calcedSpell.effects[effNum];
-    calcedEffect.min = stats.manaMax * (spellInfo.effects[effNum].valueBase + _addon.scripting.GetValue("Glyph_of_Thunderstorm")) / 100;
-    calcedEffect.max = calcedEffect.min;
-    calcedEffect.avg = calcedEffect.min;
-    calcedEffect.avgCombined = calcedEffect.min;
-    calcedEffect.avgAfterMitigation = calcedEffect.avgCombined;
-end
-
----@param calcedSpell CalcedSpell
----@param effNum integer
----@param spellInfo SpellInfo
----@param spellName string
-local function SealOfWisdomMelee(calcedSpell, effNum, spellInfo, spellName)
-    ArcaneTorrent(calcedSpell, effNum, spellInfo, spellName);
-    calcedSpell.effects[effNum].perSec = 15/60 * stats.baseAttackSpeed.mainhand; -- 15 PPM, this should be the proc chance
-end
-
----@param calcedSpell CalcedSpell
----@param effNum integer
----@param spellInfo SpellInfo
----@param spellName string
----@param spellId integer
-local function Conflagrate(calcedSpell, effNum, spellInfo, spellName, spellId)
-    local immoId = _addon.api.GetSpellBookSpellID(GetSpellInfo(348));
-    local immolate = _addon:GetCalcedSpell(immoId);
-    assert(immolate and immolate.effects[2], "Wrong Immolate Id? Immolate DoT effect not found for this spell!");
-    local immoDoTDamage = immolate.effects[2].avg * immolate.effects[2].ticks;
-
-    local calcedEffect = calcedSpell.effects[effNum];
-    local baseMult = 0.6;
-    local baseMultDoT = 0.4;
-
-    calcedEffect.min = baseMult * immoDoTDamage;
-    calcedEffect.max = calcedEffect.min;
-    calcedEffect.avg = calcedEffect.min;
-    calcedEffect.avgCombined = calcedEffect.avg;
-    FillCritValues(calcedSpell, calcedEffect, spellId);
-
-    -- Misuse this for the DoT part
-    calcedEffect.critExtraAvg = calcedEffect.avgCombined * (baseMultDoT / baseMult);
-
-    Mitigate(spellName, calcedSpell, calcedEffect, false, false, calcedEffect.avgCombined + calcedEffect.critExtraAvg);
-
-    calcedEffect.perSec = calcedEffect.avgAfterMitigation / calcedSpell.effCastTime;
-    calcedEffect.doneToOom = calcedSpell.castingData.castsToOom * calcedEffect.avgAfterMitigation;
-    calcedEffect.perResource = calcedEffect.avgAfterMitigation / calcedSpell.effectiveCost;
-
-    -- So it's treated like a normal dmg spell.
-    calcedEffect.effectFlags = 0;
-end
-
----@param calcedSpell CalcedSpell
----@param effNum integer
----@param spellInfo SpellInfo
----@param spellName string
-local function Evocation(calcedSpell, effNum, spellInfo, spellName)
-    local calcedEffect = calcedSpell.effects[effNum];
-    calcedEffect.min = stats.manaMax * 0.15;
-    calcedEffect.max = calcedEffect.min;
-    calcedEffect.avg = calcedEffect.min;
-    calcedEffect.avgCombined = calcedEffect.min;
-    calcedEffect.ticks = 4;
-    calcedEffect.tickPeriod = 2000 * calcedSpell.duration / calcedSpell.durationNoHaste;
-    calcedEffect.avgAfterMitigation = calcedEffect.avg * calcedEffect.ticks;
 end
 
 ---Register a dummy aura handler by spell ID. Spells missing on this client are skipped.
@@ -416,13 +239,10 @@ end
 
 RegisterDummyAuraHandler(20154, SealOfRighteousness);
 RegisterDummyAuraHandler(20375, SealOfCommand);
-RegisterDummyAuraHandler(974, PoM_ES); -- Earth Shield
-RegisterDummyAuraHandler(29166, Innervate);
-RegisterDummyAuraHandler(20166, SealOfWisdomMelee);
-RegisterDummyAuraHandler(12051, Evocation);
-RegisterDummyAuraHandler(401859, PoM_ES); -- Prayer of Mending (Season of Discovery ID)
--- Wrath-only handlers (Starfall, Thunderstorm, Conflagrate, Arcane Torrent, Seal of Vengeance/Corruption)
--- are not registered: those spells don't exist on Forever in that form.
+RegisterDummyAuraHandler(401859, PrayerOfMending);
+-- Innervate and Evocation are mana regen percent auras on Forever (PowerRegenPercent below), Seal of
+-- Wisdom isn't calculated, and Earth Shield, Starfall, Thunderstorm, the Wrath Conflagrate and Seal of
+-- Vengeance/Corruption don't exist on Forever, so they have no dummy handlers.
 
 
 ----------------------------------------------------------------------------------------------------------------------------------------

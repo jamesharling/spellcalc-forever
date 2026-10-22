@@ -20,11 +20,13 @@ const REPO = path.resolve(__dirname, "..", "..");
 const TOC = path.join(REPO, ADDON + ".toc");
 const DBC = path.join(REPO, "tools", "spelldata_creator", "data", "forever", "dbc");
 const SUPPORTED = ["DRUID", "MAGE", "PALADIN", "PRIEST", "SHAMAN", "WARLOCK"];
+// No data and disabled events, but the addon still loads and its tooltip hook still runs.
+const UNSUPPORTED = ["HUNTER", "ROGUE", "WARRIOR"];
 
 const args = process.argv.slice(2);
 const verbose = args.includes("--verbose");
 const classArgIdx = args.indexOf("--classes");
-const classes = classArgIdx !== -1 ? args[classArgIdx + 1].toUpperCase().split(",") : SUPPORTED;
+const classes = classArgIdx !== -1 ? args[classArgIdx + 1].toUpperCase().split(",") : [...SUPPORTED, ...UNSUPPORTED];
 
 /** Minimal CSV parser (quoted fields, embedded newlines). Calls onRow(fields) for each row. */
 function parseCsv(text, onRow) {
@@ -144,6 +146,7 @@ for (const cls of classes) {
 
     lua.lua_pushstring(L, to_luastring(cls)); lua.lua_setglobal(L, to_luastring("__CLASS"));
     lua.lua_pushstring(L, to_luastring(ADDON)); lua.lua_setglobal(L, to_luastring("__ADDON_NAME"));
+    lua.lua_pushboolean(L, UNSUPPORTED.includes(cls)); lua.lua_setglobal(L, to_luastring("__UNSUPPORTED"));
     for (const [g, map] of [["__SPELL_NAMES", names.names], ["__SPELL_SUBTEXT", names.subtexts]]) {
         lua.lua_createtable(L, 0, map.size);
         for (const [id, text] of map) { lua.lua_pushinteger(L, id); lua.lua_pushstring(L, to_luastring(text)); lua.lua_rawset(L, -3); }

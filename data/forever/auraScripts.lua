@@ -2,27 +2,6 @@
 local _addon = select(2, ...);
 
 do
-    -- Homunculi Degrade debuff
-    ---@type AuraEffectBase
-    local degradeEffect = {
-        type = _addon.CONST.EFFECT_TYPE.SCHOOLMOD_RESISTANCE_PENETRATION,
-        affectMask = _addon.CONST.SCHOOL_MASK.PHYSICAL
-    };
-    _addon.scripting.RegisterAuraScript("Degrade_Armor", function(apply, auraId, fromPlayer, _, cacheValue)
-        local name = "Degrade_Armor_Script_Effect";
-        if apply then
-            local guessedValue = 185 + UnitLevel("player") * 35;
-            _addon:ApplyAuraEffect(name, degradeEffect, guessedValue, auraId, fromPlayer);
-            return guessedValue;
-        else
-            assert(cacheValue, "Degrade_Armor_Script_Effect faded without cached value!");
-            _addon:RemoveAuraEffect(name, degradeEffect, cacheValue, auraId, fromPlayer);
-        end
-    end);
-end
-
-
-do
     -- Blessing of Light Id -> HL, FoL
     local BOL_VALUES = {
         [19977] = { 210, 60 },
@@ -65,4 +44,7 @@ do
             }
         }
     end
+
+    -- Offer Blessing of Light (highest rank) as an assumable buff on your heal target.
+    table.insert(_addon.assumableTargetAuras, { spellId = 19979, class = "PALADIN", maxStacks = 1 });
 end

@@ -35,53 +35,40 @@ local weaponSubClass = {
     ranged = nil
 };
 
-local SetWeaponBaseDmgAndSpeed;
-do
-    local scanTT = CreateFrame("GameTooltip", "SpellCalcItemsScanTT", nil, "GameTooltipTemplate")--[[@as WoWGameTooltip]];
-    scanTT:SetOwner(WorldFrame, "ANCHOR_CURSOR");
-    scanTT:AddFontStrings(
-        scanTT:CreateFontString("$parentTextLeft1", nil, "GameTooltipText"),
-        scanTT:CreateFontString("$parentTextRight1", nil, "GameTooltipText"));
+---Set weapon attack speed and base damage from the item's tooltip data.
+-- Uses the structured tooltip API (C_TooltipInfo) instead of scanning a hidden GameTooltip's font
+-- strings, which is fragile on the Mainline client. Falls back to 2.0 speed / 1-1 damage when the
+-- item data isn't available (yet) or the text is restricted.
+---@param itemId integer|nil
+---@param key string mainhand, offhand or ranged
+local function SetWeaponBaseDmgAndSpeed(itemId, key)
+    local speed = 2;
+    local dmgLow = 1;
+    local dmgHigh = 1;
 
-    ---Set weapon attack speed and base damage from tooltip.
-    ---@param itemId integer|nil
-    ---@param key string mainhand, offhand or ranged
-    function SetWeaponBaseDmgAndSpeed(itemId, key)
-        local speed = 2;
-        local dmgLow = 1;
-        local dmgHigh = 1;
-
-        if itemId then
-            scanTT:ClearLines();
-            scanTT:SetOwner(WorldFrame, "ANCHOR_CURSOR");
-            scanTT:SetHyperlink("item:" .. itemId .. ":0:0:0:0:0:0:0");
-            for i = 1, scanTT:NumLines() do
-                local fstringl = _G["SpellCalcItemsScanTTTextLeft" .. i]--[[@as FontString]];
-                local fstringr = _G["SpellCalcItemsScanTTTextRight" .. i]--[[@as FontString]];
-                if fstringl and fstringr then
-                    local textl = fstringl:GetText();
-                    local textr = fstringr:GetText();
-                    if textl and textr then
-                        local dls, dhs = strmatch(textl, "(%d+) %- (%d+)");
-                        local dl = tonumber(dls);
-                        local dh = tonumber(dhs);
-                        local s = tonumber(strmatch(textr, " (%d%.%d%d)"));
-                        if dl and dh and s then
-                            speed = s;
-                            dmgLow = dl;
-                            dmgHigh = dh;
-                            break;
-                        end
-                    end
+    local data = itemId and C_TooltipInfo and C_TooltipInfo.GetItemByID and C_TooltipInfo.GetItemByID(itemId);
+    if data and data.lines then
+        for _, line in ipairs(data.lines) do
+            local textl, textr = line.leftText, line.rightText;
+            if type(textl) == "string" and type(textr) == "string"
+                and not _addon.api.IsSecret(textl) and not _addon.api.IsSecret(textr) then
+                local dl = tonumber(strmatch(textl, "(%d+) %- %d+"));
+                local dh = tonumber(strmatch(textl, "%d+ %- (%d+)"));
+                local s = tonumber(strmatch(textr, " (%d%.%d%d)"));
+                if dl and dh and s then
+                    speed = s;
+                    dmgLow = dl;
+                    dmgHigh = dh;
+                    break;
                 end
             end
-            scanTT:Hide();
         end
-        local s = _addon.stats;
-        s.baseAttackSpeed[key] = speed;
-        s.weaponBaseDamage[key].min = dmgLow;
-        s.weaponBaseDamage[key].max = dmgHigh;
     end
+
+    local stats = _addon.stats;
+    stats.baseAttackSpeed[key] = speed;
+    stats.weaponBaseDamage[key].min = dmgLow;
+    stats.weaponBaseDamage[key].max = dmgHigh;
 end
 
 --- Update set item count and add/remove buffs as needed

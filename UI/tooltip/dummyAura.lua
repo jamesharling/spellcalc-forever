@@ -27,9 +27,7 @@ local function PoM(calcedSpell, effectNum)
     SCT:AppendEfficiency(calcedSpell, effectNum, true, false);
 end
 
--- Prayer of Mending: Season of Discovery and TBC spell IDs, whichever exists on this client.
-SCT:AddDummyHandler(GetSpellInfo(401859), PoM);
-SCT:AddDummyHandler(GetSpellInfo(974), PoM); -- Earth Shield
+SCT:AddDummyHandler(GetSpellInfo(401859), PoM); -- Prayer of Mending
 
 ---Display extended information if T5 2PC is used.
 ---@param calcedSpell CalcedSpell

@@ -3,7 +3,6 @@ local _addon = select(2, ...);
 
 local GetSpellInfo = _addon.api.GetSpellInfo;
 local GetSpellPowerCost = _addon.api.GetSpellPowerCost;
-local IsSecret = _addon.api.IsSecret;
 local ADDON_EFFECT_FLAGS = _addon.CONST.ADDON_EFFECT_FLAGS;
 local NewCalcedSpell = _addon.NewCalcedSpell;
 local SCHOOL = _addon.CONST.SCHOOL;
@@ -182,15 +181,10 @@ local function SetBaseModifiers(isDmg, isHeal, spellId, calcedSpell, isDuration,
 end
 
 --- Get effective mana pool
+-- Always starts from maximum mana: current mana is a secret value in combat on Forever, and out of
+-- combat it is usually full, so a "current mana" option would almost never change anything.
 function _addon:GetEffectiveManaPool()
     local mana = stats.manaMax;
-    if SpellCalc_settings.useCurrentPowerLevel then
-        -- Current power may be a secret value in combat; fall back to max mana then.
-        local current = UnitPower("player", 0);
-        if current ~= nil and not IsSecret(current) then
-            mana = current;
-        end
-    end
 
     if SpellCalc_settings.calcEffManaRune then
         mana = mana + 1200;
@@ -792,8 +786,9 @@ local function CalcSpell(spellId, calcedSpell, parentSpellData, parentValue)
 
             if effectData.perResouce then
                 local perPoint = effectData.perResouce;
-                local cp = _addon.Target.comboPoints;
-                if cp == 0 then cp = 1 end
+                -- Combo points only exist in combat, when they are secret on Forever; use the assumed
+                -- value from the settings (Target > Assumed combo points).
+                local cp = SpellCalc_settings.assumedComboPoints or 5;
                 calcedEffect.effectiveApCoef = calcedEffect.effectiveApCoef * cp;
                 calcedEffect.flatMod = calcedEffect.flatMod + perPoint * cp;
             end

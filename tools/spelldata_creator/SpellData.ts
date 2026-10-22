@@ -326,8 +326,7 @@ export class SpellData
         if (this.spellLevels[spellId]) return this.spellLevels[spellId];
 
         if (spellId == AUTO_ATTACK_ID
-            || spellId == 23590
-            || spellId == 58381 /** Mind Flay */)
+            || spellId == 23590)
         {
             return SpellData.emptySpellLevel(spellId);
         }

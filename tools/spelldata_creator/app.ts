@@ -5,7 +5,6 @@ import { ItemSetCreator } from "./ItemSetCreator";
 import { ClassSpellLists } from "./ClassSpellLists";
 import { ClassSpellSets } from "./ClassSpellSets";
 import { ItemEffectsCreator } from "./ItemEffectsCreator";
-import { createMechanicLists } from "./mechanicList";
 import { cfg, getBuildInfo } from "./config";
 import { TalentsCreator } from "./modules/TalentCreator";
 import { AuraHandlers } from "./ItemAuraHandlers";
@@ -16,7 +15,7 @@ import { PlayerAuras } from "./modules/PlayerAuras";
 import { TargetAuras } from "./modules/TargetAuras";
 import { SkillData } from "./modules/SkillData";
 import { TraitData } from "./modules/TraitData";
-import { fillBaseAndRange, getEffectBase, getEffectLowHigh, getSpellIdFromEffect } from "./effectValues";
+import { fillBaseAndRange, getEffectBase } from "./effectValues";
 import { createFileHead } from "./itemFunctions";
 import { report, reportSection, writeReport } from "./report";
 import path from "path";
@@ -108,109 +107,11 @@ function handleDummyAura(effect: SpellEffect, ei: EffectInfo, ri: RankInfo) {
         return;
     }
 
-    // Earth Shield
-    if (spellName == "Earth Shield")
-    {
-        ri.charges = 6;
-        fillBaseAndRange(ei, effect);
-        ei.coef = 0.538;
-        ri.forceHeal = true;
-        return;
-    }
-
-    // Sacred Shield
-    if (spellName == "Sacred Shield")
-    {
-        ei.effectType = EFFECT_TYPE.SPELL_EFFECT_TRIGGER_SPELL;
-        ei.auraType = 0;
-        ei.valueBase = 0;
-        ei.valueRange = 0;
-        ei.triggeredSpell = effect.EffectTriggerSpell;
-        return;
-    }
-
     throw new Error("Dummy aura effect not supported!");
 }
 
-function handleDummyEffect(rankInfo: RankInfo, effect: SpellEffect, effectNum: number, spellName: string)
+function handleDummyEffect(_rankInfo: RankInfo, _effect: SpellEffect, _effectNum: number, spellName: string)
 {
-    // Starfall
-    if (spellName == "Starfall")
-    {
-        if (effectNum > 0) throw new Error("Starfall dummy effect not 0!");
-
-        // Coefs are same for all ranks
-        rankInfo.effects[effectNum] = {
-            effectType: EFFECT_TYPE.SPELL_EFFECT_APPLY_AURA,
-            auraType: AURA_TYPE.SPELL_AURA_DUMMY,
-            coef: 0.3, // Star hit
-            coefAP: 0,
-            valueBase: 0,
-            valueRange: 0,
-            valuePerLevel: 0,
-            forceScaleWithHeal: false,
-            period: 0,
-            weaponCoef: 0,
-            mechanic: 0,
-            perResource: 0,
-            triggeredSpell: 0,
-        };
-        const triggeredDummy = spellData.getSpellEffects(effect.EffectTriggerSpell);
-        const startTrigger = spellData.getSpellEffects(getSpellIdFromEffect(triggeredDummy[0]));
-        if (startTrigger.length == 0) throw new Error("Failed to get spell effects for Starfall trigger!");
-        for (const teff2 of startTrigger)
-        {
-            if (teff2.EffectIndex == 0)
-            {
-                // The main hit of a star
-                fillBaseAndRange(rankInfo.effects[effectNum], teff2);
-            }
-            else if (teff2.EffectIndex == 1)
-            {
-                // Put star AoE base damage in valuePerLevel
-                const aoeTrigger = spellData.getSpellEffects(teff2.EffectTriggerSpell);
-                if (aoeTrigger.length == 0) throw new Error("Failed to get spell effects for Starfall AoE trigger!");
-                rankInfo.effects[1] = {
-                    effectType: EFFECT_TYPE.SPELL_EFFECT_APPLY_AURA,
-                    auraType: AURA_TYPE.SPELL_AURA_DUMMY,
-                    coef: 0.127, // AoE effect
-                    coefAP: 0,
-                    valueBase: getEffectLowHigh(aoeTrigger[0]).low,
-                    valueRange: 0,
-                    valuePerLevel: 0,
-                    forceScaleWithHeal: false,
-                    period: 0,
-                    weaponCoef: 0,
-                    mechanic: 0,
-                    perResource: 0,
-                    triggeredSpell: 0,
-                };
-            }
-        }
-        return;
-    }
-
-    // Conflagrate
-    if (spellName == "Conflagrate")
-    {
-        rankInfo.effects = [{
-            effectType: EFFECT_TYPE.SPELL_EFFECT_APPLY_AURA,
-            auraType: AURA_TYPE.SPELL_AURA_DUMMY,
-            coef: 0,
-            coefAP: 0,
-            valueBase: 0,
-            valueRange: 0,
-            valuePerLevel: 0,
-            forceScaleWithHeal: false,
-            period: 0,
-            weaponCoef: 0,
-            mechanic: 0,
-            perResource: 0,
-            triggeredSpell: 0,
-        }];
-        return;
-    }
-
     if (spellName == "Judgement of Righteousness") return;
 
     throw new Error("Dummy effect not handled!");
@@ -796,7 +697,6 @@ async function main()
         fs.writeFileSync(pathToLua, newContent);
     }
 
-    createMechanicLists([SpellMechanic.BLEED], spellData);
     await createItemLua();
 
     reportSection("Player auras");

@@ -1,0 +1,28 @@
+{
+    "_comment": "Target auras offered in Settings > Target Auras. The generator picks the highest rank of each name among the class's spells (SpellClassOptions), or the given id. Auras whose effects only increase the caster's own damage are offered to that class only.",
+    "auras": [
+        { "class": "DRUID", "name": "Faerie Fire", "note": "armor" },
+
+        { "class": "MAGE", "name": "Fire Vulnerability", "note": "Improved Scorch, from caster" },
+        { "class": "MAGE", "name": "Winter's Chill", "note": "Cone of Cold damage taken, from caster" },
+        { "class": "MAGE", "name": "Amplify Magic", "note": "healing taken on your heal target" },
+        { "class": "MAGE", "name": "Dampen Magic", "note": "healing taken on your heal target" },
+
+        { "class": "PALADIN", "name": "Judgement of the Crusader", "note": "Holy damage taken" },
+
+        { "class": "PRIEST", "name": "Shadow Vulnerability", "id": 15258, "note": "Shadow Weaving, from caster" },
+
+        { "class": "ROGUE", "name": "Expose Armor", "note": "armor" },
+        { "class": "ROGUE", "name": "Wound Poison", "id": 13224, "note": "healing taken (the debuff, not the weapon coating)" },
+
+        { "class": "SHAMAN", "name": "Stormstrike", "note": "from caster" },
+
+        { "class": "WARLOCK", "name": "Curse of the Elements" },
+        { "class": "WARLOCK", "name": "Curse of Recklessness", "note": "armor" },
+        { "class": "WARLOCK", "name": "Shadow Vulnerability", "id": 17794, "note": "Improved Shadow Bolt, from caster" },
+
+        { "class": "WARRIOR", "name": "Sunder Armor", "note": "armor" },
+        { "class": "WARRIOR", "name": "Mortal Strike", "note": "healing taken" },
+        { "class": "WARRIOR", "name": "Spell Vulnerability", "id": 23605, "note": "Nightfall weapon proc" }
+    ]
+}

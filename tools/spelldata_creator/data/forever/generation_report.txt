@@ -1,6 +1,6 @@
 SpellCalc Forever data generation report
 Client build: wowf 1.60.1.70532
-Generated: 2026-10-22T19:14:39.419Z
+Generated: 2026-10-22T19:55:17.063Z
 
 Everything listed here was skipped or guessed by the generator and should be reviewed.
 
@@ -798,8 +798,23 @@ The act of shapeshifting frees the caster of Polymorph and Movement Impairing ef
   Eureka! (Racial) [1259817] effect 2 skipped: wtf?
   Cooldown Reduction [1325739] effect 0 skipped: wtf?
 
-== Target auras (3)
-  Indiscriminate Outburst [423253] effect 1 skipped: Error: MOD_DAMAGE_PERCENT_TAKEN: EffectMiscValue_0 is 0!
-  Unyielding Aura [1214070] effect 0 skipped: Error: MOD_DAMAGE_PERCENT_TAKEN: EffectMiscValue_0 is 0!
-  Illimitable Dominion [1218089] effect 2 skipped: Error: MOD_DAMAGE_PERCENT_TAKEN: EffectMiscValue_0 is 0!
+== Target auras (0)
+
+== Assumable target auras (16)
+  DRUID: Faerie Fire (Rank 4) [9907]
+  MAGE: Fire Vulnerability [22959], up to 5 stacks, caster's own damage only
+  MAGE: Winter's Chill [12579], up to 5 stacks, caster's own damage only
+  MAGE: Amplify Magic (Rank 4) [10170]
+  MAGE: Dampen Magic (Rank 5) [10174]
+  PALADIN: Judgement of the Crusader (Rank 6) [20303]
+  PRIEST: Shadow Weaving [15258], up to 5 stacks, caster's own damage only
+  ROGUE: Expose Armor (Rank 5) [11198]
+  ROGUE: Wound Poison (Rank 4) [13224], up to 5 stacks
+  SHAMAN: Stormstrike [17364], caster's own damage only
+  WARLOCK: Curse of the Elements (Rank 4) [1311680]
+  WARLOCK: Curse of Recklessness (Rank 4) [1225841]
+  WARLOCK: Shadow Vulnerability [17794], caster's own damage only
+  WARRIOR: Sunder Armor (Rank 5) [11597], up to 5 stacks
+  WARRIOR: Mortal Strike (Rank 4) [27580]
+  WARRIOR: Spell Vulnerability [23605]
 

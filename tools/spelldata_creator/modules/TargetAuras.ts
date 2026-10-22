@@ -1,7 +1,18 @@
+import * as fs from "fs";
 import { createEffectLua, createFileHead } from "../itemFunctions";
 import { SpellData, SpellEffect } from "../SpellData";
 import { TargetAuraHandlers } from "./TargetAuraHandlers";
-import { report } from "../report";
+import { report, reportSection } from "../report";
+import { cfg } from "../config";
+
+/**
+ * Target auras the player can choose to assume (Settings > Target Auras).
+ *
+ * Forever makes aura data secret in combat, and debuffs on a target almost only exist in combat, so the
+ * addon no longer scans the target's auras. Instead it offers a curated list of class debuffs and
+ * helpful target buffs (data/forever/targetAuras.json) and applies the ones the player picks. The
+ * generator resolves each entry to the highest rank in the client data and converts its effects.
+ */
 
 const DO_AURAS: { [index: number]: true | undefined } = {
     [AURA_TYPE.SPELL_AURA_MOD_DAMAGE_TAKEN]: true, // = spell power? (misc_0 = school mask)
@@ -11,6 +22,43 @@ const DO_AURAS: { [index: number]: true | undefined } = {
     [AURA_TYPE.MOD_RESISTANCE_PCT]: true,
     [AURA_TYPE.MOD_HEALING_TAKEN_PCT]: true,
     [AURA_TYPE.MOD_MECHANIC_DAMAGE_TAKEN_PERCENT]: true,
+    [AURA_TYPE.MOD_SCHOOL_MASK_DAMAGE_FROM_CASTER]: true,
+    [AURA_TYPE.MOD_SPELL_DAMAGE_FROM_CASTER]: true,
+    [AURA_TYPE.MOD_TARGET_ARMOR_FOREVER]: true,
+}
+
+/** Aura types that only increase damage done by the aura's caster. */
+const FROM_CASTER_AURAS = new Set<number>([
+    AURA_TYPE.MOD_SCHOOL_MASK_DAMAGE_FROM_CASTER,
+    AURA_TYPE.MOD_SPELL_DAMAGE_FROM_CASTER,
+]);
+
+const AURA_EFFECTS = [
+    EFFECT_TYPE.SPELL_EFFECT_APPLY_AURA,
+    EFFECT_TYPE.SPELL_EFFECT_PERSISTENT_AREA_AURA,
+    EFFECT_TYPE.SPELL_EFFECT_APPLY_AREA_AURA_PARTY,
+];
+
+/** class token -> SpellClassOptions.SpellClassSet */
+const CLASS_SET: { [cls: string]: number } = {
+    MAGE: 3, WARRIOR: 4, WARLOCK: 5, PRIEST: 6, DRUID: 7, ROGUE: 8, HUNTER: 9, PALADIN: 10, SHAMAN: 11,
+};
+
+interface CuratedAura
+{
+    class: string,
+    name: string,
+    id?: number,
+    note?: string,
+}
+
+interface AssumableAura
+{
+    spellId: number,
+    cls: string,
+    maxStacks: number,
+    fromCaster: boolean,
+    effects: AddonEffectData[],
 }
 
 export class TargetAuras
@@ -25,39 +73,27 @@ export class TargetAuras
     }
 
     /**
-     * Process spell and return addon effect data if spell has a valid effect.
-     * @param spellId 
+     * Addon effects of a spell's target aura effects.
      */
-    private processEffects(spellEffects: SpellEffect[]): AddonEffectData[]
+    private processEffects(spellId: number): { effects: AddonEffectData[], fromCaster: boolean }
     {
         const aedarr: AddonEffectData[] = [];
+        let fromCaster = false;
+        const name = this.spellData.getSpellNameWithRank(spellId);
 
-        if (!spellEffects) return aedarr;
-
-        const spellId = spellEffects[0].SpellID;
-        const misc = this.spellData.getSpellMisc(spellId, true);
-        const name = this.spellData.getSpellName(spellId, true)?.Name_lang;
-
-        if (!misc
-            || !name
-            || String(name).toLowerCase().indexOf("test") !== -1
-            || misc.Attributes_0 & SPELL_ATTR0.SPELL_ATTR_DO_NOT_DISPLAY) return aedarr;
-
-        for (let spellEffect of spellEffects)
+        for (const spellEffect of this.spellData.getSpellEffects(spellId, true) ?? [] as SpellEffect[])
         {
-            if (spellEffect.Effect !== EFFECT_TYPE.SPELL_EFFECT_APPLY_AURA
-                && spellEffect.Effect !== EFFECT_TYPE.SPELL_EFFECT_PERSISTENT_AREA_AURA
-                && spellEffect.Effect !== EFFECT_TYPE.SPELL_EFFECT_APPLY_AREA_AURA_PARTY) continue;
+            if (AURA_EFFECTS.indexOf(spellEffect.Effect) === -1) continue;
             if (!DO_AURAS[spellEffect.EffectAura]) continue;
-            if (!this.handlers[spellEffect.EffectAura])
-            {
-                throw new Error("Aura type " + spellEffect.EffectAura + " not handled! spellId: " + spellEffect.SpellID);
-            }
 
             try
             {
                 const aed = this.handlers[spellEffect.EffectAura](spellEffect);
-                if (aed) aedarr.push(aed);
+                if (aed)
+                {
+                    aedarr.push(aed);
+                    if (FROM_CASTER_AURAS.has(spellEffect.EffectAura)) fromCaster = true;
+                }
             }
             catch (error)
             {
@@ -65,58 +101,92 @@ export class TargetAuras
             }
         }
 
-        return aedarr;
+        return { effects: aedarr, fromCaster };
     }
 
-    private getSpellData()
+    /**
+     * Highest-level spell of a class with the given name.
+     */
+    private findHighestRank(cls: string, name: string)
     {
-        const filteredSpells = new Map<number, AddonEffectData[]>();
-
-        console.log("Building spell target aura data...");
-
-        const spells = this.spellData.spellEffectsBySpellId;
-
-        for (const [spellId, effects] of spells)
+        const set = CLASS_SET[cls];
+        let best: number | undefined;
+        let bestLevel = -1;
+        for (const spellId of this.spellData.getSpellsByName(name, true) ?? [])
         {
-            const addonEffects = this.processEffects(effects);
-            if (addonEffects.length === 0) continue;
-
-            if (!filteredSpells.has(spellId)) filteredSpells.set(spellId, []);
-            const flistentry = filteredSpells.get(spellId)!;
-            for (const aeff of addonEffects)
+            if (!this.spellData.spellExists(spellId)) continue;
+            if (this.spellData.getSpellClassOption(spellId, true)?.SpellClassSet !== set) continue;
+            const level = this.spellData.getSpellLevel(spellId, true)?.SpellLevel ?? 0;
+            if (level > bestLevel || (level === bestLevel && best !== undefined && spellId > best))
             {
-                flistentry.push(aeff);
+                best = spellId;
+                bestLevel = level;
             }
         }
+        return best;
+    }
 
-        return filteredSpells;
+    private getAssumableAuras()
+    {
+        const curated: CuratedAura[] = JSON.parse(fs.readFileSync(cfg.dataDir + "targetAuras.json", "utf8")).auras;
+        const auras: AssumableAura[] = [];
+
+        for (const entry of curated)
+        {
+            const spellId = entry.id ?? this.findHighestRank(entry.class, entry.name);
+            if (!spellId || !this.spellData.spellExists(spellId))
+            {
+                report(`${entry.class} ${entry.name}${entry.id ? ` [${entry.id}]` : ""}: not found in the client data, skipped`);
+                continue;
+            }
+
+            const { effects, fromCaster } = this.processEffects(spellId);
+            if (effects.length === 0)
+            {
+                report(`${entry.class} ${this.spellData.getSpellNameWithRank(spellId)} [${spellId}]: no effects the addon models, skipped`);
+                continue;
+            }
+
+            const cumulative = this.spellData.getSpellAuraOptions(spellId)?.CumulativeAura ?? 0;
+            auras.push({ spellId, cls: entry.class, maxStacks: cumulative > 1 ? cumulative : 1, fromCaster, effects });
+        }
+
+        return auras;
     }
 
     getAuraLua()
     {
-        console.log("Creating Lua for spell target aura data...");
+        console.log("Creating Lua for assumable target auras...");
+        reportSection("Assumable target auras");
 
-        const auraData = this.getSpellData();
+        const auras = this.getAssumableAuras();
 
-        let luaStr = ""
+        let luaStr = createFileHead();
+        luaStr += `-- Target auras the player can assume in the settings (the addon doesn't scan the target: aura data is
+-- secret in combat on Forever). Curated in tools/spelldata_creator/data/forever/targetAuras.json.
 
-        luaStr = createFileHead();
-        luaStr += "---@type table<integer, UnitAuraEffect[]>\n"
-        luaStr += "_addon.aurasTarget = {\n";
+---@type table<integer, UnitAuraEffect[]>
+_addon.aurasTarget = {\n`;
 
-        for (const [spellId, effects] of auraData)
+        for (const aura of auras)
         {
-            luaStr += `    [${spellId}] = { -- ${this.spellData.getSpellName(spellId).Name_lang}\n`;
-            for (let i = 0; i < effects.length; i++)
+            luaStr += `    [${aura.spellId}] = { -- ${this.spellData.getSpellNameWithRank(aura.spellId)}\n`;
+            for (const effect of aura.effects)
             {
-                luaStr += createEffectLua("        ", effects[i]);
+                luaStr += createEffectLua("        ", effect);
             }
             luaStr += `    },\n`;
         }
 
+        luaStr += `}\n\n---@type AssumableTargetAura[]\n_addon.assumableTargetAuras = {\n`;
+        for (const aura of auras)
+        {
+            luaStr += `    { spellId = ${aura.spellId}, class = "${aura.cls}", maxStacks = ${aura.maxStacks}${aura.fromCaster ? ", fromCaster = true" : ""} }, -- ${this.spellData.getSpellNameWithRank(aura.spellId)}\n`;
+            report(`${aura.cls}: ${this.spellData.getSpellNameWithRank(aura.spellId)} [${aura.spellId}]${aura.maxStacks > 1 ? `, up to ${aura.maxStacks} stacks` : ""}${aura.fromCaster ? ", caster's own damage only" : ""}`);
+        }
         luaStr += `}\n`;
 
-        console.log("Target aura data created!");
+        console.log(`${auras.length} assumable target auras`);
         return luaStr;
     }
 }

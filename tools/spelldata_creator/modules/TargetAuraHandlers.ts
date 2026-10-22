@@ -70,16 +70,6 @@ export class TargetAuraHandlers
         {
             if (effect.EffectMiscValue_0 == 0) throw new Error("SPELL_AURA_MOD_RESISTANCE: EffectMiscValue_0 is 0!");
 
-            const spellName = this.spellData.getSpellName(effect.SpellID)?.Name_lang;
-            if (spellName && spellName == "Degrade")
-            {
-                return {
-                    type: ADDON_EFFECT_TYPE.SCRIPT_AURASCRIPT,
-                    value: 123,
-                    scriptKey: "Degrade_Armor"
-                };
-            }
-
             const value = getBaseValue(effect);
             if (value == 0) return;
 
@@ -119,6 +109,47 @@ export class TargetAuraHandlers
                 affectMask: effect.EffectMiscValue_0,
                 value: value,
                 hasStacks: this.hasAuraCumStacks(effect.SpellID)
+            };
+        }
+
+        // Forever (Mainline) "from caster" debuffs only increase the damage of the aura's caster.
+        this.handlers[AURA_TYPE.MOD_SCHOOL_MASK_DAMAGE_FROM_CASTER] = effect =>
+        {
+            if (effect.EffectMiscValue_0 == 0) throw new Error("MOD_SCHOOL_MASK_DAMAGE_FROM_CASTER: EffectMiscValue_0 is 0!");
+            const value = getBaseValue(effect);
+            if (value == 0) return;
+            return {
+                type: ADDON_EFFECT_TYPE.TARGET_SCHOOLMOD_DMG_TAKEN_PCT,
+                affectMask: effect.EffectMiscValue_0,
+                value: value,
+                hasStacks: this.hasAuraCumStacks(effect.SpellID)
+            };
+        }
+
+        this.handlers[AURA_TYPE.MOD_SPELL_DAMAGE_FROM_CASTER] = effect =>
+        {
+            const mask = [effect.EffectSpellClassMask_0, effect.EffectSpellClassMask_1, effect.EffectSpellClassMask_2, effect.EffectSpellClassMask_3];
+            if (mask.every(m => m === 0)) throw new Error("MOD_SPELL_DAMAGE_FROM_CASTER without a spell class mask");
+            const value = getBaseValue(effect);
+            if (value == 0) return;
+            return {
+                type: ADDON_EFFECT_TYPE.TARGET_SPELLMOD_DMG_TAKEN_FROM_CASTER,
+                affectSpell: mask,
+                value: value,
+                hasStacks: this.hasAuraCumStacks(effect.SpellID)
+            };
+        }
+
+        this.handlers[AURA_TYPE.MOD_TARGET_ARMOR_FOREVER] = effect =>
+        {
+            if (effect.EffectMiscValue_0 == 0) throw new Error("MOD_TARGET_ARMOR_FOREVER: EffectMiscValue_0 is 0!");
+            const value = getBaseValue(effect);
+            if (value == 0) return;
+            return {
+                type: ADDON_EFFECT_TYPE.SCHOOLMOD_RESISTANCE_PENETRATION,
+                affectMask: effect.EffectMiscValue_0,
+                value: -value,
+                hasStacks: this.hasAuraCumStacks(effect.SpellID),
             };
         }
 

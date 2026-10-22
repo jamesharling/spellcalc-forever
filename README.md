@@ -32,8 +32,20 @@ from upstream SpellCalc in more than the TOC:
   lookups go through thin wrappers in `compat.lua` (`_addon.api.*`) over `C_Spell`, `C_Item` and `C_SpellBook`.
 - **Tooltips** hook `TooltipDataProcessor.AddTooltipPostCall(Enum.TooltipDataType.Spell, ...)` instead of
   the removed `OnTooltipSetSpell` script.
-- **Auras** are scanned with `C_UnitAuras.GetAuraDataByIndex` instead of `UnitAura`.
-- **Talents** are read from the trait system (`C_ClassTalents.GetActiveConfigID` + `C_Traits`), which is how
+- **Player buffs** are scanned with `C_UnitAuras.GetAuraDataByIndex` instead of `UnitAura`, out of combat only.
+- **Target auras are assumed, not scanned.** Aura data is secret in combat, and debuffs on a target almost
+  only exist in combat, so the addon doesn't read the target's auras. Settings > Target Auras lists the
+  class debuffs and heal-target buffs the calculator models (Curse of the Elements, Sunder Armor, Faerie
+  Fire, Judgement of the Crusader, Mortal Strike, Amplify Magic, Blessing of Light, ...). The ones you pick
+  apply to every target. Debuffs that only boost their caster's own damage (Shadow Weaving, Improved Scorch,
+  Stormstrike, Winter's Chill, Improved Shadow Bolt) are only offered to that class.
+- **Fixed assumptions instead of live state** where the live value is only readable when it doesn't matter:
+  the mana pool always starts full (current mana is secret in combat), finishing moves use an assumed
+  combo point count (Settings > Target), and the table of raid boss resistances by NPC ID is gone (unit
+  identity is secret inside instances, where those bosses are). Target level and creature type are still read
+  when available, and the default level difference applies otherwise.
+- **Weapon damage and speed** come from `C_TooltipInfo.GetItemByID` instead of scanning a hidden tooltip.
+- **Talents** are read from the trait system (`C_SpecializationInfo` / `C_ClassTalents` + `C_Traits`), which is how
   Forever stores its classic-style trees. Talent data is keyed by the rank-1 spell ID of each talent
   (`spellId` in `data/forever/classes/*_talents.lua`) instead of tree/tier/column.
 - **Weapon skill** is resolved from the equipped weapon's skill line via `C_SkillInfo.GetSkillLineInfoByID`,
@@ -65,6 +77,9 @@ Nothing here has run on a live Forever client (the beta closed before this port 
 8. Conditional talents (Fire Power per Fire effect on the target, Shadow Weaving, Eclipse, Maelstrom Weapon,
    procs and target-state bonuses) are listed in `generation_report.txt` and have no effect in the calculator,
    same as upstream. Active talents (Arcane Power, Inner Focus, ...) only count while their buff is up.
+9. Target auras: if aura data on the target turns out to be readable in combat (in the open world, say), the
+   removed target scan is in the git history (`system/unitAuras.lua` before the assumed target auras).
+   Also check the "from caster" debuffs (aura types 270 and 271) really only boost their caster's damage.
 
 ## Regenerating data
 
@@ -105,6 +120,9 @@ What the generator does differently from upstream, because of the Forever (Mainl
 - **Item effects** are linked through `ItemXItemEffect`. Forever turned most "Equip: +X" spell bonuses into
   plain item stats (which the addon reads from the API), so `itemEffects.lua` only lists the remaining spell
   modifiers and procs.
+- **Target auras** come from the curated list in `data/forever/targetAuras.json`: the generator picks the
+  highest rank of each entry and converts its effects, including Forever's "damage taken from caster" (270,
+  271) and armor reduction (674) aura types. The bleed mechanic list and the full target aura dump are gone.
 - **Level scaling variables** (`$<power>` style formulas) are only attached to a spell whose description
   really references them. No learnable Forever spell does; the sets still get emitted for completeness.
 - Nothing aborts the run any more: everything the generator cannot interpret (dummy auras of new talents and
@@ -126,7 +144,10 @@ npm test
   on a stubbed WoW API (`wow_env.lua`), once per supported class. `driver.lua` then fires the login events and
   calculates every spell in the generated data, with no talents, with every talent at max rank (through a
   simulated trait API), and with a sample of buffs from `auras.lua`. It runs the spell tooltip hook for each
-  spell too. Lua errors, `NaN` or infinite results, min above max, and talents not read back fail the run.
+  spell too. It then enables every target aura offered in the settings through the real settings options,
+  checks they change the numbers, and checks that clearing them restores the previous numbers. Warrior,
+  hunter and rogue are loaded too, to check the tooltip hook copes with a class that has no data. Lua errors,
+  `NaN` or infinite results, min above max, and talents not read back fail the run.
 
 It catches load errors, broken data references and crashes in the calculation and tooltip code. The stub
 returns made-up stats, so it cannot tell whether numbers match the game. It also lists the globals the addon

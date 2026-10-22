@@ -25,14 +25,6 @@ SlashCmdList["SPELLCALC"] = function(arg)
         InterfaceOptionsFrame_OpenToCategory(_addonName);
     end
 
-    --[[ if arg == "ub" then
-        _addon:UpdateAurasForUnit("player", true);
-        _addon:UpdateAurasForUnit("player");
-        _addon:UpdateAurasForUnit("target", true);
-        _addon:UpdateAurasForUnit("target");
-        return;
-    end ]]
-
 --[[     if string.find(arg, "^tt") then
         local talentOverride = {};
 

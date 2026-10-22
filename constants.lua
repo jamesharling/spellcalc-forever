@@ -96,14 +96,12 @@ CONST.EFFECT_TYPE = {
     TARGET_SCHOOLMOD_SPELLPOWER = 108,
 
     SCRIPT_MIN_ID_DO_NOT_USE = 1000,
-    SCRIPT_TARGET_UPDATE_ON_AURA_PERSONAL = 1001, -- Trigger update if specified own aura changes.
-    SCRIPT_TARGET_UPDATE_ON_AURA = 1002, -- Trigger update if specified aura changes.
+    -- 1001, 1002 and 1008 were target aura update triggers; the addon no longer scans target auras.
     SCRIPT_SPELLMOD_DONE_PCT = 1003,
     SCRIPT_SPELLMOD_CRIT_CHANCE = 1004,
     SCRIPT_SET_VALUE = 1005,
     SCRIPT_SPELLMOD_EFFECT_PRE = 1006,
     SCRIPT_AURASCRIPT = 1007, -- Aura application/removal triggers script
-    SCRIPT_TARGET_UPDATE_ON_AURA_MECHANIC = 1008,
     SCRIPT_SPELLMOD_EFFECT_BASEVALUES = 1009,
 };
 
@@ -352,3 +350,13 @@ CONST.STANCE_SPELLS = {
 }
 
 _A.CONST = CONST;
+
+-- Empty class data. The generated files under data/forever/classes replace these for the supported
+-- classes; warrior, hunter and rogue have no data (the addon disables its events for them), but the
+-- tooltip hook still looks spells up.
+---@type SpellInfoTable
+_A.spellInfo = {};
+---@type SpellClassSet
+_A.spellClassSet = { {}, {}, {}, {} };
+---@type TalentDataRawEntry[]
+_A.talentDataRaw = {};

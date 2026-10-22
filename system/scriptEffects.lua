@@ -12,12 +12,6 @@ local auraValueCache = {};
 ---spellId -> effectType -> scriptKey -> func
 ---@type table<integer, table<AddonEffectType, table<string, EffectScript>>>
 local spellScripts = {};
----@type table<string, number|nil>
-local targetUpdateOnAuraPersonal = {};
----@type table<string, number|nil>
-local targetUpdateOnAura = {};
----@type table<SpellMechanic, number|nil>
-local targetUpdateOnMechanic = {};
 
 ---Apply or remove script affecting a SpellClassSet.
 ---@param apply boolean
@@ -73,56 +67,12 @@ function scripting.HandleEffect(apply, name, value, effectBase, auraId, personal
     local scriptKey = effectBase.scriptKey;
     local type = effectBase.type;
 
-    if type == EFFECT_TYPE.SCRIPT_TARGET_UPDATE_ON_AURA_MECHANIC then
-        local m = effectBase.affectMechanic;
-        assert(m, "SCRIPT_TARGET_UPDATE_ON_AURA_MECHANIC used without affectMechanic defined!");
-        if apply then
-            targetUpdateOnMechanic[m] = targetUpdateOnMechanic[m] or 0;
-            targetUpdateOnMechanic[m] = targetUpdateOnMechanic[m] + 1;
-        else
-            if not targetUpdateOnMechanic[m] then return end
-            targetUpdateOnMechanic[m] = targetUpdateOnMechanic[m] - 1;
-            if targetUpdateOnMechanic[m] == 0 then
-                targetUpdateOnMechanic[m] = nil;
-            end
-        end
-        return;
-    end
-
     assert(scriptKey, "Aura " .. name .. " uses SCRIPT_ effect without scriptKey!");
 
     if type == EFFECT_TYPE.SCRIPT_AURASCRIPT then
         local script = auraSripts[scriptKey];
         assert(script, "Aura " .. name .. " uses SCRIPT_AURASCRIPT with undefined script " .. scriptKey .. "!");
         auraValueCache[scriptKey] = script(apply, auraId, personal, type, auraValueCache[scriptKey], value);
-        return;
-    end
-
-    if type == EFFECT_TYPE.SCRIPT_TARGET_UPDATE_ON_AURA_PERSONAL then
-        if apply then
-            targetUpdateOnAuraPersonal[scriptKey] = targetUpdateOnAuraPersonal[scriptKey] or 0;
-            targetUpdateOnAuraPersonal[scriptKey] = targetUpdateOnAuraPersonal[scriptKey] + 1;
-        else
-            if not targetUpdateOnAuraPersonal[scriptKey] then return end
-            targetUpdateOnAuraPersonal[scriptKey] = targetUpdateOnAuraPersonal[scriptKey] - 1;
-            if targetUpdateOnAuraPersonal[scriptKey] == 0 then
-                targetUpdateOnAuraPersonal[scriptKey] = nil;
-            end
-        end
-        return;
-    end
-
-    if type == EFFECT_TYPE.SCRIPT_TARGET_UPDATE_ON_AURA then
-        if apply then
-            targetUpdateOnAura[scriptKey] = targetUpdateOnAura[scriptKey] or 0;
-            targetUpdateOnAura[scriptKey] = targetUpdateOnAura[scriptKey] + 1;
-        else
-            if not targetUpdateOnAura[scriptKey] then return end
-            targetUpdateOnAura[scriptKey] = targetUpdateOnAura[scriptKey] - 1;
-            if targetUpdateOnAura[scriptKey] == 0 then
-                targetUpdateOnAura[scriptKey] = nil;
-            end
-        end
         return;
     end
 
@@ -168,31 +118,6 @@ function scripting.DoSpell(type, cs, ce, spellId, si, spellName)
         for scriptKey, func in pairs(spellScripts[spellId][type]) do
             func(scriptValueCache[scriptKey], cs, ce, spellId, si, type, spellName);
         end
-    end
-end
-
----Triggers update if needed.
----@param auraName string
----@param unit "target"|"player"
----@param personal boolean|nil
-function scripting.AuraChanged(auraName, unit, personal)
-    if unit == "target" then
-        if personal then
-            if targetUpdateOnAuraPersonal[auraName] then _addon:TriggerUpdate() end
-            return;
-        end
-        if targetUpdateOnAura[auraName] then _addon:TriggerUpdate() end
-        return;
-    end
-end
-
----Triggers update if needed.
----@param mechanic SpellMechanic
----@param unit "target"|"player"
-function scripting.MechanicChanged(mechanic, unit)
-    if unit == "target" then
-        if targetUpdateOnMechanic[mechanic] then _addon:TriggerUpdate() end
-        return;
     end
 end
 

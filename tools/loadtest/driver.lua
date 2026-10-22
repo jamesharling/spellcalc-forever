@@ -26,6 +26,25 @@ if not A.spellInfo then
     return table.concat(out, "\n")
 end
 
+if __UNSUPPORTED then
+    -- Warrior, hunter and rogue have no data; the addon disables its events for them. The tooltip hook is
+    -- still registered, so it must cope with any spell.
+    local hooks = 0
+    for _, pc in ipairs(__TOOLTIP_POSTCALLS) do
+        if pc.kind == Enum.TooltipDataType.Spell then
+            hooks = hooks + 1
+            for _, id in ipairs({ 133, 116, 6603, 78, 1752 }) do
+                GameTooltip:ClearLines()
+                local ok, err = xpcall(pc.fn, debug.traceback, GameTooltip, { id = id, type = Enum.TooltipDataType.Spell })
+                if not ok then emit("FAIL tooltip hook error on spell " .. id .. ": " .. tostring(err):gsub("\n.*", "")) end
+                if GameTooltip:NumLines() > 0 then emit("FAIL tooltip hook added lines for an unsupported class") end
+            end
+        end
+    end
+    emit(("unsupported class: %d spells in data, %d tooltip hooks ran without adding lines"):format(next(A.spellInfo) and 1 or 0, hooks))
+    return table.concat(out, "\n")
+end
+
 local spellIds = {}
 for id in pairs(A.spellInfo) do spellIds[#spellIds + 1] = id end
 table.sort(spellIds)
@@ -166,9 +185,48 @@ for id, v in pairs(talented) do
 end
 emit(("talents changed the average of %d spells"):format(changed))
 
-for _, id in ipairs(sampleIds) do
-    emit(("sample %s [%d]: %s | with talents %s"):format(name(id), id, baseSamples[id], sampleLine(id)))
+local talentSamples = {}
+for _, id in ipairs(sampleIds) do talentSamples[id] = sampleLine(id) end
+
+-- Assumed target auras, set through the generated settings options like a player would
+local settingsArgs = A.AssumedTargetAuraSettings and A.AssumedTargetAuraSettings() or {}
+local offered, enabled = 0, 0
+for key, group in pairs(settingsArgs) do
+    if type(group) == "table" and group.type == "group" then
+        for _, option in pairs(group.args) do
+            offered = offered + 1
+            local ok, err = pcall(function()
+                if option.type == "range" then option.set(nil, option.max) else option.set(nil, true) end
+                local v = option.get()
+                if not v or v == 0 then error("option " .. tostring(option.name) .. " did not keep its value") end
+                if type(option.desc) == "function" then option.desc() end
+            end)
+            if ok then enabled = enabled + 1 else emit("FAIL target aura option in " .. key .. ": " .. tostring(err)) end
+        end
+    end
 end
+settle()
+local withAuras = runAll("assumed target auras")
+local auraChanged = 0
+for id, v in pairs(withAuras) do
+    if talented[id] and math.abs(talented[id] - v) > 1e-6 then auraChanged = auraChanged + 1 end
+end
+emit(("target auras: %d offered to this class, %d enabled through the options, changed the average of %d spells"):format(offered, enabled, auraChanged))
+if offered > 0 and auraChanged == 0 then emit("FAIL assumed target auras changed no spell") end
+
+for _, id in ipairs(sampleIds) do
+    emit(("sample %s [%d]: %s | talents %s | + target auras %s"):format(name(id), id, baseSamples[id], talentSamples[id], sampleLine(id)))
+end
+
+-- Clearing them must restore the talent-only numbers
+if settingsArgs.clearAll then settingsArgs.clearAll.func() end
+settle()
+local cleared = runAll("target auras cleared")
+local notRestored = 0
+for id, v in pairs(cleared) do
+    if talented[id] and math.abs(talented[id] - v) > 1e-6 then notRestored = notRestored + 1 end
+end
+if notRestored > 0 then emit(("FAIL %d spells differ after clearing the target auras"):format(notRestored)) end
 
 -- A few player buffs from the generated aura data through the C_UnitAuras path
 local auraIds = {}
