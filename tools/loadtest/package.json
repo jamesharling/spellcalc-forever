@@ -1,0 +1,15 @@
+{
+  "name": "spellcalc-forever-loadtest",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Syntax check plus headless load and smoke test of SpellCalc_Forever on a stubbed WoW API (fengari Lua VM)",
+  "scripts": {
+    "syntax": "node syntax.js",
+    "load": "node run.js",
+    "test": "node syntax.js && node run.js"
+  },
+  "dependencies": {
+    "fengari": "0.1.4",
+    "luaparse": "0.3.1"
+  }
+}
