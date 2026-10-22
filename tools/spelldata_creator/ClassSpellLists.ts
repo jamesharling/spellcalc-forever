@@ -61,6 +61,16 @@ const PTSA_IGNORES = [
     552, 1515, 2893, 1949, 11683, 11684
 ];
 
+/**
+ * The addon calculates SPELL_AURA_PERIODIC_ENERGIZE, SPELL_AURA_OBS_MOD_MANA and SPELL_EFFECT_ENERGIZE_PCT
+ * effects only through per-spell dummy handlers (core/effectHandlers.lua). Forever uses these on many more spells
+ * (Blessing of Wisdom, Dark Sacrifice, Enrage, Water Shield's mana proc); without a handler the addon
+ * errors, so only spells with a handler keep these effects.
+ */
+const MANA_GAIN_AURAS_WITH_HANDLER: { [spellName: string]: boolean } = {
+    "Innervate": true,
+};
+
 export class ClassSpellLists
 {
     private readonly spellData: SpellData;
@@ -117,6 +127,9 @@ export class ClassSpellLists
 
             if (DO_EFFECTS.indexOf(effect.Effect) == -1) continue;
 
+            // Energize percent effects are dispatched to the same per-spell dummy handlers as mana gain auras.
+            if (effect.Effect == EFFECT_TYPE.SPELL_EFFECT_ENERGIZE_PCT && !MANA_GAIN_AURAS_WITH_HANDLER[spellName]) continue;
+
             if (effect.Effect == EFFECT_TYPE.SPELL_EFFECT_APPLY_AURA
                 || effect.Effect == EFFECT_TYPE.SPELL_EFFECT_PERSISTENT_AREA_AURA
                 || effect.Effect == EFFECT_TYPE.SPELL_EFFECT_APPLY_AREA_AURA_PARTY
@@ -130,6 +143,14 @@ export class ClassSpellLists
                     }
                     continue;
                 };
+
+                if ((effect.EffectAura == AURA_TYPE.SPELL_AURA_PERIODIC_ENERGIZE || effect.EffectAura == AURA_TYPE.SPELL_AURA_OBS_MOD_MANA)
+                    && !MANA_GAIN_AURAS_WITH_HANDLER[spellName]) continue;
+
+                // The addon's regen percent handler models mana regen over the aura's duration;
+                // rage/energy regen auras (Bear Form) or auras without a duration can't be calculated.
+                if (effect.EffectAura == AURA_TYPE.MOD_POWER_REGEN_PERCENT
+                    && (effect.EffectMiscValue_0 != PowerType.MANA || !this.spellData.getSpellMisc(effect.SpellID).DurationIndex)) continue;
 
                 if (effect.EffectAura == AURA_TYPE.SPELL_AURA_PROC_TRIGGER_SPELL)
                 {

@@ -116,6 +116,7 @@ _addon.talentDataRaw = {
             {
                 type = _addon.CONST.EFFECT_TYPE.SCHOOLMOD_PCT_DAMAGE,
                 affectMask = 1,
+                neededWeaponMask = 43153,
                 values = {3, 7, 10},
             },
         }
@@ -143,6 +144,7 @@ _addon.talentDataRaw = {
             {
                 type = _addon.CONST.EFFECT_TYPE.SCHOOLMOD_PCT_DAMAGE,
                 affectMask = 1,
+                neededWeaponMask = 136546,
                 perPoint = 2,
             },
         }

@@ -558,25 +558,6 @@ _addon.spellInfo = {
             },
         }
     },
-    [19742] = { -- Blessing of Wisdom (Rank 1)
-        spellLevel = 14,
-        maxLevel = 0,
-        duration = 3600,
-        baseCost = 30,
-        school = 2,
-        schoolMask = 2,
-        defType = 1,
-        effects = {
-            [1] = {
-                effectType = 6,
-                auraType = 24,
-                valueBase = 12,
-                valueRange = 0,
-                coef = 0,
-                coefAP = 0,
-            },
-        }
-    },
     [19750] = { -- Flash of Light (Rank 1)
         spellLevel = 20,
         maxLevel = 25,
@@ -591,82 +572,6 @@ _addon.spellInfo = {
                 valueRange = 6,
                 valuePerLevel = 1,
                 coef = 0.42857142857142855,
-                coefAP = 0,
-            },
-        }
-    },
-    [19850] = { -- Blessing of Wisdom (Rank 2)
-        spellLevel = 24,
-        maxLevel = 0,
-        duration = 3600,
-        baseCost = 45,
-        school = 2,
-        schoolMask = 2,
-        defType = 1,
-        effects = {
-            [1] = {
-                effectType = 6,
-                auraType = 24,
-                valueBase = 18,
-                valueRange = 0,
-                coef = 0,
-                coefAP = 0,
-            },
-        }
-    },
-    [19852] = { -- Blessing of Wisdom (Rank 3)
-        spellLevel = 34,
-        maxLevel = 0,
-        duration = 3600,
-        baseCost = 65,
-        school = 2,
-        schoolMask = 2,
-        defType = 1,
-        effects = {
-            [1] = {
-                effectType = 6,
-                auraType = 24,
-                valueBase = 24,
-                valueRange = 0,
-                coef = 0,
-                coefAP = 0,
-            },
-        }
-    },
-    [19853] = { -- Blessing of Wisdom (Rank 4)
-        spellLevel = 44,
-        maxLevel = 0,
-        duration = 3600,
-        baseCost = 90,
-        school = 2,
-        schoolMask = 2,
-        defType = 1,
-        effects = {
-            [1] = {
-                effectType = 6,
-                auraType = 24,
-                valueBase = 30,
-                valueRange = 0,
-                coef = 0,
-                coefAP = 0,
-            },
-        }
-    },
-    [19854] = { -- Blessing of Wisdom (Rank 5)
-        spellLevel = 54,
-        maxLevel = 0,
-        duration = 3600,
-        baseCost = 115,
-        school = 2,
-        schoolMask = 2,
-        defType = 1,
-        effects = {
-            [1] = {
-                effectType = 6,
-                auraType = 24,
-                valueBase = 36,
-                valueRange = 0,
-                coef = 0,
                 coefAP = 0,
             },
         }
@@ -1486,25 +1391,6 @@ _addon.spellInfo = {
             },
         }
     },
-    [25290] = { -- Blessing of Wisdom (Rank 6)
-        spellLevel = 60,
-        maxLevel = 0,
-        duration = 3600,
-        baseCost = 125,
-        school = 2,
-        schoolMask = 2,
-        defType = 1,
-        effects = {
-            [1] = {
-                effectType = 6,
-                auraType = 24,
-                valueBase = 40,
-                valueRange = 0,
-                coef = 0,
-                coefAP = 0,
-            },
-        }
-    },
     [25292] = { -- Holy Light (Rank 9)
         spellLevel = 60,
         maxLevel = 65,
@@ -1519,25 +1405,6 @@ _addon.spellInfo = {
                 valueRange = 170,
                 valuePerLevel = 5.80000019073,
                 coef = 0.7142857142857143,
-                coefAP = 0,
-            },
-        }
-    },
-    [25894] = { -- Greater Blessing of Wisdom (Rank 1)
-        spellLevel = 54,
-        maxLevel = 0,
-        duration = 3600,
-        baseCost = 230,
-        school = 2,
-        schoolMask = 2,
-        defType = 1,
-        effects = {
-            [1] = {
-                effectType = 6,
-                auraType = 24,
-                valueBase = 36,
-                valueRange = 0,
-                coef = 0,
                 coefAP = 0,
             },
         }
@@ -1634,25 +1501,6 @@ _addon.spellInfo = {
                 valueBase = 150,
                 valueRange = 12,
                 coef = 0.42899999022,
-                coefAP = 0,
-            },
-        }
-    },
-    [25918] = { -- Greater Blessing of Wisdom (Rank 2)
-        spellLevel = 60,
-        maxLevel = 0,
-        duration = 3600,
-        baseCost = 250,
-        school = 2,
-        schoolMask = 2,
-        defType = 1,
-        effects = {
-            [1] = {
-                effectType = 6,
-                auraType = 24,
-                valueBase = 40,
-                valueRange = 0,
-                coef = 0,
                 coefAP = 0,
             },
         }

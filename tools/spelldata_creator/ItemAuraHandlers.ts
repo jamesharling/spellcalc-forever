@@ -104,6 +104,31 @@ function getBaseValue(effect: SpellEffect)
     return getEffectBase(effect);
 }
 
+/**
+ * Spells whose SPELLMOD_EFFECT1/2/3 modifiers change things the calculator doesn't model
+ * (threat, armor, reflect chance, chill effects, totem mitigation, mana shield efficiency).
+ */
+const IGNORED_EFFECT_MOD_SPELLS = new Set<number>([
+    11094,  // Improved Fire Ward: reflect chance
+    11175,  // Permafrost: chill duration and slow
+    11189,  // Frost Warding: armor and reflect
+    11252,  // Arcane Shielding: mana lost per damage, Mage Armor resistances
+    16258,  // Guardian Totems: totem mitigation and cooldown
+    16268,  // Spirit Weapons: threat
+    20468,  // Improved Righteous Fury: damage taken
+    25780,  // Righteous Fury: threat
+    407627, // Righteous Fury (Forever): threat, mana, damage taken
+]);
+
+/**
+ * Value-based effects with a school or creature type mask: a zero mask affects nothing and
+ * would reach the addon as an effect it cannot apply.
+ */
+function hasMask(effect: SpellEffect)
+{
+    return effect.EffectMiscValue_0 !== 0;
+}
+
 
 export class AuraHandlers
 {
@@ -290,6 +315,7 @@ export class AuraHandlers
 
         this.handlers[AURA_TYPE.SPELL_AURA_MOD_TARGET_RESISTANCE] = (effect) =>
         {
+            if (!hasMask(effect)) return;
             const aed: AddonEffectData = {
                 type: ADDON_EFFECT_TYPE.SCHOOLMOD_RESISTANCE_PENETRATION,
                 affectMask: effect["EffectMiscValue_0"],
@@ -374,7 +400,8 @@ export class AuraHandlers
                                     value: getBaseValue(effect)
                                 }
                             default:
-                                throw new Error("Unhandled FLAT SPELLMOD_EFFECT1: " + effect.SpellID + ": // " + spellData.getSpell(effect.SpellID).Description_lang);
+                                if (IGNORED_EFFECT_MOD_SPELLS.has(effect.SpellID)) return;
+                                throw new Error("Unhandled SPELLMOD_EFFECT1: " + effect.SpellID + ": // " + spellData.getSpell(effect.SpellID).Description_lang);
                         }
                     }
                 case 12: // SPELLMOD_EFFECT2 (melee stuff mostly?)
@@ -415,7 +442,8 @@ export class AuraHandlers
                             case 22801: // Increases the speed of your Ghost Wolf ability by $s1%
                                 return;
                             default:
-                                throw new Error("Unhandled FLAT SPELLMOD_EFFECT2: " + effect.SpellID + ": // " + spellData.getSpell(effect.SpellID).Description_lang);
+                                if (IGNORED_EFFECT_MOD_SPELLS.has(effect.SpellID)) return;
+                                throw new Error("Unhandled SPELLMOD_EFFECT2: " + effect.SpellID + ": // " + spellData.getSpell(effect.SpellID).Description_lang);
                         }
                     }
                 case 23: // SPELLMOD_EFFECT3 (melee stuff mostly?)
@@ -438,7 +466,8 @@ export class AuraHandlers
                             case 400014: // You take $s1% reduced Physical damage while Blade Dance is active.
                                 return;
                             default:
-                                throw new Error("Unhandled FLAT SPELLMOD_EFFECT3: " + effect.SpellID + ": // " + spellData.getSpell(effect.SpellID).Description_lang);
+                                if (IGNORED_EFFECT_MOD_SPELLS.has(effect.SpellID)) return;
+                                throw new Error("Unhandled SPELLMOD_EFFECT3: " + effect.SpellID + ": // " + spellData.getSpell(effect.SpellID).Description_lang);
                         }
                     }
                 case 4: // SPELLMOD_CHARGES 
@@ -527,10 +556,13 @@ export class AuraHandlers
                             case 20330: // Increases the damage done by your Seal of Righteousness and Judgement of Righteousness by $s1%
                             case 20331: // Increases the damage done by your Seal of Righteousness and Judgement of Righteousness by $s1%
                             case 20332: // Increases the damage done by your Seal of Righteousness and Judgement of Righteousness by $s1%
+                            case 14748: // Improved Power Word: Shield: increases the damage absorbed by your Power Word: Shield by $s1%
+                            case 18703: // Improved Health Funnel: increases the amount of health transferred by your Health Funnel by $m1%
                                 aed.type = ADDON_EFFECT_TYPE.SPELLMOD_PCT_EFFECT; // TODO: this could alos behave like pct dmg healing (=include bonus)
                                 break;
                             default:
-                                throw new Error("Unhandled FLAT SPELLMOD_EFFECT1: " + effect.SpellID + ": // " + spellData.getSpell(effect.SpellID).Description_lang);
+                                if (IGNORED_EFFECT_MOD_SPELLS.has(effect.SpellID)) return;
+                                throw new Error("Unhandled SPELLMOD_EFFECT1: " + effect.SpellID + ": // " + spellData.getSpell(effect.SpellID).Description_lang);
                         }
                         break;
                     }
@@ -543,7 +575,8 @@ export class AuraHandlers
                             case 55436: // Increases the passive mana regeneration of your Water Shield spell by $55436s1%
                                 return;
                             default:
-                                throw new Error("Unhandled FLAT SPELLMOD_EFFECT2: " + effect.SpellID + ": // " + spellData.getSpell(effect.SpellID).Description_lang);
+                                if (IGNORED_EFFECT_MOD_SPELLS.has(effect.SpellID)) return;
+                                throw new Error("Unhandled SPELLMOD_EFFECT2: " + effect.SpellID + ": // " + spellData.getSpell(effect.SpellID).Description_lang);
                         }
                     }
                 case 23: // SPELLMOD_EFFECT3
@@ -553,7 +586,8 @@ export class AuraHandlers
                             case 56384: // Your Ice Armor and Frost Armor spells grant an additional $56384s1% armor and resistance.
                                 return;
                             default:
-                                throw new Error("Unhandled FLAT SPELLMOD_EFFECT3: " + effect.SpellID + ": // " + spellData.getSpell(effect.SpellID).Description_lang);
+                                if (IGNORED_EFFECT_MOD_SPELLS.has(effect.SpellID)) return;
+                                throw new Error("Unhandled SPELLMOD_EFFECT3: " + effect.SpellID + ": // " + spellData.getSpell(effect.SpellID).Description_lang);
                         }
                     }
                 case 27: // SPELLMOD_MULTIPLE_VALUE
@@ -905,6 +939,8 @@ export class AuraHandlers
 
         this.handlers[AURA_TYPE.SPELL_AURA_PERIODIC_ENERGIZE] = (effect) =>
         {
+            // A periodic energize without a period (some Forever spells) has no rate to convert to mp5.
+            if (!effect.EffectAuraPeriod) return;
             return {
                 type: ADDON_EFFECT_TYPE.MOD_MANA_PER_5,
                 value: 5000 * getBaseValue(effect) / effect.EffectAuraPeriod,
@@ -965,6 +1001,7 @@ export class AuraHandlers
 
         this.handlers[AURA_TYPE.SPELL_AURA_MOD_DAMAGE_DONE_VERSUS] = (effect) =>
         {
+            if (!hasMask(effect)) return;
             return {
                 type: ADDON_EFFECT_TYPE.VERSUSMOD_PCT_DAMAGE,
                 affectMask: effect["EffectMiscValue_0"],
@@ -975,6 +1012,7 @@ export class AuraHandlers
 
         this.handlers[AURA_TYPE.SPELL_AURA_MOD_FLAT_SPELL_DAMAGE_VERSUS] = effect =>
         {
+            if (!hasMask(effect)) return;
             return {
                 type: ADDON_EFFECT_TYPE.VERSUSMOD_FLAT_SPELLPOWER,
                 affectMask: effect["EffectMiscValue_0"],
@@ -985,6 +1023,7 @@ export class AuraHandlers
 
         this.handlers[AURA_TYPE.SPELL_AURA_MOD_DAMAGE_DONE_CREATURE] = effect =>
         {
+            if (!hasMask(effect)) return;
             return {
                 type: ADDON_EFFECT_TYPE.VERSUSMOD_FLAT_DAMAGE,
                 affectMask: effect["EffectMiscValue_0"],
@@ -995,6 +1034,7 @@ export class AuraHandlers
 
         this.handlers[AURA_TYPE.SPELL_AURA_MOD_MELEE_ATTACK_POWER_VERSUS] = effect =>
         {
+            if (!hasMask(effect)) return;
             return {
                 type: ADDON_EFFECT_TYPE.VERSUSMOD_FLAT_ATTACKPOWER,
                 affectMask: effect["EffectMiscValue_0"],
@@ -1005,6 +1045,7 @@ export class AuraHandlers
 
         this.handlers[AURA_TYPE.SPELL_AURA_MOD_RANGED_ATTACK_POWER_VERSUS] = effect =>
         {
+            if (!hasMask(effect)) return;
             return {
                 type: ADDON_EFFECT_TYPE.VERSUSMOD_FLAT_ATTACKPOWER_RANGED,
                 affectMask: effect["EffectMiscValue_0"],
@@ -1033,6 +1074,7 @@ export class AuraHandlers
 
         this.handlers[AURA_TYPE.SPELL_AURA_MOD_DAMAGE_PERCENT_DONE] = effect =>
         {
+            if (!hasMask(effect)) return;
             return {
                 type: ADDON_EFFECT_TYPE.SCHOOLMOD_PCT_DAMAGE,
                 affectMask: effect["EffectMiscValue_0"],

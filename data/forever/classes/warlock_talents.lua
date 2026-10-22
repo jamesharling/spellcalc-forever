@@ -54,18 +54,6 @@ _addon.talentDataRaw = {
             },
         }
     },
-    { -- Amplify Curse (node 105916, 1 rank)
-        name = "Amplify Curse",
-        spellId = 18288,
-        maxRanks = 1,
-        effects = {
-            {
-                type = _addon.CONST.EFFECT_TYPE.SPELLMOD_PCT_EFFECT,
-                affectSpell = {33792, 0, 0, 0},
-                perPoint = 50,
-            },
-        }
-    },
     { -- Improved Bane of Agony (node 105919, 2 ranks)
         name = "Improved Bane of Agony",
         spellId = 18827,
@@ -122,6 +110,18 @@ _addon.talentDataRaw = {
     -----------------------------
     -- Column group 2
     -----------------------------
+    { -- Improved Health Funnel (node 105905, 2 ranks)
+        name = "Improved Health Funnel",
+        spellId = 18703,
+        maxRanks = 2,
+        effects = {
+            {
+                type = _addon.CONST.EFFECT_TYPE.SPELLMOD_PCT_EFFECT,
+                affectSpell = {16777216, 0, 0, 0},
+                perPoint = 20,
+            },
+        }
+    },
     { -- Decimation (node 105897, 2 ranks)
         name = "Decimation",
         spellId = 440870,

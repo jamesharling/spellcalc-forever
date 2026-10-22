@@ -183,18 +183,6 @@ _addon.talentDataRaw = {
             },
         }
     },
-    { -- Berserk (node 104956, 1 rank)
-        name = "Berserk",
-        spellId = 417141,
-        maxRanks = 1,
-        effects = {
-            {
-                type = _addon.CONST.EFFECT_TYPE.SPELLMOD_FLAT_CRIT_CHANCE,
-                affectSpell = {233472, 0, 0, 0},
-                perPoint = 100,
-            },
-        }
-    },
     -----------------------------
     -- Column group 3
     -----------------------------

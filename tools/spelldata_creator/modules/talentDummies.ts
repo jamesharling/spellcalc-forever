@@ -26,7 +26,8 @@ type TalentDummyList = { [talentName: string]: TalentDummyDef[] }
 
 function addMageTalents(list: TalentDummyList, spellData: SpellData, classSpellSets: ClassSpellSets)
 {
-    // Ignite: extra damage on crit for all fire spells
+    // Ignite: extra damage on crit for all fire spells. Each class mask bit is set once if any
+    // fire spell uses it (upstream added the bit once per spell, producing values above 32 bits).
     const affectedSpellSets = [0, 0, 0, 0];
     const mageSet = classSpellSets.getClassSets(SpellClassSetId.MAGE);
     for (let set = 0; set < 4; set++)
@@ -39,8 +40,8 @@ function addMageTalents(list: TalentDummyList, spellData: SpellData, classSpellS
                 const misc = spellData.getSpellMisc(parseInt(spellId), true);
                 if (misc && (misc.SchoolMask & SCHOOL_MASK.FIRE) !== 0)
                 {
-                    affectedSpellSets[set] += parseInt(bit);
-                    continue;
+                    affectedSpellSets[set] = (affectedSpellSets[set] | parseInt(bit)) >>> 0;
+                    break;
                 }
             }
         }

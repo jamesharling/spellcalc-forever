@@ -201,6 +201,34 @@ export class TalentsCreator
     }
 
     /**
+     * Talents that require an equipped weapon type (weapon specializations, Wand Specialization) only
+     * modify damage done with that weapon. Physical damage bonuses get the weapon requirement so the
+     * addon applies them only while such a weapon is equipped; bonuses to magic schools would apply to
+     * every spell instead of the weapon's own damage (wand shots), so they are dropped.
+     */
+    private applyWeaponRequirement(talentName: string, spellId: number, effects: AddonTalentData[]): AddonTalentData[]
+    {
+        const equipped = this.spellData.getSpellEquipeedItems(spellId);
+        if (!equipped || equipped.EquippedItemClass !== ItemClass.ITEM_CLASS_WEAPON || !equipped.EquippedItemSubclass) return effects;
+
+        const kept: AddonTalentData[] = [];
+        for (const eff of effects)
+        {
+            const physicalOnly = eff.affectMask === SCHOOL_MASK.PHYSICAL && !eff.affectSpell;
+            if (physicalOnly)
+            {
+                eff.neededWeaponMask = equipped.EquippedItemSubclass;
+                kept.push(eff);
+            }
+            else
+            {
+                report(`${talentName} (${spellId}) requires weapon subclass mask ${equipped.EquippedItemSubclass}; its ${eff.type.replace("_addon.CONST.EFFECT_TYPE.", "")} effect only applies to that weapon's damage and is dropped`);
+            }
+        }
+        return kept;
+    }
+
+    /**
      * Build talent list for player class.
      */
     private getTalentList(pclass: PlayerClass)
@@ -235,8 +263,14 @@ export class TalentsCreator
 
             const talentName = this.spellData.getSpellName(talent.spellId).Name_lang;
 
-            // Active abilities granted by talents are handled as regular spells (see ClassSpellLists).
+            // Active abilities granted by talents (Arcane Power, Inner Focus, ...) are handled as regular
+            // spells and, when they buff the player, through auras.lua while the buff is up.
             if (this.spellData.getSpellPowerCosts(talent.spellId).length !== 0) continue;
+            if ((this.spellData.getSpellMisc(talent.spellId).Attributes_0 & SPELL_ATTR0.SPELL_ATTR_PASSIVE) === 0)
+            {
+                report(`${talentName} (${talent.spellId}) is an active ability, not applied as a permanent talent effect`);
+                continue;
+            }
 
             if (!this.spellData.getSpellEffects(talent.spellId, true)) continue;
 
@@ -259,6 +293,7 @@ export class TalentsCreator
                 continue;
             }
 
+            talentEffects = this.applyWeaponRequirement(talentName, talent.spellId, talentEffects);
             if (talentEffects.length === 0) continue;
 
             list.push({

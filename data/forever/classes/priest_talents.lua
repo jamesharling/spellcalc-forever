@@ -15,18 +15,6 @@ _addon.talentDataRaw = {
     -----------------------------
     -- Column group 1
     -----------------------------
-    { -- Wand Specialization (node 105850, 2 ranks)
-        name = "Wand Specialization",
-        spellId = 14524,
-        maxRanks = 2,
-        effects = {
-            {
-                type = _addon.CONST.EFFECT_TYPE.SCHOOLMOD_PCT_DAMAGE,
-                affectMask = 126,
-                values = {13, 25},
-            },
-        }
-    },
     { -- Twin Disciplines (node 105849, 5 ranks)
         name = "Twin Disciplines",
         spellId = 1225132,
@@ -56,15 +44,15 @@ _addon.talentDataRaw = {
             },
         }
     },
-    { -- Inner Focus (node 105844, 1 rank)
-        name = "Inner Focus",
-        spellId = 14751,
-        maxRanks = 1,
+    { -- Improved Power Word: Shield (node 105846, 3 ranks)
+        name = "Improved Power Word: Shield",
+        spellId = 14748,
+        maxRanks = 3,
         effects = {
             {
-                type = _addon.CONST.EFFECT_TYPE.SPELLMOD_FLAT_CRIT_CHANCE,
-                affectSpell = {-638304624, 623668, 0, 270532608},
-                perPoint = 25,
+                type = _addon.CONST.EFFECT_TYPE.SPELLMOD_PCT_EFFECT,
+                affectSpell = {1, 0, 0, 0},
+                values = {7, 14, 20},
             },
         }
     },

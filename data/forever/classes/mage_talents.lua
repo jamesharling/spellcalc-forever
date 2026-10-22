@@ -15,18 +15,6 @@ _addon.talentDataRaw = {
     -----------------------------
     -- Column group 1
     -----------------------------
-    { -- Wand Specialization (node 105815, 2 ranks)
-        name = "Wand Specialization",
-        spellId = 6057,
-        maxRanks = 2,
-        effects = {
-            {
-                type = _addon.CONST.EFFECT_TYPE.SCHOOLMOD_PCT_DAMAGE,
-                affectMask = 126,
-                values = {13, 25},
-            },
-        }
-    },
     { -- Arcane Focus (node 105814, 5 ranks)
         name = "Arcane Focus",
         spellId = 11222,
@@ -114,23 +102,6 @@ _addon.talentDataRaw = {
             },
         }
     },
-    { -- Arcane Power (node 105798, 1 rank)
-        name = "Arcane Power",
-        spellId = 12042,
-        maxRanks = 1,
-        effects = {
-            {
-                type = _addon.CONST.EFFECT_TYPE.SPELLMOD_PCT_DAMAGE_HEALING,
-                affectSpell = {551686903, 36864, 0, 0},
-                perPoint = 30,
-            },
-            {
-                type = _addon.CONST.EFFECT_TYPE.SPELLMOD_PCT_OVER_TIME,
-                affectSpell = {4194437, 0, 0, 0},
-                perPoint = 30,
-            },
-        }
-    },
     -----------------------------
     -- Column group 2
     -----------------------------
@@ -153,7 +124,7 @@ _addon.talentDataRaw = {
         effects = {
             {
                 type = _addon.CONST.EFFECT_TYPE.SPELLMOD_EXTRA_ON_CRIT,
-                affectSpell = {49779446166, 208904, 525080, 536887344},
+                affectSpell = {3369469983, 200712, 262408, 536887304},
                 perPoint = 8,
             },
         }

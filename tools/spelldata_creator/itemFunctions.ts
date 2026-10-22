@@ -187,6 +187,7 @@ export function createEffectLua(indent: string, eff: AddonEffectData, additional
     if (typeof eff.scriptKey !== "undefined") lua += `${indent}    scriptKey = "${eff.scriptKey}",\n`;
     if (eff.hasStacks) lua += `${indent}    hasStacks = true,\n`;
     if (eff.affectMechanic) lua += `${indent}    affectMechanic = ${eff.affectMechanic},\n`;
+    if (eff.neededWeaponMask) lua += `${indent}    neededWeaponMask = ${eff.neededWeaponMask},\n`;
     if (eff.auraCategory) lua += `${indent}    auraCategory = ${eff.auraCategory},\n`;
     if (additionalMembers)
     {

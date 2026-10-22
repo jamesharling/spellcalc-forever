@@ -724,43 +724,6 @@ _addon.spellInfo = {
             },
         }
     },
-    [5229] = { -- Enrage
-        spellLevel = 12,
-        maxLevel = 0,
-        duration = 10,
-        school = 1,
-        schoolMask = 1,
-        GCD = 0,
-        defType = 0,
-        effects = {
-            [1] = {
-                effectType = 6,
-                auraType = 24,
-                valueBase = 20,
-                valueRange = 0,
-                coef = 0,
-                coefAP = 0,
-            },
-        }
-    },
-    [5487] = { -- Bear Form (Shapeshift)
-        spellLevel = 10,
-        maxLevel = 40,
-        baseCostPct = 55,
-        school = 1,
-        schoolMask = 1,
-        defType = 0,
-        effects = {
-            [1] = {
-                effectType = 6,
-                auraType = 110,
-                valueBase = -100,
-                valueRange = 0,
-                coef = 0,
-                coefAP = 0,
-            },
-        }
-    },
     [5570] = { -- Insect Swarm (Rank 1)
         spellLevel = 20,
         maxLevel = 0,
@@ -1564,24 +1527,6 @@ _addon.spellInfo = {
                 coef = 0,
                 coefAP = 0.01,
                 mechanic = 15,
-            },
-        }
-    },
-    [9634] = { -- Dire Bear Form (Shapeshift)
-        spellLevel = 40,
-        maxLevel = 70,
-        baseCostPct = 55,
-        school = 1,
-        schoolMask = 1,
-        defType = 0,
-        effects = {
-            [1] = {
-                effectType = 6,
-                auraType = 110,
-                valueBase = -100,
-                valueRange = 0,
-                coef = 0,
-                coefAP = 0,
             },
         }
     },

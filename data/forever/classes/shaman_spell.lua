@@ -1802,43 +1802,6 @@ _addon.spellInfo = {
             },
         }
     },
-    [408510] = { -- Water Shield
-        spellLevel = 20,
-        maxLevel = 0,
-        duration = 600,
-        school = 4,
-        schoolMask = 8,
-        defType = 1,
-        charges = 3,
-        effects = {
-            [1] = {
-                effectType = 6,
-                auraType = 42,
-                valueBase = 100,
-                valueRange = 0,
-                triggeredSpell = 408511,
-                coef = 0,
-                coefAP = 0,
-            },
-        }
-    },
-    [408511] = { -- Water Shield
-        spellLevel = 20,
-        maxLevel = 0,
-        school = 4,
-        schoolMask = 8,
-        defType = 0,
-        noCrit = true,
-        effects = {
-            [1] = {
-                effectType = 137,
-                valueBase = 2,
-                valueRange = 0,
-                coef = 0,
-                coefAP = 0,
-            },
-        }
-    },
     [408521] = { -- Riptide (Rank 1)
         spellLevel = 40,
         maxLevel = 48,

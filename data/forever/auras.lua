@@ -125,12 +125,6 @@ _addon.aurasPlayer = {
             value = -25,
         },
     },
-    [4312] = { -- Strider Presence
-        {
-            type = _addon.CONST.EFFECT_TYPE.MOD_MANA_PER_5,
-            value = Infinity,
-        },
-    },
     [5884] = { -- Banshee Curse
         {
             type = _addon.CONST.EFFECT_TYPE.GLOBAL_FLAT_HIT_CHANCE,
@@ -1743,12 +1737,6 @@ _addon.aurasPlayer = {
             value = 1000,
         },
     },
-    [401990] = { -- Shadowcrawl
-        {
-            type = _addon.CONST.EFFECT_TYPE.SCHOOLMOD_PCT_DAMAGE,
-            value = 15,
-        },
-    },
     [402362] = { -- White
         {
             type = _addon.CONST.EFFECT_TYPE.PCT_HEALING,
@@ -2105,12 +2093,6 @@ _addon.aurasPlayer = {
             type = _addon.CONST.EFFECT_TYPE.SCHOOLMOD_PCT_DAMAGE,
             affectMask = 127,
             value = 8,
-        },
-    },
-    [436641] = { -- Blood Moon Copy
-        {
-            type = _addon.CONST.EFFECT_TYPE.VERSUSMOD_PCT_DAMAGE,
-            value = 0,
         },
     },
     [437390] = { -- Lethargic Poison
@@ -2852,12 +2834,6 @@ _addon.aurasPlayer = {
             value = 10,
         },
     },
-    [1214958] = { -- [DNT] Modify Health & Damage
-        {
-            type = _addon.CONST.EFFECT_TYPE.SCHOOLMOD_PCT_DAMAGE,
-            value = 15,
-        },
-    },
     [1215756] = { -- [DNT] Frenzy Ramp
         {
             type = _addon.CONST.EFFECT_TYPE.SCHOOLMOD_PCT_DAMAGE,
@@ -2939,11 +2915,6 @@ _addon.aurasPlayer = {
         },
     },
     [1219072] = { -- Orders complete!
-        {
-            type = _addon.CONST.EFFECT_TYPE.SCHOOLMOD_PCT_DAMAGE,
-            value = 2,
-            hasStacks = true,
-        },
         {
             type = _addon.CONST.EFFECT_TYPE.PCT_HEALING,
             value = 5,
@@ -3516,13 +3487,6 @@ _addon.aurasPlayer = {
             type = _addon.CONST.EFFECT_TYPE.SCHOOLMOD_PCT_DAMAGE,
             affectMask = 127,
             value = 100,
-        },
-    },
-    [1275553] = { -- Growing Flames
-        {
-            type = _addon.CONST.EFFECT_TYPE.SCHOOLMOD_PCT_DAMAGE,
-            value = 5,
-            hasStacks = true,
         },
     },
     [1277324] = { -- Dark Sacrifice
