@@ -29,7 +29,6 @@ end
 
 -- Prayer of Mending: Season of Discovery and TBC spell IDs, whichever exists on this client.
 SCT:AddDummyHandler(GetSpellInfo(401859), PoM);
-SCT:AddDummyHandler(GetSpellInfo(33076), PoM);
 SCT:AddDummyHandler(GetSpellInfo(974), PoM); -- Earth Shield
 
 ---Display extended information if T5 2PC is used.

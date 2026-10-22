@@ -10,8 +10,8 @@ local HEALING_TOUCH = GetSpellInfo(5186);
 local HEALING_WAVE = GetSpellInfo(332);
 local LESSER_HEALING_WAVE = GetSpellInfo(8004);
 local FLAME_SHOCK = GetSpellInfo(8053);
-local HOLY_SHOCK = GetSpellInfo(33072);
-local MAUL = GetSpellInfo(48480);
+local HOLY_SHOCK = GetSpellInfo(20473);
+local MAUL = GetSpellInfo(6807);
 local HEROIC_STRIKE = GetSpellInfo(284);
 
 local CostHandler = {};
@@ -22,7 +22,11 @@ local CostHandler = {};
 ---@param spellName string
 ---@param spellId integer
 function CostHandler.Mana(calcedSpell, spellInfo, spellName, spellId)
-    local mps = stats.mp5.val / 5 + stats.manaRegAura;
+    -- mp5 known from the addon's aura/item data versus mp5 seen in GetManaRegen (manaRegAura).
+    -- A client whose GetManaRegen includes mp5 (TBC and later behaviour) already counts the
+    -- addon's sources there, one that excludes it (Classic Era) reports ~0; taking the larger
+    -- value avoids counting the same mp5 twice in either case.
+    local mps = math.max(stats.mp5.val / 5, stats.manaRegAura);
     local effCastTime = calcedSpell.effCastTime;
 
     calcedSpell.effectiveCost = calcedSpell.baseCost - math.min(5, effCastTime) * (stats.manaRegCasting + mps);

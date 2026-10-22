@@ -61,7 +61,7 @@ local function ApplyOrRemoveSpellSet(apply, name, value, destTable, setMasks)
     local spellIdsDone = {};
     for k, setMask in ipairs(setMasks) do
         for setBit, spellSet in pairs(_addon.spellClassSet[k]) do
-            if bit.band(setBit, setMask) > 0 then
+            if bit.band(setBit, setMask) ~= 0 then -- WoW bit ops return signed values; bit 31 is negative
                 for _, spellId in ipairs(spellSet) do
                     if not spellIdsDone[spellId] then
                         spellIdsDone[spellId] = true;
@@ -103,7 +103,7 @@ local function ApplyOrRemoveSpellSetMult(apply, name, value, destTable, setMasks
     local spellIdsDone = {};
     for k, setMask in ipairs(setMasks) do
         for setBit, spellSet in pairs(_addon.spellClassSet[k]) do
-            if bit.band(setBit, setMask) > 0 then
+            if bit.band(setBit, setMask) ~= 0 then -- WoW bit ops return signed values; bit 31 is negative
                 for _, spellId in ipairs(spellSet) do
                     if not spellIdsDone[spellId] then
                         spellIdsDone[spellId] = true;

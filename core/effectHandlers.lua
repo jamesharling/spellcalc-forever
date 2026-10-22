@@ -361,7 +361,7 @@ end
 ---@param spellName string
 ---@param spellId integer
 local function Conflagrate(calcedSpell, effNum, spellInfo, spellName, spellId)
-    local immoId = _addon.api.GetSpellBookSpellID(GetSpellInfo(47811));
+    local immoId = _addon.api.GetSpellBookSpellID(GetSpellInfo(348));
     local immolate = _addon:GetCalcedSpell(immoId);
     assert(immolate and immolate.effects[2], "Wrong Immolate Id? Immolate DoT effect not found for this spell!");
     local immoDoTDamage = immolate.effects[2].avg * immolate.effects[2].ticks;
@@ -421,7 +421,6 @@ RegisterDummyAuraHandler(29166, Innervate);
 RegisterDummyAuraHandler(20166, SealOfWisdomMelee);
 RegisterDummyAuraHandler(12051, Evocation);
 RegisterDummyAuraHandler(401859, PoM_ES); -- Prayer of Mending (Season of Discovery ID)
-RegisterDummyAuraHandler(33076, PoM_ES); -- Prayer of Mending (TBC ID)
 -- Wrath-only handlers (Starfall, Thunderstorm, Conflagrate, Arcane Torrent, Seal of Vengeance/Corruption)
 -- are not registered: those spells don't exist on Forever in that form.
 

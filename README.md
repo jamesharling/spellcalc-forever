@@ -57,12 +57,14 @@ Nothing here has run on a live Forever client (the beta closed before this port 
 4. Downranking: compare low-rank tooltips with the addon's numbers.
 5. Events: unknown events are skipped with a warning in chat; check for warnings after login.
 6. Action bar support: stock bars use `MainActionBar` paging; Bartender4, Dominos and ElvUI need their Forever builds.
-7. Mana regen from gear: Forever stores mp5 and similar bonuses as item stats instead of equip auras, so
-   `system/stats.lua` has to take them from the API (`GetManaRegen`) rather than from `itemEffects.lua`.
-   StatLogic's Forever data also uses the same 0.125 mana per spirit per second for every caster, while
-   `stats.lua` still splits priest/mage from the other classes.
-8. Talents listed in `generation_report.txt` as "SPELL_AURA_DUMMY spell not handled" (Fire Power, Shadow
-   Weaving, Eclipse, Maelstrom Weapon, ...) have no effect in the calculator until someone writes handlers.
+7. Mana regen: Forever stores mp5 as an item stat, so mp5 has to show up in `GetManaRegen`. The addon treats
+   whatever `GetManaRegen` reports above its spirit formula as mp5 and uses the larger of that and the mp5 it
+   knows from aura data, so mp5 is not counted twice. Spirit regen uses 0.125 mana per spirit per second for
+   every caster, as StatLogic's Forever tables do. Compare `/sc info` ("Spirit/Int base regen", "Mp5 from API")
+   with the character sheet.
+8. Conditional talents (Fire Power per Fire effect on the target, Shadow Weaving, Eclipse, Maelstrom Weapon,
+   procs and target-state bonuses) are listed in `generation_report.txt` and have no effect in the calculator,
+   same as upstream. Active talents (Arcane Power, Inner Focus, ...) only count while their buff is up.
 
 ## Regenerating data
 
@@ -91,9 +93,15 @@ What the generator does differently from upstream, because of the Forever (Mainl
 - **Talents** come from the trait tables. Each talent is one spell (`TraitDefinition.SpellID`) whose effects hold
   the max-rank values; `TraitDefinitionEffectPoints` → `Curve` → `CurvePoint` give the value per rank. The
   generator runs the aura handlers once per rank and emits `perPoint` when the values are linear, otherwise a
-  `values` list. All talents of a tree are processed; the handful that need hand-written definitions
-  (Ignite, Illumination, Master of Elements, Arcane Concentration, Elemental Focus) live in
-  `modules/talentDummies.ts` and now take their numbers from the client data.
+  `values` list. All passive talents of a tree are processed; active ones (Arcane Power, Combustion, ...) are
+  skipped because their buffs are handled as auras. Weapon specializations get a weapon requirement
+  (`neededWeaponMask`); weapon-restricted bonuses to magic schools (Wand Specialization) are dropped because
+  they only apply to the weapon's own damage. The handful that need hand-written definitions (Ignite,
+  Illumination, Master of Elements, Arcane Concentration, Elemental Focus) live in `modules/talentDummies.ts`
+  and take their numbers from the client data.
+- Effects the addon can only calculate through per-spell handlers (mana gain auras and energize effects:
+  Forever's Blessing of Wisdom, Dark Sacrifice, Water Shield) are left out unless such a handler exists,
+  currently only for Innervate.
 - **Item effects** are linked through `ItemXItemEffect`. Forever turned most "Equip: +X" spell bonuses into
   plain item stats (which the addon reads from the API), so `itemEffects.lua` only lists the remaining spell
   modifiers and procs.
@@ -102,6 +110,27 @@ What the generator does differently from upstream, because of the Forever (Mainl
 - Nothing aborts the run any more: everything the generator cannot interpret (dummy auras of new talents and
   set bonuses, removed spells, unhandled spell modifier types) is listed in
   `tools/spelldata_creator/data/forever/generation_report.txt` for review.
+
+## Testing without the game
+
+`tools/loadtest` checks the addon without a WoW client (Node.js 18 or newer):
+
+```bash
+cd tools/loadtest
+npm install
+npm test
+```
+
+- `syntax.js` parses every Lua file of the addon and its libraries as Lua 5.1 (no `goto`).
+- `run.js` loads the addon in TOC order, libraries included, into a Lua VM ([fengari](https://github.com/fengari-lua/fengari))
+  on a stubbed WoW API (`wow_env.lua`), once per supported class. `driver.lua` then fires the login events and
+  calculates every spell in the generated data, with no talents, with every talent at max rank (through a
+  simulated trait API), and with a sample of buffs from `auras.lua`. It runs the spell tooltip hook for each
+  spell too. Lua errors, `NaN` or infinite results, min above max, and talents not read back fail the run.
+
+It catches load errors, broken data references and crashes in the calculation and tooltip code. The stub
+returns made-up stats, so it cannot tell whether numbers match the game. It also lists the globals the addon
+reads that the stubs don't define; most exist in the real client.
 
 ## Debug commands
 

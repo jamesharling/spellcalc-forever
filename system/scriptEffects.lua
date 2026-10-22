@@ -30,7 +30,7 @@ local function ApplyOrRemoveSpellSet(apply, type, affectSpell, scriptKey, script
     local spellIdsDone = {};
     for k, setMask in ipairs(affectSpell) do
         for setBit, spellSet in pairs(_addon.spellClassSet[k]) do
-            if bit.band(setBit, setMask) > 0 then
+            if bit.band(setBit, setMask) ~= 0 then -- WoW bit ops return signed values; bit 31 is negative
                 for _, spellId in ipairs(spellSet) do
                     if not spellIdsDone[spellId] then
                         spellIdsDone[spellId] = true;

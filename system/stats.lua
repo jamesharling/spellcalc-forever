@@ -337,18 +337,17 @@ local function UpdateDmgDoneMods()
 end
 
 ---Update spirit based and MP5 regen values (classic rules: spirit only, no intellect term).
+-- Classic Era gave priests and mages 0.125 mana per spirit per second and everyone else 0.1.
+-- Forever uses 0.125 for every caster (StatLogic's Forever tables, CamelotLogic.lua, versus its
+-- Era tables), so the priest/mage formula applies to all classes.
+-- Whatever GetManaRegen reports above the spirit part is treated as mp5 (manaRegAura); see
+-- CostHandler for how it combines with mp5 from the addon's own aura data.
 function _addon:UpdateManaRegen()
     if SkipIfRestricted() then return end
     local _, spirit = UnitStat("player", 5);
     spirit = Num(spirit);
 
-    local _, class = UnitClass("player");
-    local spiritRegen;
-    if class == "PRIEST" or class == "MAGE" then
-        spiritRegen = (12.5 + spirit / 4) / 2;
-    else
-        spiritRegen = (15 + spirit / 5) / 2;
-    end
+    local spiritRegen = (12.5 + spirit / 4) / 2;
 
     local newmanaRegCasting = spiritRegen * (stats.fsrRegenMult.val / 100);
     local newmanaRegAura = math.max(0, Num(GetManaRegen()) - spiritRegen);
