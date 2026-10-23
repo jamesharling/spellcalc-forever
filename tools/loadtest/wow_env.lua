@@ -512,8 +512,15 @@ C_SpellBook = namespace("C_SpellBook", {
 IsSpellKnown = function() return true end
 IsPlayerSpell = function() return true end
 
+-- Any item ID is a cached cloth armor piece; the driver equips items through __INVENTORY (slot -> item ID).
+__INVENTORY = {}
 C_Item = namespace("C_Item", {
-    GetItemInfo = function() return nil end,
+    GetItemInfo = function(item)
+        local id = tonumber(item) or tonumber(tostring(item):match("item:(%d+)"))
+        if not id then return nil end
+        return "item " .. id, ("|cffa335ee|Hitem:%d::::::::60:::::|h[item %d]|h|r"):format(id, id), 4, 60, 60, "Armor", "Cloth",
+            1, "INVTYPE_CHEST", 0, 0, 4, 1
+    end,
     GetItemInfoInstant = function() return nil end,
     GetItemStats = function() return {} end,
     GetItemSetInfo = function() return nil end,
@@ -527,8 +534,11 @@ C_TooltipInfo = namespace("C_TooltipInfo", {
 })
 LOCALIZED_CLASS_NAMES_MALE = { DRUID = "Druid", HUNTER = "Hunter", MAGE = "Mage", PALADIN = "Paladin", PRIEST = "Priest",
     ROGUE = "Rogue", SHAMAN = "Shaman", WARLOCK = "Warlock", WARRIOR = "Warrior" }
-GetInventoryItemLink = function() return nil end
-GetInventoryItemID = function() return nil end
+GetInventoryItemLink = function(unit, slot)
+    local id = unit == "player" and __INVENTORY[slot]
+    if id then return (select(2, C_Item.GetItemInfo(id))) end
+end
+GetInventoryItemID = function(unit, slot) if unit == "player" then return __INVENTORY[slot] end end
 GetInventoryItemDurability = function() return nil end
 GetWeaponEnchantInfo = function() return false end
 

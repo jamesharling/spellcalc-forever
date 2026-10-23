@@ -3,9 +3,8 @@ import { ClassSpellSets } from "./ClassSpellSets";
 import { cfg } from "./config";
 import { readDBCSVtoMap } from "./CSVReader";
 import { AuraHandlers, USELESS_AURAS } from "./ItemAuraHandlers";
-import { createEffectLua, createFileHead, getItemDbData, orderItemsByClass } from "./itemFunctions";
+import { classFromSpells, createEffectLua, createFileHead, DbRow, getItemDbData, orderItemsByClass } from "./itemFunctions";
 import { SpellData } from "./SpellData";
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from "fs";
 import { report } from "./report";
 
 const AURA_TYPES_TO_IGNORE: { [index: number]: true | undefined } = {
@@ -46,19 +45,12 @@ interface ItemXItemEffect
     ItemID: number
 }
 
-interface DbRow
-{
-    entry: number,
-    name: string,
-    AllowableClass: number,
-    class: number,
-    subclass: number
-}
-
 export class ItemEffectsCreator
 {
     private readonly spellData: SpellData;
     private readonly auraHandlers: AuraHandlers;
+    /** Equip effect spells per item, to infer the class of items without a detail row. */
+    private readonly itemSpells = new Map<number, number[]>();
 
     constructor(spellData: SpellData, classSpellLists: ClassSpellLists, classSpellSets: ClassSpellSets)
     {
@@ -120,11 +112,9 @@ export class ItemEffectsCreator
 
     private getItemEffectData(dbData: { [itemId: number]: DbRow })
     {
-        const cacheFile = "cache/itemEffDoneCache_forever.json";
         const itemEffects = readDBCSVtoMap<ItemEffect>(cfg.dataDir + "dbc/ItemEffect.csv", "ID");
         const itemXEffects = readDBCSVtoMap<ItemXItemEffect>(cfg.dataDir + "dbc/ItemXItemEffect.csv", "ID");
         const filteredItems = new Map<number, AddonEffectData[]>();
-        let doneEffectIds: { [id: number]: true | AddonEffectData[] };
         let counter = 0;
 
         // Item effect ID -> item IDs (an effect can be shared by several items)
@@ -135,55 +125,27 @@ export class ItemEffectsCreator
             effectToItems.get(link.ItemEffectID)!.push(link.ItemID);
         }
 
-        try
-        {
-            if (existsSync(cacheFile))
-            {
-                console.log("Load item effect cache...");
-                doneEffectIds = JSON.parse(readFileSync(cacheFile, "utf-8"));
-            }
-            else
-            {
-                doneEffectIds = {};
-            }
-        }
-        catch (error)
-        {
-            console.log(error);
-            process.exit(1);
-        }
-
         console.log("Building item effect data...");
 
         const logEvery = 500;
 
         for (const ie of itemEffects.values())
         {
-            const fromCache = doneEffectIds[ie.ID];
             const itemIds = (effectToItems.get(ie.ID) ?? []).filter(itemId => !!dbData[itemId]);
-            let effects: AddonEffectData[];
             counter++;
 
             if (counter % logEvery === 0) console.log(`${counter}/${itemEffects.size}`);
 
-            if (!fromCache)
-            {
-                doneEffectIds[ie.ID] = true;
-                if (ie.TriggerType !== 1) continue; // 1 == on equip auras, we can ignore the rest
-                // Items not in the DB shouldn't matter
-                if (itemIds.length === 0) continue;
-                effects = this.processSpell(ie.SpellID);
-                if (effects.length === 0) continue;
-                doneEffectIds[ie.ID] = effects;
-            }
-            else
-            {
-                if (fromCache === true) continue;
-                effects = fromCache;
-            }
+            if (ie.TriggerType !== 1) continue; // 1 == on equip auras, we can ignore the rest
+            // Items not in the DB (removed from Forever) don't matter
+            if (itemIds.length === 0) continue;
+            const effects = this.processSpell(ie.SpellID);
+            if (effects.length === 0) continue;
 
             for (const itemId of itemIds)
             {
+                if (!this.itemSpells.has(itemId)) this.itemSpells.set(itemId, []);
+                this.itemSpells.get(itemId)!.push(ie.SpellID);
                 if (!filteredItems.has(itemId)) filteredItems.set(itemId, []);
                 const flistentry = filteredItems.get(itemId)!;
                 for (const eff of effects)
@@ -191,16 +153,6 @@ export class ItemEffectsCreator
                     flistentry.push(eff);
                 }
             }
-        }
-
-        try
-        {
-            mkdirSync("cache", { recursive: true });
-            writeFileSync(cacheFile, JSON.stringify(doneEffectIds, null, 4));
-        }
-        catch (error)
-        {
-            console.log("Could not write item effect cache: " + error);
         }
 
         return filteredItems;
@@ -227,7 +179,17 @@ export class ItemEffectsCreator
             GENERAL: ""
         };
 
-        const ordered = await orderItemsByClass(itemEffectData);
+        // Items without a detail row (hotfix-only) have no allowed-class mask; use their effect spells' class.
+        const classHints = new Map<number, ReturnType<typeof classFromSpells>>();
+        for (const itemId of itemEffectData.keys())
+        {
+            if (dbData[itemId]?.hasDetails) continue;
+            const cls = classFromSpells(this.spellData, this.itemSpells.get(itemId) ?? []);
+            classHints.set(itemId, cls);
+            report(`Item ${itemId}: no detail row (hotfix-only), ${cls ? "class " + cls + " inferred from its effect spells" : "placed in the class-neutral file"}`);
+        }
+
+        const ordered = await orderItemsByClass(itemEffectData, classHints);
 
         luaStrings.GENERAL = createFileHead();
         luaStrings.GENERAL += "---@type ItemEffects\n"

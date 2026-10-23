@@ -19,6 +19,20 @@ _addon.itemEffects = {
             value = 10,
         },
     },
+    [280607] = { -- Lightning's Grasp
+        {
+            type = _addon.CONST.EFFECT_TYPE.SPELLMOD_FLAT_CRIT_CHANCE,
+            affectSpell = {1, 0, 0, 1},
+            value = 1,
+        },
+    },
+    [280605] = { -- Tidebringer's Claw
+        {
+            type = _addon.CONST.EFFECT_TYPE.SPELLMOD_FLAT_CRIT_CHANCE,
+            affectSpell = {192, 0, 0, 0},
+            value = 2,
+        },
+    },
     [21566] = { -- Rune of Perfection
         {
             type = _addon.CONST.EFFECT_TYPE.SCHOOLMOD_RESISTANCE_PENETRATION,

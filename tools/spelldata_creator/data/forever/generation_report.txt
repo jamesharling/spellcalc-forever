@@ -1,6 +1,6 @@
 SpellCalc Forever data generation report
 Client build: wowf 1.60.1.70532
-Generated: 2026-10-22T19:55:17.063Z
+Generated: 2026-10-22T21:11:44.712Z
 
 Everything listed here was skipped or guessed by the generator and should be reviewed.
 
@@ -661,112 +661,153 @@ Everything listed here was skipped or guessed by the generator and should be rev
   Item set bonus spell 1324298 effect 1 doesn't apply an aura (effect 3), skipped
   Item set bonus spell 1324309 effect 0: Triggered spell needs some love: 1324308
   Item set bonus spell 1324684 effect 0: Triggered spell needs some love: 1324683
-  Item set 81 (The Postmaster): none of its items exist in the item DB, skipped
-  Item set 121 (Cadaverous Garb): none of its items exist in the item DB, skipped
-  Item set 161 (Defias Leather): none of its items exist in the item DB, skipped
-  Item set 163 (Chain of the Scarlet Crusade): none of its items exist in the item DB, skipped
-  Item set 181 (Magister's Regalia): none of its items exist in the item DB, skipped
-  Item set 182 (Vestments of the Devout): none of its items exist in the item DB, skipped
-  Item set 183 (Dreadmist Raiment): none of its items exist in the item DB, skipped
-  Item set 185 (Wildheart Raiment): none of its items exist in the item DB, skipped
-  Item set 186 (Beaststalker Armor): none of its items exist in the item DB, skipped
-  Item set 187 (The Elements): none of its items exist in the item DB, skipped
-  Item set 188 (Lightforge Armor): none of its items exist in the item DB, skipped
-  Item set 201 (Arcanist Regalia): none of its items exist in the item DB, skipped
-  Item set 202 (Vestments of Prophecy): none of its items exist in the item DB, skipped
-  Item set 205 (Cenarion Raiment): none of its items exist in the item DB, skipped
-  Item set 207 (The Earthfury): none of its items exist in the item DB, skipped
-  Item set 210 (Netherwind Regalia): none of its items exist in the item DB, skipped
-  Item set 211 (Vestments of Transcendence): none of its items exist in the item DB, skipped
-  Item set 214 (Stormrage Raiment): none of its items exist in the item DB, skipped
-  Item set 216 (The Ten Storms): none of its items exist in the item DB, skipped
-  Item set 217 (Judgement Armor): none of its items exist in the item DB, skipped
-  Item set 241 (Scale of the Gods): none of its items exist in the item DB, skipped
-  Item set 261 (Spirit of Eskhandar): none of its items exist in the item DB, skipped
-  Item set 462 (Zanzil's Concentration): none of its items exist in the item DB, skipped
-  Item set 520 (Ironweave Battlesuit): none of its items exist in the item DB, skipped
-  Item set 1570 (Twilight Invoker's Vestments): none of its items exist in the item DB, skipped
-  Item set 1577 (Blackfathom Avenger's Mail): none of its items exist in the item DB, skipped
-  Item set 1578 (Blackfathom Slayer's Leather): none of its items exist in the item DB, skipped
-  Item set 1579 (Blackfathom Elementalist's Hide): none of its items exist in the item DB, skipped
-  Item set 1586 (Insulated Sorceror's Leathers): none of its items exist in the item DB, skipped
-  Item set 1587 (Hyperconductive Wizard's Attire): none of its items exist in the item DB, skipped
-  Item set 1588 (Hyperconductive Mender's Meditation): none of its items exist in the item DB, skipped
-  Item set 1589 (H.A.Z.A.R.D. Suit): none of its items exist in the item DB, skipped
-  Item set 1592 (Shockforged Warplate): none of its items exist in the item DB, skipped
-  Item set 1637 (Nightmare Prophet's Garb): none of its items exist in the item DB, skipped
-  Item set 1638 (Benevolent Prophet's Vestments): none of its items exist in the item DB, skipped
-  Item set 1640 (Coagulate Bloodguard's Leathers): none of its items exist in the item DB, skipped
-  Item set 1641 (Blood Corrupted Leathers): none of its items exist in the item DB, skipped
-  Item set 1642 (Lost Worshipper's Armor): none of its items exist in the item DB, skipped
-  Item set 1643 (Exiled Prophet's Raiment): none of its items exist in the item DB, skipped
-  Item set 1644 (Corrupted Spiritweaver's Mail): none of its items exist in the item DB, skipped
-  Item set 1649 (Wailing Berserker's Plate Armor): none of its items exist in the item DB, skipped
-  Item set 1650 (Banished Martyr's Full Plate): none of its items exist in the item DB, skipped
-  Item set 1664 (Cenarion Eclipse): none of its items exist in the item DB, skipped
-  Item set 1667 (Feralheart Raiment): none of its items exist in the item DB, skipped
-  Item set 1669 (Beastmaster Armor): none of its items exist in the item DB, skipped
-  Item set 1671 (Sorcerer's Regalia): none of its items exist in the item DB, skipped
-  Item set 1673 (Soulforge Armor): none of its items exist in the item DB, skipped
-  Item set 1675 (Vestments of the Virtuous): none of its items exist in the item DB, skipped
-  Item set 1679 (The Five Thunders): none of its items exist in the item DB, skipped
-  Item set 1681 (Deathmist Raiment): none of its items exist in the item DB, skipped
-  Item set 1698 (Cenarion Eclipse): none of its items exist in the item DB, skipped
-  Item set 1700 (Cenarion Bounty): none of its items exist in the item DB, skipped
-  Item set 1708 (Lawbringer Will): none of its items exist in the item DB, skipped
-  Item set 1709 (Dawn Prophecy): none of its items exist in the item DB, skipped
-  Item set 1713 (Earthfury Relief): none of its items exist in the item DB, skipped
-  Item set 1731 (Warlord's Earthshaker): none of its items exist in the item DB, skipped
-  Item set 1732 (Warlord's Thunderfist): none of its items exist in the item DB, skipped
-  Item set 1733 (Warlord's Wartide): none of its items exist in the item DB, skipped
-  Item set 1734 (Warlord's Threads): none of its items exist in the item DB, skipped
-  Item set 1746 (Field Marshal's Threads): none of its items exist in the item DB, skipped
-  Item set 1757 (Champion's Thunderfist): none of its items exist in the item DB, skipped
-  Item set 1758 (Champion's Wartide): none of its items exist in the item DB, skipped
-  Item set 1759 (Champion's Earthshaker): none of its items exist in the item DB, skipped
-  Item set 1760 (Champion's Threads): none of its items exist in the item DB, skipped
-  Item set 1774 (Lieutenant Commander's Threads): none of its items exist in the item DB, skipped
-  Item set 1781 (Spirit of Eskhandar): none of its items exist in the item DB, skipped
-  Item set 1791 (Green Dragon Mail): none of its items exist in the item DB, skipped
-  Item set 1792 (Black Dragon Mail): none of its items exist in the item DB, skipped
-  Item set 1793 (Devilsaur Armor): none of its items exist in the item DB, skipped
-  Item set 1795 (Zanzil's Concentration): none of its items exist in the item DB, skipped
-  Item set 1802 (Bounty of Stormrage): none of its items exist in the item DB, skipped
-  Item set 1803 (Cunning of Stormrage): none of its items exist in the item DB, skipped
-  Item set 1809 (Merciful Judgement): none of its items exist in the item DB, skipped
-  Item set 1810 (Radiant Judgement): none of its items exist in the item DB, skipped
-  Item set 1812 (Dawn of Transcendence): none of its items exist in the item DB, skipped
-  Item set 1816 (Relief of the Ten Storms): none of its items exist in the item DB, skipped
-  Item set 1820 (Corrupted Nemesis): none of its items exist in the item DB, skipped
-  Item set 1824 (Haruspex's Garb): none of its items exist in the item DB, skipped
-  Item set 1826 (Illusionist's Attire): none of its items exist in the item DB, skipped
-  Item set 1827 (Freethinker's Armor): none of its items exist in the item DB, skipped
-  Item set 1836 (Genesis Eclipse): none of its items exist in the item DB, skipped
-  Item set 1851 (Stormcaller's Eruption): none of its items exist in the item DB, skipped
-  Item set 1853 (Stormcaller's Impact): none of its items exist in the item DB, skipped
-  Item set 1854 (Doomcaller's Corruption): none of its items exist in the item DB, skipped
-  Item set 1884 (Plagueheart Stitchings): none of its items exist in the item DB, skipped
-  Item set 1885 (Plagueheart Raiment): none of its items exist in the item DB, skipped
-  Item set 1889 (The Earthshatterer's Storm): none of its items exist in the item DB, skipped
-  Item set 1893 (Raiments of Faith): none of its items exist in the item DB, skipped
-  Item set 1903 (Dreamwalker Ferocity): none of its items exist in the item DB, skipped
-  Item set 1904 (Dreamwalker Eclipse): none of its items exist in the item DB, skipped
-  Item set 1939 (Vestments of Revelation): none of its items exist in the item DB, skipped
-  Item set 1946 (Waywatcher Eclipse): none of its items exist in the item DB, skipped
-  Item set 1950 (The Soulcrusher): none of its items exist in the item DB, skipped
-  Item set 2098 (Manaflare Regalia): none of its items exist in the item DB, skipped
-  Item set 2099 (Grimstitch Armor): none of its items exist in the item DB, skipped
-  Item set 2100 (Demonheart Raiment): none of its items exist in the item DB, skipped
-  Item set 2101 (Wildstalker Armor): none of its items exist in the item DB, skipped
-  Item set 2102 (Battlegear of Glory): none of its items exist in the item DB, skipped
-  Item set 2105 (Raiments of Conviction): none of its items exist in the item DB, skipped
-  Item set 2106 (Justice Battlegear): none of its items exist in the item DB, skipped
-  Item set 2110 (The Spiritcaller's Rage): none of its items exist in the item DB, skipped
-  Item set 2111 (The Spiritcaller's Storm): none of its items exist in the item DB, skipped
-  Item set 2114 (Grovekeeper Eclipse): none of its items exist in the item DB, skipped
-  Item set 2115 (Grovekeeper Ferocity): none of its items exist in the item DB, skipped
+  Item set 81 (The Postmaster): none of its items exist in Forever (no exported or hotfix detail row), skipped
+  Item set 121 (Cadaverous Garb): none of its items exist in Forever (no exported or hotfix detail row), skipped
+  Item set 161 (Defias Leather): none of its items exist in Forever (no exported or hotfix detail row), skipped
+  Item set 163 (Chain of the Scarlet Crusade): none of its items exist in Forever (no exported or hotfix detail row), skipped
+  Item set 181 (Magister's Regalia): no item has a detail row (hotfix-only items), placed in the class-neutral file
+  Item set 182 (Vestments of the Devout): no item has a detail row (hotfix-only items), placed in the class-neutral file
+  Item set 183 (Dreadmist Raiment): no item has a detail row (hotfix-only items), placed in the class-neutral file
+  Item set 185 (Wildheart Raiment): no item has a detail row (hotfix-only items), placed in the class-neutral file
+  Item set 186 (Beaststalker Armor): no item has a detail row (hotfix-only items), placed in the class-neutral file
+  Item set 187 (The Elements): no item has a detail row (hotfix-only items), placed in the class-neutral file
+  Item set 188 (Lightforge Armor): no item has a detail row (hotfix-only items), placed in the class-neutral file
+  Item set 201 (Arcanist Regalia): none of its items exist in Forever (no exported or hotfix detail row), skipped
+  Item set 202 (Vestments of Prophecy): none of its items exist in Forever (no exported or hotfix detail row), skipped
+  Item set 205 (Cenarion Raiment): none of its items exist in Forever (no exported or hotfix detail row), skipped
+  Item set 207 (The Earthfury): none of its items exist in Forever (no exported or hotfix detail row), skipped
+  Item set 210 (Netherwind Regalia): none of its items exist in Forever (no exported or hotfix detail row), skipped
+  Item set 211 (Vestments of Transcendence): none of its items exist in Forever (no exported or hotfix detail row), skipped
+  Item set 214 (Stormrage Raiment): none of its items exist in Forever (no exported or hotfix detail row), skipped
+  Item set 216 (The Ten Storms): none of its items exist in Forever (no exported or hotfix detail row), skipped
+  Item set 217 (Judgement Armor): none of its items exist in Forever (no exported or hotfix detail row), skipped
+  Item set 241 (Scale of the Gods): none of its items exist in Forever (no exported or hotfix detail row), skipped
+  Item set 261 (Spirit of Eskhandar): none of its items exist in Forever (no exported or hotfix detail row), skipped
+  Item set 462 (Zanzil's Concentration): none of its items exist in Forever (no exported or hotfix detail row), skipped
+  Item set 520 (Ironweave Battlesuit): none of its items exist in Forever (no exported or hotfix detail row), skipped
+  Item set 1570 (Twilight Invoker's Vestments): none of its items exist in Forever (no exported or hotfix detail row), skipped
+  Item set 1577 (Blackfathom Avenger's Mail): none of its items exist in Forever (no exported or hotfix detail row), skipped
+  Item set 1578 (Blackfathom Slayer's Leather): none of its items exist in Forever (no exported or hotfix detail row), skipped
+  Item set 1579 (Blackfathom Elementalist's Hide): none of its items exist in Forever (no exported or hotfix detail row), skipped
+  Item set 1586 (Insulated Sorceror's Leathers): none of its items exist in Forever (no exported or hotfix detail row), skipped
+  Item set 1587 (Hyperconductive Wizard's Attire): none of its items exist in Forever (no exported or hotfix detail row), skipped
+  Item set 1588 (Hyperconductive Mender's Meditation): none of its items exist in Forever (no exported or hotfix detail row), skipped
+  Item set 1589 (H.A.Z.A.R.D. Suit): none of its items exist in Forever (no exported or hotfix detail row), skipped
+  Item set 1592 (Shockforged Warplate): none of its items exist in Forever (no exported or hotfix detail row), skipped
+  Item set 1637 (Nightmare Prophet's Garb): none of its items exist in Forever (no exported or hotfix detail row), skipped
+  Item set 1638 (Benevolent Prophet's Vestments): none of its items exist in Forever (no exported or hotfix detail row), skipped
+  Item set 1640 (Coagulate Bloodguard's Leathers): none of its items exist in Forever (no exported or hotfix detail row), skipped
+  Item set 1641 (Blood Corrupted Leathers): none of its items exist in Forever (no exported or hotfix detail row), skipped
+  Item set 1642 (Lost Worshipper's Armor): none of its items exist in Forever (no exported or hotfix detail row), skipped
+  Item set 1643 (Exiled Prophet's Raiment): none of its items exist in Forever (no exported or hotfix detail row), skipped
+  Item set 1644 (Corrupted Spiritweaver's Mail): none of its items exist in Forever (no exported or hotfix detail row), skipped
+  Item set 1649 (Wailing Berserker's Plate Armor): none of its items exist in Forever (no exported or hotfix detail row), skipped
+  Item set 1650 (Banished Martyr's Full Plate): none of its items exist in Forever (no exported or hotfix detail row), skipped
+  Item set 1664 (Cenarion Eclipse): none of its items exist in Forever (no exported or hotfix detail row), skipped
+  Item set 1667 (Feralheart Raiment): none of its items exist in Forever (no exported or hotfix detail row), skipped
+  Item set 1669 (Beastmaster Armor): none of its items exist in Forever (no exported or hotfix detail row), skipped
+  Item set 1671 (Sorcerer's Regalia): none of its items exist in Forever (no exported or hotfix detail row), skipped
+  Item set 1673 (Soulforge Armor): none of its items exist in Forever (no exported or hotfix detail row), skipped
+  Item set 1675 (Vestments of the Virtuous): none of its items exist in Forever (no exported or hotfix detail row), skipped
+  Item set 1679 (The Five Thunders): none of its items exist in Forever (no exported or hotfix detail row), skipped
+  Item set 1681 (Deathmist Raiment): none of its items exist in Forever (no exported or hotfix detail row), skipped
+  Item set 1698 (Cenarion Eclipse): none of its items exist in Forever (no exported or hotfix detail row), skipped
+  Item set 1700 (Cenarion Bounty): none of its items exist in Forever (no exported or hotfix detail row), skipped
+  Item set 1708 (Lawbringer Will): none of its items exist in Forever (no exported or hotfix detail row), skipped
+  Item set 1709 (Dawn Prophecy): none of its items exist in Forever (no exported or hotfix detail row), skipped
+  Item set 1713 (Earthfury Relief): none of its items exist in Forever (no exported or hotfix detail row), skipped
+  Item set 1731 (Warlord's Earthshaker): none of its items exist in Forever (no exported or hotfix detail row), skipped
+  Item set 1732 (Warlord's Thunderfist): none of its items exist in Forever (no exported or hotfix detail row), skipped
+  Item set 1733 (Warlord's Wartide): none of its items exist in Forever (no exported or hotfix detail row), skipped
+  Item set 1734 (Warlord's Threads): none of its items exist in Forever (no exported or hotfix detail row), skipped
+  Item set 1746 (Field Marshal's Threads): none of its items exist in Forever (no exported or hotfix detail row), skipped
+  Item set 1757 (Champion's Thunderfist): none of its items exist in Forever (no exported or hotfix detail row), skipped
+  Item set 1758 (Champion's Wartide): none of its items exist in Forever (no exported or hotfix detail row), skipped
+  Item set 1759 (Champion's Earthshaker): none of its items exist in Forever (no exported or hotfix detail row), skipped
+  Item set 1760 (Champion's Threads): none of its items exist in Forever (no exported or hotfix detail row), skipped
+  Item set 1774 (Lieutenant Commander's Threads): none of its items exist in Forever (no exported or hotfix detail row), skipped
+  Item set 1781 (Spirit of Eskhandar): none of its items exist in Forever (no exported or hotfix detail row), skipped
+  Item set 1791 (Green Dragon Mail): none of its items exist in Forever (no exported or hotfix detail row), skipped
+  Item set 1792 (Black Dragon Mail): none of its items exist in Forever (no exported or hotfix detail row), skipped
+  Item set 1793 (Devilsaur Armor): none of its items exist in Forever (no exported or hotfix detail row), skipped
+  Item set 1795 (Zanzil's Concentration): none of its items exist in Forever (no exported or hotfix detail row), skipped
+  Item set 1802 (Bounty of Stormrage): none of its items exist in Forever (no exported or hotfix detail row), skipped
+  Item set 1803 (Cunning of Stormrage): none of its items exist in Forever (no exported or hotfix detail row), skipped
+  Item set 1809 (Merciful Judgement): none of its items exist in Forever (no exported or hotfix detail row), skipped
+  Item set 1810 (Radiant Judgement): none of its items exist in Forever (no exported or hotfix detail row), skipped
+  Item set 1812 (Dawn of Transcendence): none of its items exist in Forever (no exported or hotfix detail row), skipped
+  Item set 1816 (Relief of the Ten Storms): none of its items exist in Forever (no exported or hotfix detail row), skipped
+  Item set 1820 (Corrupted Nemesis): none of its items exist in Forever (no exported or hotfix detail row), skipped
+  Item set 1824 (Haruspex's Garb): none of its items exist in Forever (no exported or hotfix detail row), skipped
+  Item set 1826 (Illusionist's Attire): none of its items exist in Forever (no exported or hotfix detail row), skipped
+  Item set 1827 (Freethinker's Armor): none of its items exist in Forever (no exported or hotfix detail row), skipped
+  Item set 1836 (Genesis Eclipse): none of its items exist in Forever (no exported or hotfix detail row), skipped
+  Item set 1851 (Stormcaller's Eruption): none of its items exist in Forever (no exported or hotfix detail row), skipped
+  Item set 1853 (Stormcaller's Impact): none of its items exist in Forever (no exported or hotfix detail row), skipped
+  Item set 1854 (Doomcaller's Corruption): none of its items exist in Forever (no exported or hotfix detail row), skipped
+  Item set 1884 (Plagueheart Stitchings): none of its items exist in Forever (no exported or hotfix detail row), skipped
+  Item set 1885 (Plagueheart Raiment): none of its items exist in Forever (no exported or hotfix detail row), skipped
+  Item set 1889 (The Earthshatterer's Storm): none of its items exist in Forever (no exported or hotfix detail row), skipped
+  Item set 1893 (Raiments of Faith): none of its items exist in Forever (no exported or hotfix detail row), skipped
+  Item set 1903 (Dreamwalker Ferocity): none of its items exist in Forever (no exported or hotfix detail row), skipped
+  Item set 1904 (Dreamwalker Eclipse): none of its items exist in Forever (no exported or hotfix detail row), skipped
+  Item set 1939 (Vestments of Revelation): none of its items exist in Forever (no exported or hotfix detail row), skipped
+  Item set 1946 (Waywatcher Eclipse): none of its items exist in Forever (no exported or hotfix detail row), skipped
+  Item set 1950 (The Soulcrusher): none of its items exist in Forever (no exported or hotfix detail row), skipped
+  Item set 2098 (Manaflare Regalia): none of its items exist in Forever (no exported or hotfix detail row), skipped
+  Item set 2099 (Grimstitch Armor): none of its items exist in Forever (no exported or hotfix detail row), skipped
+  Item set 2100 (Demonheart Raiment): none of its items exist in Forever (no exported or hotfix detail row), skipped
+  Item set 2101 (Wildstalker Armor): none of its items exist in Forever (no exported or hotfix detail row), skipped
+  Item set 2102 (Battlegear of Glory): none of its items exist in Forever (no exported or hotfix detail row), skipped
+  Item set 2105 (Raiments of Conviction): none of its items exist in Forever (no exported or hotfix detail row), skipped
+  Item set 2106 (Justice Battlegear): none of its items exist in Forever (no exported or hotfix detail row), skipped
+  Item set 2110 (The Spiritcaller's Rage): none of its items exist in Forever (no exported or hotfix detail row), skipped
+  Item set 2111 (The Spiritcaller's Storm): none of its items exist in Forever (no exported or hotfix detail row), skipped
+  Item set 2114 (Grovekeeper Eclipse): none of its items exist in Forever (no exported or hotfix detail row), skipped
+  Item set 2115 (Grovekeeper Ferocity): none of its items exist in Forever (no exported or hotfix detail row), skipped
 
-== Item effects (0)
+== Item effects (41)
+  Item effect spell 14825 effect 0: aura type 557 is not handled, skipped
+  Item effect spell 29417 effect 0: aura type 557 is not handled, skipped
+  Item effect spell 29418 effect 0: aura type 557 is not handled, skipped
+  Item effect spell 14824 effect 0: aura type 557 is not handled, skipped
+  Item effect spell 29413 effect 0: aura type 557 is not handled, skipped
+  Item effect spell 14827 effect 0: aura type 557 is not handled, skipped
+  Item effect spell 29416 effect 0: aura type 557 is not handled, skipped
+  Item effect spell 14826 effect 0: aura type 557 is not handled, skipped
+  Item effect spell 17768 effect 0: Error: Unhandled SPELLMOD_EFFECT2: 17768: // You gain an additional ${$m1/10} Rage from activating Enrage and an additional $m2 Energy from activating Shifting Power.
+  Item effect spell 17768 effect 1: SPELL_AURA_DUMMY spell not handled! 17768
+  Item effect spell 1320643 effect 0: aura type 155 is not handled, skipped
+  Item effect spell 29414 effect 0: aura type 557 is not handled, skipped
+  Item effect spell 14829 effect 0: aura type 557 is not handled, skipped
+  Item effect spell 418509 effect 0: SPELL_AURA_DUMMY spell not handled! 418509
+  Item effect spell 459217 effect 0: SPELL_AURA_DUMMY spell not handled! 459217
+  Item effect spell 1252323 effect 0 doesn't apply an aura (effect 24), skipped
+  Item effect spell 1270490 effect 0: aura type 142 is not handled, skipped
+  Item effect spell 1270490 effect 1: aura type 466 is not handled, skipped
+  Item effect spell 1291060 effect 0: Error: Unhandled SPELLMOD_EFFECT1: 1291060: // Your Enrage ability generates an additional $s1 Rage over its duration.
+  Item effect spell 1291075 effect 0: SPELL_AURA_DUMMY spell not handled! 1291075
+  Item effect spell 1291078 effect 0: SPELL_AURA_DUMMY spell not handled! 1291078
+  Item effect spell 1295267 effect 0: SPELL_AURA_DUMMY spell not handled! 1295267
+  Item effect spell 1300740 effect 0: SPELL_AURA_DUMMY spell not handled! 1300740
+  Item effect spell 1302968 effect 0: SPELL_AURA_DUMMY spell not handled! 1302968
+  Item effect spell 1302968 effect 1: aura type 470 is not handled, skipped
+  Item effect spell 1306433 effect 0: SPELL_AURA_DUMMY spell not handled! 1306433
+  Item effect spell 1306483 effect 0: SPELL_AURA_DUMMY spell not handled! 1306483
+  Item effect spell 1299095 effect 0: SPELL_AURA_DUMMY spell not handled! 1299095
+  Item effect spell 1316049 effect 0: SPELL_AURA_DUMMY spell not handled! 1316049
+  Item effect spell 23076 effect 0: SPELL_AURA_DUMMY spell not handled! 23076
+  Item effect spell 1317283 effect 0: SPELL_AURA_DUMMY spell not handled! 1317283
+  Item effect spell 1317286 effect 0: SPELL_AURA_DUMMY spell not handled! 1317286
+  Item effect spell 1317479 effect 0: SPELL_AURA_DUMMY spell not handled! 1317479
+  Item effect spell 1317480 effect 0: SPELL_AURA_DUMMY spell not handled! 1317480
+  Item effect spell 1317483 effect 0: SPELL_AURA_DUMMY spell not handled! 1317483
+  Item effect spell 1317985 effect 0: SPELL_AURA_DUMMY spell not handled! 1317985
+  Item effect spell 1318317 effect 0: SPELL_AURA_DUMMY spell not handled! 1318317
+  Item effect spell 1318325 effect 0: SPELL_AURA_DUMMY spell not handled! 1318325
+  Item effect spell 1318470 effect 0: SPELL_AURA_DUMMY spell not handled! 1318470
+  Item effect spell 1318514 effect 0: SPELL_AURA_DUMMY spell not handled! 1318514
+  Item effect spell 11789 effect 0: aura type 155 is not handled, skipped
 
 == Player auras (24)
   Nature's Grace [16886] effect 1 skipped: Error: SPELL_AURA_ADD_PCT_MODIFIER misc value 21 not handled: 16886 // 

@@ -20,6 +20,76 @@ _addon.itemSetData = {
             },
         }
     },
+    [181] = {
+        name = "Magister's Regalia",
+        effects = {
+            {
+                type = _addon.CONST.EFFECT_TYPE.MOD_MANA_PER_5,
+                value = 8,
+                need = 6,
+            },
+        }
+    },
+    [182] = {
+        name = "Vestments of the Devout",
+        effects = {
+            {
+                type = _addon.CONST.EFFECT_TYPE.MOD_MANA_PER_5,
+                value = 8,
+                need = 6,
+            },
+        }
+    },
+    [183] = {
+        name = "Dreadmist Raiment",
+        effects = {
+            {
+                type = _addon.CONST.EFFECT_TYPE.MOD_MANA_PER_5,
+                value = 8,
+                need = 6,
+            },
+        }
+    },
+    [185] = {
+        name = "Wildheart Raiment",
+        effects = {
+            {
+                type = _addon.CONST.EFFECT_TYPE.MOD_MANA_PER_5,
+                value = 8,
+                need = 6,
+            },
+        }
+    },
+    [186] = {
+        name = "Beaststalker Armor",
+        effects = {
+            {
+                type = _addon.CONST.EFFECT_TYPE.MOD_MANA_PER_5,
+                value = 8,
+                need = 6,
+            },
+        }
+    },
+    [187] = {
+        name = "The Elements",
+        effects = {
+            {
+                type = _addon.CONST.EFFECT_TYPE.MOD_MANA_PER_5,
+                value = 8,
+                need = 6,
+            },
+        }
+    },
+    [188] = {
+        name = "Lightforge Armor",
+        effects = {
+            {
+                type = _addon.CONST.EFFECT_TYPE.MOD_MANA_PER_5,
+                value = 8,
+                need = 6,
+            },
+        }
+    },
     [321] = {
         name = "Imperial Plate",
         effects = {
@@ -156,6 +226,62 @@ _addon.itemSetData = {
 _addon.setItemData = {
     [15062] = 143,
     [15063] = 143,
+    [16685] = 181,
+    [16683] = 181,
+    [16686] = 181,
+    [16684] = 181,
+    [16687] = 181,
+    [16689] = 181,
+    [16688] = 181,
+    [16682] = 181,
+    [16696] = 182,
+    [16691] = 182,
+    [16697] = 182,
+    [16693] = 182,
+    [16692] = 182,
+    [16695] = 182,
+    [16694] = 182,
+    [16690] = 182,
+    [16702] = 183,
+    [16703] = 183,
+    [16699] = 183,
+    [16701] = 183,
+    [16700] = 183,
+    [16704] = 183,
+    [16698] = 183,
+    [16705] = 183,
+    [16716] = 185,
+    [16715] = 185,
+    [16714] = 185,
+    [16720] = 185,
+    [16706] = 185,
+    [16718] = 185,
+    [16719] = 185,
+    [16717] = 185,
+    [16680] = 186,
+    [16675] = 186,
+    [16681] = 186,
+    [16677] = 186,
+    [16674] = 186,
+    [16678] = 186,
+    [16679] = 186,
+    [16676] = 186,
+    [16673] = 187,
+    [16670] = 187,
+    [16671] = 187,
+    [16667] = 187,
+    [16672] = 187,
+    [16668] = 187,
+    [16669] = 187,
+    [16666] = 187,
+    [16723] = 188,
+    [16725] = 188,
+    [16722] = 188,
+    [16726] = 188,
+    [16724] = 188,
+    [16728] = 188,
+    [16729] = 188,
+    [16727] = 188,
     [12424] = 321,
     [12426] = 321,
     [12425] = 321,

@@ -6,6 +6,7 @@
   "scripts": {
     "build": "tsc",
     "update-tables-forever": "tsc && node ./build/DataUpdater.js",
+    "update-hotfixes-forever": "tsc && node ./build/HotfixSnapshot.js",
     "start": "tsc && node ./build/app.js"
   },
   "author": "coolmodi",

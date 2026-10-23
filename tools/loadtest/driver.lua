@@ -325,6 +325,66 @@ end
 __AURAS.player = auraList
 __FireEvent("UNIT_AURA", "player", { isFullUpdate = true })
 settle()
-runAll("with " .. #auraList .. " buffs")
+local buffed = runAll("with " .. #auraList .. " buffs")
+
+-- Equipped items: the class's tier 0 set (hotfix-only items, see hotfixItems.json), then every item with
+-- effects in the data, then nothing again, which must restore the numbers.
+local ARMOR_SLOTS = { 1, 2, 3, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15 }
+local TIER0 = { MAGE = "Magister's Regalia", PRIEST = "Vestments of the Devout", WARLOCK = "Dreadmist Raiment",
+    DRUID = "Wildheart Raiment", SHAMAN = "The Elements", PALADIN = "Lightforge Armor" }
+local function equip(itemIds)
+    __INVENTORY = {}
+    for i, itemId in ipairs(itemIds) do __INVENTORY[ARMOR_SLOTS[i]] = itemId end
+    __FireEvent("UNIT_INVENTORY_CHANGED", "player")
+    settle()
+end
+
+local setId
+for id, set in pairs(A.itemSetData or {}) do
+    if set.name == TIER0[__CLASS] then setId = id end
+end
+if not setId then
+    emit("FAIL tier 0 set " .. tostring(TIER0[__CLASS]) .. " not in the data")
+else
+    local setItems = {}
+    for itemId, id in pairs(A.setItemData) do
+        if id == setId then setItems[#setItems + 1] = itemId end
+    end
+    table.sort(setItems)
+    local expected = 0
+    for _, effect in ipairs(A.itemSetData[setId].effects) do
+        if effect.need <= #setItems and effect.type == A.CONST.EFFECT_TYPE.MOD_MANA_PER_5 then expected = expected + effect.value end
+    end
+    local mp5Before = A.stats.mp5.val
+    equip(setItems)
+    runAll("with " .. TIER0[__CLASS])
+    local gained = A.stats.mp5.val - mp5Before
+    emit(("set: %d pieces of %s [%d] equipped, mp5 +%d from its bonuses"):format(#setItems, TIER0[__CLASS], setId, gained))
+    if gained ~= expected or expected == 0 then emit(("FAIL %s gave mp5 +%d, expected +%d"):format(TIER0[__CLASS], gained, expected)) end
+end
+
+local effectItems = {}
+for itemId in pairs(A.itemEffects or {}) do effectItems[#effectItems + 1] = itemId end
+table.sort(effectItems)
+local itemChanged = {}
+for first = 1, #effectItems, #ARMOR_SLOTS do
+    local batch = {}
+    for i = first, math.min(first + #ARMOR_SLOTS - 1, #effectItems) do batch[#batch + 1] = effectItems[i] end
+    equip(batch)
+    for id, v in pairs(runAll(("with item effects %d-%d"):format(first, first + #batch - 1))) do
+        if buffed[id] and math.abs(buffed[id] - v) > 1e-6 then itemChanged[id] = true end
+    end
+end
+local changedCount = 0
+for _ in pairs(itemChanged) do changedCount = changedCount + 1 end
+emit(("item effects: %d items equipped in batches of %d, changed the average of %d spells"):format(#effectItems, #ARMOR_SLOTS, changedCount))
+
+equip({})
+local unequipped = runAll("items removed")
+local itemsNotRestored = 0
+for id, v in pairs(unequipped) do
+    if buffed[id] and math.abs(buffed[id] - v) > 1e-6 then itemsNotRestored = itemsNotRestored + 1 end
+end
+if itemsNotRestored > 0 then emit(("FAIL %d spells differ after removing all items"):format(itemsNotRestored)) end
 
 return table.concat(out, "\n")

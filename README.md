@@ -85,6 +85,9 @@ Nothing here has run on a live Forever client (the beta closed before this port 
 9. Target auras: if aura data on the target turns out to be readable in combat (in the open world, say), the
    removed target scan is in the git history (`system/unitAuras.lua` before the assumed target auras).
    Also check the "from caster" debuffs (aura types 270 and 271) really only boost their caster's damage.
+10. Hotfixed items: launch-day hotfixes can add items and sets. After logging in on launch day, run
+    `npm run update-hotfixes-forever` and regenerate (see *Regenerating data*). Check a tier 0 set's bonus
+    shows up (`/sc debug` prints "Add set bonus" when the pieces go on).
 
 ## Regenerating data
 
@@ -101,6 +104,19 @@ npm start                       # writes data/forever/* and data/forever/generat
 
 `npm run update-tables-forever -- 1.60.1.70532` pins a build. Every generated file carries the build it was
 made from in its first line.
+
+The wago.tools tables are the DB2 files as shipped in the client build, without the rows the server pushes as
+hotfixes. Forever adds and reworks a lot of items that way (the tier 0 sets among them), so their detail row is
+missing from the export, just like the rows of items Forever removed. `data/forever/hotfixItems.json` tells the
+two apart. It is a committed snapshot of the item rows in the client's hotfix cache, with their names. To
+refresh it, log in to the Forever client once, then run:
+
+```bash
+npm run update-hotfixes-forever -- "C:/Program Files (x86)/World of Warcraft/_forever_"
+```
+
+The path is the client folder (or `DBCache.bin` itself); that folder is also the default. The report warns when
+the snapshot's build differs from the tables'.
 
 What the generator does differently from upstream, because of the Forever (Mainline-style) database:
 
@@ -125,6 +141,12 @@ What the generator does differently from upstream, because of the Forever (Mainl
 - **Item effects** are linked through `ItemXItemEffect`. Forever turned most "Equip: +X" spell bonuses into
   plain item stats (which the addon reads from the API), so `itemEffects.lua` only lists the remaining spell
   modifiers and procs.
+- **Items and sets from hotfixes.** An item counts when it has a detail row in the export or in the hotfix
+  snapshot; the rest of `Item.csv` (removed items, most of them Season of Discovery leftovers) is skipped. A
+  hotfix row has no usable allowed-class mask, so the class file a hotfix-only item or set goes to comes from
+  its effect or bonus spells: the class whose spells they modify, if they all agree. Otherwise it goes to the
+  class-neutral file, which every class loads. That is where the tier 0 sets end up, because their bonuses are
+  stats and procs.
 - **Target auras** come from the curated list in `data/forever/targetAuras.json`: the generator picks the
   highest rank of each entry and converts its effects, including Forever's "damage taken from caster" (270,
   271) and armor reduction (674) aura types. The bleed mechanic list and the full target aura dump are gone.
@@ -154,7 +176,9 @@ npm test
   hunter and rogue are loaded too, to check the tooltip hook copes with a class that has no data. It puts
   spells on the stock action bar and checks their values show, sit above the cooldown frame, and follow every
   anchor, outline and shadow setting, validates the settings table with AceConfig, and checks old saved
-  settings migrate. Lua errors,
+  settings migrate. Finally it equips the class's tier 0 set (hotfix-only items) and checks its set bonus
+  applies, equips every item that has effects in the data, then unequips everything and checks the numbers
+  return to what they were. Lua errors,
   `NaN` or infinite results, min above max, and talents not read back fail the run.
 
 It catches load errors, broken data references and crashes in the calculation and tooltip code. The stub

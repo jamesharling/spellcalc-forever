@@ -3,7 +3,7 @@ import { ClassSpellSets } from "./ClassSpellSets";
 import { cfg } from "./config";
 import { readDBCSVtoMap } from "./CSVReader";
 import { AuraHandlers, USELESS_AURAS } from "./ItemAuraHandlers";
-import { createEffectLua, createFileHead, getItemDbData, orderItemsByClass } from "./itemFunctions";
+import { classFromSpells, createEffectLua, createFileHead, getItemDbData, orderItemsByClass } from "./itemFunctions";
 import { SpellData } from "./SpellData";
 import { report } from "./report";
 
@@ -66,6 +66,8 @@ interface ItemSetAddonData
     ID: number,
     name: string,
     items: number[],
+    /** Bonus spells of the set, to infer the class when no item has a detail row. */
+    spellIds: number[],
     effects: {
         need: number,
         effect: AddonEffectData
@@ -179,6 +181,7 @@ export class ItemSetCreator
             ID: setDataEntry.ID,
             name: setDataEntry.Name_lang,
             items: [],
+            spellIds: (setSpells ?? []).map(entry => entry.SpellID),
             effects: []
         }
 
@@ -291,20 +294,29 @@ export class ItemSetCreator
         console.log("Creating Lua for  item set data...");
         const processedData = this.getProcessedSetData();
 
-        // Represent each set by one of its items that exists in the item DB (the class ordering looks it up there)
+        // Represent each set by one of its items (the class ordering looks it up in the item DB). Prefer an
+        // item with a detail row; sets made of hotfix-only items get their class from the bonus spells.
         const dbData = getItemDbData();
         const itemToSetId = new Map<number, ItemSetAddonData>();
+        const classHints = new Map<number, ReturnType<typeof classFromSpells>>();
         for (const setData of processedData.values())
         {
-            const representative = setData.items.find(itemId => !!dbData[itemId]);
+            const representative = setData.items.find(itemId => dbData[itemId]?.hasDetails)
+                ?? setData.items.find(itemId => !!dbData[itemId]);
             if (typeof representative === "undefined")
             {
-                report(`Item set ${setData.ID} (${setData.name}): none of its items exist in the item DB, skipped`);
+                report(`Item set ${setData.ID} (${setData.name}): none of its items exist in Forever (no exported or hotfix detail row), skipped`);
                 continue;
+            }
+            if (!dbData[representative].hasDetails)
+            {
+                const cls = classFromSpells(this.spellData, setData.spellIds);
+                classHints.set(representative, cls);
+                report(`Item set ${setData.ID} (${setData.name}): no item has a detail row (hotfix-only items), ${cls ? "class " + cls + " inferred from its bonus spells" : "placed in the class-neutral file"}`);
             }
             itemToSetId.set(representative, setData);
         }
-        const ordered = await orderItemsByClass(itemToSetId);
+        const ordered = await orderItemsByClass(itemToSetId, classHints);
 
         const luaStrings = {
             warrior: "",
