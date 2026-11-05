@@ -2,118 +2,6 @@
 local _addon = select(2, ...);
 local SCHOOL = _addon.CONST.SCHOOL;
 
-local CREATURE_TYPE_LOC_TO_ID = {
-    ["Beast"] = 1,
-    ["Wildtier"] = 1,
-    ["Bestia"] = 1,
-    ["Bête"] = 1,
-    ["Fera"] = 1,
-    ["Животное"] = 1,
-    ["야수"] = 1,
-    ["野兽"] = 1,
-    ["野獸"] = 1,
-
-    ["Dragonkin"] = 2,
-    ["Drachkin"] = 2,
-    ["Dragon"] = 2,
-    ["Dragón"] = 2,
-    ["Draconien"] = 2,
-    ["Dragoide"] = 2,
-    ["Dracônico"] = 2,
-    ["Дракон"] = 2,
-    ["용족"] = 2,
-    ["龙类"] = 2,
-    ["龍類"] = 2,
-
-    ["Demon"] = 3,
-    ["Dämon"] = 3,
-    ["Demonio"] = 3,
-    ["Démon"] = 3,
-    ["Demone"] = 3,
-    ["Demônio"] = 3,
-    ["Демон"] = 3,
-    ["악마"] = 3,
-    ["恶魔"] = 3,
-    ["惡魔"] = 3,
-
-    ["Elemental"] = 4,
-    ["Elementar"] = 4,
-    ["Élémentaire"] = 4,
-    ["Elementale"] = 4,
-    ["Элементаль"] = 4,
-    ["정령"] = 4,
-    ["元素生物"] = 4,
-
-    ["Giant"] = 5,
-    ["Riese"] = 5,
-    ["Gigante"] = 5,
-    ["Géant"] = 5,
-    ["Великан"] = 5,
-    ["거인"] = 5,
-    ["巨人"] = 5,
-
-    ["Undead"] = 6,
-    ["Untoter"] = 6,
-    ["No-muerto"] = 6,
-    ["Mort-vivant"] = 6,
-    ["Non Morto"] = 6,
-    ["Renegado"] = 6,
-    ["Нежить"] = 6,
-    ["언데드"] = 6,
-    ["亡灵"] = 6,
-    ["不死族"] = 6,
-
-    ["Humanoid"] = 7,
-    ["Humanoide"] = 7,
-    ["Humanoïde"] = 7,
-    ["Umanoide"] = 7,
-    ["Гуманоид"] = 7,
-    ["인간형"] = 7,
-    ["人型生物"] = 7,
-
-    ["Critter"] = 8,
-    ["Kleintier"] = 8,
-    ["Alma"] = 8,
-    ["Bestiole"] = 8,
-    ["Animale"] = 8,
-    ["Bicho"] = 8,
-    ["Существо"] = 8,
-    ["동물"] = 8,
-    ["小动物"] = 8,
-    ["小動物"] = 8,
-
-    ["Mechanical"] = 9,
-    ["Mechanisch"] = 9,
-    ["Mecánico"] = 9,
-    ["Machine"] = 9,
-    ["Meccanico"] = 9,
-    ["Mecânico"] = 9,
-    ["Механизм"] = 9,
-    ["기계"] = 9,
-    ["机械"] = 9,
-    ["機械"] = 9,
-
-    ["Not specified"] = 10,
-    ["Nicht spezifiziert"] = 10,
-    ["No especificado"] = 10,
-    ["Sin especificar"] = 10,
-    ["Non spécifié"] = 10,
-    ["Non Specificato"] = 10,
-    ["Não especificado"] = 10,
-    ["Не указано"] = 10,
-    ["기타"] = 10,
-    ["未指定"] = 10,
-    ["不明"] = 10,
-
-    ["Totem"] = 11,
-    ["Tótem"] = 11,
-    ["Totém"] = 11,
-    ["Тотем"] = 11,
-    ["토템"] = 11,
-    ["图腾"] = 11,
-    ["圖騰"] = 11,
-}
-
 ---@class Target
 ---@field class string|nil
 ---@field creatureType number|nil
@@ -190,24 +78,28 @@ function Target:GetEffectiveResistance(school)
 end
 
 --- Update currently selected target.
--- Unit identity (name, GUID, creature type, class) can be a secret value inside instances and in
+-- Unit identity (name, GUID, creature type, class, level) can be a secret value inside instances and in
 -- combat; such values are treated as unknown rather than compared or used as table keys.
 function Target:Update()
     local Unsecret = _addon.api.Unsecret;
     local rawName = UnitName("target");
     local pLevel = UnitLevel("player");
     local _, class = UnitClass("target");
+    -- Second return: the CreatureType ID (1 Beast ... 7 Humanoid ... 11 Totem), so no localized names.
+    local _, creatureTypeId = UnitCreatureType("target");
+    local level = UnitLevel("target");
+    local tLevel = Unsecret(level);
 
     self.class = Unsecret(class);
     self.isSelf = Unsecret(UnitIsUnit("player", "target"), false) == true;
     self.isPlayer = Unsecret(UnitIsPlayer("target"), false) == true;
     self.exists = rawName ~= nil;
 
-    if not self.exists or not SpellCalc_settings.useCurrentTarget then
+    -- An unknown (secret) level gets the default level difference, not the skull level (-1).
+    if not self.exists or not SpellCalc_settings.useCurrentTarget or tLevel == nil then
         self.level = pLevel + SpellCalc_settings.defaultTargetLvlOffset;
         self.levelDiff = SpellCalc_settings.defaultTargetLvlOffset;
     else
-        local tLevel = Unsecret(UnitLevel("target"), -1);
         if tLevel == -1 then
             tLevel = pLevel + 3;
         end
@@ -224,8 +116,7 @@ function Target:Update()
 
     if self.exists then
         if not self.isPlayer then
-            local creatureType = Unsecret(UnitCreatureType("target"));
-            self.creatureType = creatureType and CREATURE_TYPE_LOC_TO_ID[creatureType] or nil;
+            self.creatureType = Unsecret(creatureTypeId);
         else
             self.creatureType = 7;
         end

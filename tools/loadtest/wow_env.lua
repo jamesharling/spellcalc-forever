@@ -546,22 +546,63 @@ GetWeaponEnchantInfo = function() return false end
 -- Unit and stats (plausible level 60 caster values)
 ----------------------------------------------------------------------------------------------
 local CLASS_IDS = { WARRIOR = 1, PALADIN = 2, HUNTER = 3, ROGUE = 4, PRIEST = 5, SHAMAN = 7, MAGE = 8, WARLOCK = 9, DRUID = 11 }
-issecretvalue = function() return false end
+-- Secret values: opaque proxies that issecretvalue recognises and that raise an error when the addon
+-- does arithmetic, compares, concatenates, indexes or calls them, like the client's. (Using one as a
+-- table key can't be trapped in plain Lua; the driver checks no secret ends up in the addon's state.)
+local secrets = setmetatable({}, { __mode = "k" })
+local function secretError() error("attempted to use a secret value", 2) end
+local SECRET_MT = { __index = secretError, __newindex = secretError, __len = secretError, __concat = secretError,
+    __add = secretError, __sub = secretError, __mul = secretError, __div = secretError, __mod = secretError,
+    __unm = secretError, __lt = secretError, __le = secretError, __call = secretError,
+    __tostring = function() return "<secret>" end }
+function __Secret(v)
+    if v == nil then return nil end
+    local proxy = setmetatable({}, SECRET_MT)
+    secrets[proxy] = true
+    return proxy
+end
+issecretvalue = function(v) return secrets[v] == true end
 InCombatLockdown = function() return false end
+
+-- The target, set by the driver: { name, level, creatureType = { name, id }, class, isPlayer, secret }.
+-- With secret = true every identity value comes back secret, as inside instances and in combat.
+__TARGET = nil
+local function targetValues(unit, ...)
+    if unit ~= "target" or not __TARGET then return nil end
+    if not __TARGET.secret then return ... end
+    local n = select("#", ...)
+    local out = { ... }
+    for i = 1, n do out[i] = __Secret(out[i]) end
+    return unpack(out, 1, n)
+end
 UnitClass = function(unit)
     if unit == "player" then return __CLASS:sub(1, 1) .. __CLASS:sub(2):lower(), __CLASS, CLASS_IDS[__CLASS] end
-    return nil
+    local class = __TARGET and __TARGET.class
+    return targetValues(unit, class and (class:sub(1, 1) .. class:sub(2):lower()), class, class and CLASS_IDS[class])
 end
 UnitRace = function(unit) if unit == "player" then return "Human", "Human", 1 end end
-UnitName = function(unit) if unit == "player" then return "Tester" end end
+UnitName = function(unit)
+    if unit == "player" then return "Tester" end
+    return targetValues(unit, __TARGET and __TARGET.name)
+end
 UnitGUID = function(unit) if unit == "player" then return "Player-1-00000001" end end
-UnitExists = function(unit) return unit == "player" end
+UnitExists = function(unit) return unit == "player" or (unit == "target" and __TARGET ~= nil) end
 UnitIsUnit = function(a, b) return a == b end
-UnitIsPlayer = function(unit) return unit == "player" end
+UnitIsPlayer = function(unit)
+    if unit == "player" then return true end
+    return targetValues(unit, __TARGET and __TARGET.isPlayer or false)
+end
 UnitIsFriend = function() return true end
 UnitCanAttack = function() return false end
-UnitCreatureType = function() return nil end
-UnitLevel = function(unit) if unit == "player" then return 60 end return -1 end
+UnitCreatureType = function(unit)
+    local ct = __TARGET and __TARGET.creatureType
+    if not ct then return nil end
+    return targetValues(unit, ct[1], ct[2])
+end
+UnitLevel = function(unit)
+    if unit == "player" then return 60 end
+    return targetValues(unit, __TARGET and __TARGET.level or -1)
+end
 UnitEffectiveLevel = UnitLevel
 UnitSex = function() return 2 end
 UnitStat = function(_, i) return 100, 150, 50, 0 end

@@ -21,6 +21,8 @@ function api.IsSecret(v)
 end
 
 ---Return the value, or `fallback` if it is a secret value.
+---Don't pass a call that returns several values (`Unsecret(UnitCreatureType(unit))`): its second
+---value becomes the fallback, which is just as secret. Take the value into a local first.
 ---@generic T
 ---@param v T
 ---@param fallback T|nil

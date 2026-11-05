@@ -57,7 +57,8 @@ from upstream SpellCalc in more than the TOC:
 - **Combat restrictions.** Aura data and player stats become secret values in combat. `system/combat.lua`
   makes every read skip while in combat, keeps the last snapshot, and re-reads everything on
   `PLAYER_REGEN_ENABLED`. Tooltips and action-bar numbers in combat show the last out-of-combat state.
-  Target identity that comes back secret (inside instances) is treated as unknown.
+  Target identity that comes back secret (inside instances, and in combat) is treated as unknown: no class or
+  creature type, and the default level difference instead of the target's level.
 - **No downranking penalty** on coefficients: Forever's spell data carries the full coefficient on every rank.
 - Settings open through the Settings API (`Settings.OpenToCategory`); Ace3 updated to r1386.
 
@@ -166,7 +167,9 @@ npm install
 npm test
 ```
 
-- `syntax.js` parses every Lua file of the addon and its libraries as Lua 5.1 (no `goto`).
+- `syntax.js` parses every Lua file of the addon and its libraries as Lua 5.1 (no `goto`). It also rejects
+  `Unsecret(f(...))` in the addon's own files. When the only argument is a call, the call's second return
+  value becomes the fallback, and that value is just as secret as the first.
 - `run.js` loads the addon in TOC order, libraries included, into a Lua VM ([fengari](https://github.com/fengari-lua/fengari))
   on a stubbed WoW API (`wow_env.lua`), once per supported class. `driver.lua` then fires the login events and
   calculates every spell in the generated data, with no talents, with every talent at max rank (through a
@@ -178,7 +181,9 @@ npm test
   anchor, outline and shadow setting, validates the settings table with AceConfig, and checks old saved
   settings migrate. Finally it equips the class's tier 0 set (hotfix-only items) and checks its set bonus
   applies, equips every item that has effects in the data, then unequips everything and checks the numbers
-  return to what they were. Lua errors,
+  return to what they were. Last, it selects a target, then the same target with every identity value secret
+  (the stub's secret values raise an error when used, like the client's), and checks the secret one is
+  treated as unknown and no secret value is stored. Lua errors,
   `NaN` or infinite results, min above max, and talents not read back fail the run.
 
 It catches load errors, broken data references and crashes in the calculation and tooltip code. The stub

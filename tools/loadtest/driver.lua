@@ -387,4 +387,37 @@ for id, v in pairs(unequipped) do
 end
 if itemsNotRestored > 0 then emit(("FAIL %d spells differ after removing all items"):format(itemsNotRestored)) end
 
+-- Targets: a readable one, then the same target with secret identity (inside instances, in combat).
+-- Secret values must be treated as unknown and never stored.
+local function selectTarget(t)
+    __TARGET = t
+    __FireEvent("PLAYER_TARGET_CHANGED")
+    settle()
+end
+local function targetState()
+    local T = A.Target
+    return ("level %s (diff %s), creature type %s, class %s, player %s"):format(tostring(T.level), tostring(T.levelDiff),
+        tostring(T.creatureType), tostring(T.class), tostring(T.isPlayer))
+end
+local dummy = { name = "Risen Guard", level = 62, creatureType = { "Undead", 6 }, class = "WARRIOR", isPlayer = false }
+selectTarget(dummy)
+runAll("readable target")
+emit("readable target: " .. targetState())
+if A.Target.level ~= 62 or A.Target.levelDiff ~= 2 or A.Target.creatureType ~= 6 or A.Target.class ~= "WARRIOR" then
+    emit("FAIL readable target not read correctly: " .. targetState())
+end
+
+dummy.secret = true
+selectTarget(dummy)
+runAll("secret target")
+emit("secret target: " .. targetState())
+for k, v in pairs(A.Target) do
+    if issecretvalue(v) then emit("FAIL secret value stored in Target." .. tostring(k)) end
+end
+local defaultLevel = UnitLevel("player") + SpellCalc_settings.defaultTargetLvlOffset
+if A.Target.level ~= defaultLevel or A.Target.creatureType ~= nil or A.Target.class ~= nil then
+    emit("FAIL secret target not treated as unknown: " .. targetState())
+end
+selectTarget(nil)
+
 return table.concat(out, "\n")
