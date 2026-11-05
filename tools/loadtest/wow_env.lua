@@ -354,7 +354,8 @@ for i = 1, 12 do
     -- Stock action buttons have a cooldown frame one level above the button.
     button.cooldown = newObject("Cooldown", nil, button)
     button.cooldown:SetFrameLevel(button:GetFrameLevel() + 1)
-    for _, bar in ipairs({ "MultiBarRightButton", "MultiBarLeftButton", "MultiBarBottomRightButton", "MultiBarBottomLeftButton" }) do
+    for _, bar in ipairs({ "MultiBarRightButton", "MultiBarLeftButton", "MultiBarBottomRightButton", "MultiBarBottomLeftButton",
+        "MultiBar5Button", "MultiBar6Button", "MultiBar7Button" }) do
         newObject("CheckButton", bar .. i, UIParent)
     end
 end

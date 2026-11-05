@@ -52,7 +52,7 @@ from upstream SpellCalc in more than the TOC:
 - **Action bar text** sits on its own overlay frame above the button's cooldown swipe (text drawn on the
   button itself is hidden by the swipe), and Settings > Actionbar adds an anchor point with x/y pixel
   offsets, thick outline styles and a drop shadow. The old "percent of button height" position migrates to
-  the bottom anchor with a matching offset.
+  the bottom anchor with a matching offset. The stock action bars 6–8 (slots 145–180) get values too.
 - **Talents** are read from the trait system (`C_SpecializationInfo` / `C_ClassTalents` + `C_Traits`), which is how
   Forever stores its classic-style trees. Talent data is keyed by the rank-1 spell ID of each talent
   (`spellId` in `data/forever/classes/*_talents.lua`) instead of tree/tier/column.
@@ -181,9 +181,10 @@ npm test
   spell too. It then enables every target aura offered in the settings through the real settings options,
   checks they change the numbers, and checks that clearing them restores the previous numbers. Warrior,
   hunter and rogue are loaded too, to check the tooltip hook copes with a class that has no data. It puts
-  spells on the stock action bar and checks their values show, sit above the cooldown frame, and follow every
-  anchor, outline and shadow setting. It checks macro slots and Macro tooltips show the macro's current spell,
-  including after the spell switches. It validates the settings table with AceConfig, and checks old saved
+  spells on the stock action bars (6–8 included) and checks their values show, sit above the cooldown frame,
+  and follow every anchor, outline and shadow setting. It checks macro slots and Macro tooltips show the
+  macro's current spell, including after the spell switches. It validates the settings table with AceConfig,
+  and checks old saved
   settings migrate. Finally it equips the class's tier 0 set (hotfix-only items) and checks its set bonus
   applies, equips every item that has effects in the data, then unequips everything and checks the numbers
   return to what they were. Last, it selects a target, then the same target with every identity value secret

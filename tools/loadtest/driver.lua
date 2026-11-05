@@ -290,6 +290,26 @@ do
     __FireEvent("ACTIONBAR_SLOT_CHANGED", 0)
 end
 
+-- Action bars 6-8 (slots 145-180): first and last slot of each
+do
+    local abv = A.ActionBarValues
+    local slots = { 145, 156, 157, 168, 169, 180 }
+    for i, slot in ipairs(slots) do
+        __ACTION_SLOTS[slot] = __ACTION_SLOTS[i]
+        __FireEvent("ACTIONBAR_SLOT_CHANGED", slot)
+    end
+    __TickOnUpdate(10, 0.1)
+    local shown = 0
+    for i, slot in ipairs(slots) do
+        local text = abv:GetSlotText(slot)
+        if text and text ~= "" and text == abv:GetSlotText(i) then shown = shown + 1 end
+    end
+    emit(("action bars 6-8: %d of %d slots show their spell's value"):format(shown, #slots))
+    if shown ~= #slots then emit("FAIL action bars 6-8 don't show values") end
+    for _, slot in ipairs(slots) do __ACTION_SLOTS[slot] = nil end
+    __FireEvent("ACTIONBAR_SLOT_CHANGED", 0)
+end
+
 local baseSamples = {}
 for _, id in ipairs(sampleIds) do baseSamples[id] = sampleLine(id) end
 

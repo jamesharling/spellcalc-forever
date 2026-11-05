@@ -140,6 +140,12 @@ local function CreateStockButtonFS()
         buttonFontStrings[i+36] = CreateActionButtonFS(_G["MultiBarLeftButton"..i]);
         buttonFontStrings[i+48] = CreateActionButtonFS(_G["MultiBarBottomRightButton"..i]);
         buttonFontStrings[i+60] = CreateActionButtonFS(_G["MultiBarBottomLeftButton"..i]);
+        -- Action bars 6-8 (action pages 13-15)
+        for bar, offset in pairs({ MultiBar5Button = 144, MultiBar6Button = 156, MultiBar7Button = 168 }) do
+            if _G[bar..i] then
+                buttonFontStrings[i+offset] = CreateActionButtonFS(_G[bar..i]);
+            end
+        end
     end
 end
 

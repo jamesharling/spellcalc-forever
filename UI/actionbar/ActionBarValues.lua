@@ -15,6 +15,9 @@ local needsUpdate = {};
 ---@type table<integer, table<integer, boolean|nil>>
 local slotMap = {};
 local actionbarSupport = "STOCK";
+--- Action slots: pages 1-10 (1-120: bars 1-5 and the main bar's stance pages), 11-12 (121-144),
+--- 13-15 (145-180: bars 6-8).
+local NUM_ACTION_SLOTS = 180;
 ---@type ActionButtonText
 local buttonText;
 
@@ -221,6 +224,13 @@ local function SlotUpdate(slot)
     end
 end
 
+--- Update every action slot
+local function FullSlotUpdate()
+    for i = 1, NUM_ACTION_SLOTS do
+        SlotUpdate(i);
+    end
+end
+
 ----------------------------------------------------------------
 -- Actionbar Paging
 ----------------------------------------------------------------
@@ -381,9 +391,7 @@ _addon.events.Register("PLAYER_LOGIN", function ()
         delayedButtonUpdate = delayedButtonUpdate - diff;
         if delayedButtonUpdate <= 0 then
             _addon.util.PrintDebug("Doing delayed full actionbar slot update")
-            for i = 1, 120 do
-                SlotUpdate(i);
-            end
+            FullSlotUpdate();
             frame:SetScript("OnUpdate", UpdateLoop);
         end
     end);
@@ -393,20 +401,10 @@ end)
 
 local function DelayedFullSlotUpdate()
     -- There's no slot update event and slots still have wrong value at this point.
-    C_Timer.After(2, function ()
-        for i=1, 120 do
-            SlotUpdate(i);
-        end
-    end);
+    C_Timer.After(2, FullSlotUpdate);
 end
 _addon.events.Register("ACTIVE_TALENT_GROUP_CHANGED", DelayedFullSlotUpdate);
 _addon.events.Register("TRAIT_CONFIG_UPDATED", DelayedFullSlotUpdate);
-
-local function FullSlotUpdate()
-    for i = 1, 120 do
-        SlotUpdate(i);
-    end
-end
 
 _addon.events.Register("PLAYER_ENTERING_WORLD", function (isLogin, isReload)
     if isLogin or isReload then
@@ -414,7 +412,7 @@ _addon.events.Register("PLAYER_ENTERING_WORLD", function (isLogin, isReload)
         _addon.events.Register("ACTIONBAR_SLOT_CHANGED", function (slot)
             if slot == 0 then
                 FullSlotUpdate();
-            elseif slot >= 1 and slot <= 120 then
+            elseif slot >= 1 and slot <= NUM_ACTION_SLOTS then
                 SlotUpdate(slot);
             end
         end);
