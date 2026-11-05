@@ -1,9 +1,10 @@
 -- Player buff scanning.
 --
--- On Forever, aura data is secret in combat. The player's own buffs are scanned out of combat and the
--- last state is kept while in combat (resync on PLAYER_REGEN_ENABLED). Target auras are not scanned at
--- all: debuffs on a target almost only exist in combat, so the player picks which target auras to assume
--- instead (system/assumedTargetAuras.lua).
+-- On Forever, aura data is secret in combat and under other addon restrictions (system/combat.lua), and
+-- the aura API raises an error then. The player's own buffs are scanned while auras are readable and the
+-- last state is kept meanwhile (resync when combat ends or the restriction lifts). Target auras are not
+-- scanned at all: debuffs on a target almost only exist in combat, so the player picks which target auras
+-- to assume instead (system/assumedTargetAuras.lua).
 
 ---@class AddonEnv
 local _addon = select(2, ...);
@@ -92,7 +93,12 @@ local function UpdateAuratype(filter)
     local auraTable = _addon.aurasPlayer;
 
     for i = 1, 255 do
-        local aura = GetAuraDataByIndex("player", i, filter);
+        -- Raises an error when aura data turned secret since AurasRestricted() was checked.
+        local ok, aura = pcall(GetAuraDataByIndex, "player", i, filter);
+        if not ok then
+            combat.MarkStale();
+            return aurasChanged, true;
+        end
         if not aura then break end
 
         local name, count, source, spellId = aura.name, aura.applications, aura.sourceUnit, aura.spellId;
@@ -135,8 +141,8 @@ end
 ---Update the player's buffs and debuffs.
 ---@param clearOnly boolean|nil Only remove everything currently applied.
 function _addon:UpdatePlayerAuras(clearOnly)
-    if not clearOnly and combat.IsRestricted() then
-        -- Aura data is secret in combat; keep the last known state and resync afterwards.
+    if not clearOnly and combat.AurasRestricted() then
+        -- Aura data is secret right now; keep the last known state and resync afterwards.
         combat.MarkStale();
         return;
     end

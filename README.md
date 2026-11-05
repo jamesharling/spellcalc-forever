@@ -36,7 +36,8 @@ from upstream SpellCalc in more than the TOC:
   current spell: from the button's action, or from `GetMacroSpell` anywhere else. `GetActionInfo` reports a
   macro's current spell itself (`"macro", spellId, "spell"`), not the macro index, and fires
   `ACTIONBAR_SLOT_CHANGED` (slot 0 for every slot) when macro conditions switch the spell.
-- **Player buffs** are scanned with `C_UnitAuras.GetAuraDataByIndex` instead of `UnitAura`, out of combat only.
+- **Player buffs** are scanned with `C_UnitAuras.GetAuraDataByIndex` instead of `UnitAura`, only while aura
+  data is readable (see *Combat restrictions*).
 - **Target auras are assumed, not scanned.** Aura data is secret in combat, and debuffs on a target almost
   only exist in combat, so the addon doesn't read the target's auras. Settings > Target Auras lists the
   class debuffs and heal-target buffs the calculator models (Curse of the Elements, Sunder Armor, Faerie
@@ -58,9 +59,13 @@ from upstream SpellCalc in more than the TOC:
   (`spellId` in `data/forever/classes/*_talents.lua`) instead of tree/tier/column.
 - **Weapon skill** is resolved from the equipped weapon's skill line via `C_SkillInfo.GetSkillLineInfoByID`,
   mirroring Forever's own character sheet, because `UnitAttackBothHands` no longer exists.
-- **Combat restrictions.** Aura data and player stats become secret values in combat. `system/combat.lua`
-  makes every read skip while in combat, keeps the last snapshot, and re-reads everything on
-  `PLAYER_REGEN_ENABLED`. Tooltips and action-bar numbers in combat show the last out-of-combat state.
+- **Combat restrictions.** Aura data and player stats become secret values in combat. The same happens
+  under the other addon restrictions (encounters, Mythic+ runs, PvP matches, restricted maps), even out of
+  combat. The aura API then raises an error rather than returning secrets. `system/combat.lua` makes every
+  read skip while in combat, while a restriction is active (`C_RestrictedActions.IsAddOnRestrictionActive`),
+  or, for auras, while `C_Secrets.ShouldAurasBeSecret()` is true. It keeps the last snapshot meanwhile.
+  It re-reads everything on `PLAYER_REGEN_ENABLED`, or on `ADDON_RESTRICTION_STATE_CHANGED` when a
+  restriction lifts. Tooltips and action-bar numbers show the last unrestricted state.
   Target identity that comes back secret (inside instances, and in combat) is treated as unknown: no class or
   creature type, and the default level difference instead of the target's level.
 - **No downranking penalty** on coefficients: Forever's spell data carries the full coefficient on every rank.
@@ -70,7 +75,9 @@ from upstream SpellCalc in more than the TOC:
 
 Nothing here has run on a live Forever client (the beta closed before this port was written). Check first:
 
-1. Secret values: which stat and aura APIs are secret, and only in combat or also elsewhere.
+1. Secret values: which stat and aura APIs are secret, and only in combat or also elsewhere. Known so far:
+   `GetAuraDataByIndex` raises an error for addons while auras are secret, which happened at least once
+   outside `InCombatLockdown()`.
 2. Talent reading: tree IDs and ranks from `C_Traits` (`/sc debugtalents` also prints which API returned the
    config ID). The config comes from `C_SpecializationInfo.GetCombatConfigIDForSpecGroup`, as in StatLogic and
    RatingBuster on Forever, with `C_ClassTalents.GetActiveConfigID` as a fallback.
@@ -189,7 +196,9 @@ npm test
   applies, equips every item that has effects in the data, then unequips everything and checks the numbers
   return to what they were. Last, it selects a target, then the same target with every identity value secret
   (the stub's secret values raise an error when used, like the client's), and checks the secret one is
-  treated as unknown and no secret value is stored. Lua errors,
+  treated as unknown and no secret value is stored. Then it simulates a Mythic+ restriction outside combat.
+  Stats turn secret, the aura API raises errors, and the buffs run out meanwhile. It checks the numbers stay
+  as they were, then resync without the buffs once the restriction lifts. Lua errors,
   `NaN` or infinite results, min above max, and talents not read back fail the run.
 
 It catches load errors, broken data references and crashes in the calculation and tooltip code. The stub

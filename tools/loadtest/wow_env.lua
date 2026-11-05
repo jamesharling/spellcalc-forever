@@ -453,6 +453,8 @@ Settings = namespace("Settings", {
 ----------------------------------------------------------------------------------------------
 Enum = {
     TooltipDataType = { Item = 0, Spell = 1, Unit = 2, Macro = 25 },
+    AddOnRestrictionType = { Combat = 0, Encounter = 1, ChallengeMode = 2, PvPMatch = 3, Map = 4, Chat = 5 },
+    AddOnRestrictionState = { Inactive = 0, Activating = 1, Active = 2 },
     ItemClass = { Consumable = 0, Container = 1, Weapon = 2, Gem = 3, Armor = 4, Reagent = 5, Projectile = 6 },
     ItemWeaponSubclass = { Axe1H = 0, Axe2H = 1, Bows = 2, Guns = 3, Mace1H = 4, Mace2H = 5, Polearm = 6,
         Sword1H = 7, Sword2H = 8, Warglaive = 9, Staff = 10, Bearclaw = 11, Catclaw = 12, Unarmed = 13,
@@ -635,6 +637,30 @@ GetComboPoints = function() return 0 end
 GetShapeshiftForm = function() return 0 end
 GetShapeshiftFormInfo = function() return nil end
 GetNumShapeshiftForms = function() return 0 end
+
+-- Addon restrictions, set by the driver: __RESTRICTIONS[Enum.AddOnRestrictionType.X] = true. While one is
+-- active, aura data is secret (the aura API raises an error, as it does for addon code on the client) and
+-- the stat APIs return secret values.
+__RESTRICTIONS = {}
+local function restricted() return next(__RESTRICTIONS) ~= nil end
+C_RestrictedActions = namespace("C_RestrictedActions", {
+    IsAddOnRestrictionActive = function(t) return __RESTRICTIONS[t] == true end,
+})
+C_Secrets = namespace("C_Secrets", {
+    ShouldAurasBeSecret = function() return restricted() end,
+})
+for _, name in ipairs({ "UnitStat", "UnitPower", "UnitPowerMax", "UnitArmor", "UnitResistance", "UnitAttackPower",
+    "UnitRangedAttackPower", "UnitDamage", "UnitRangedDamage", "UnitAttackSpeed", "GetSpellBonusDamage", "GetSpellBonusHealing",
+    "GetSpellCritChance", "GetCritChance", "GetRangedCritChance", "GetHitModifier", "GetSpellHitModifier", "GetManaRegen",
+    "GetCombatRatingBonus" }) do
+    local real = _G[name]
+    _G[name] = function(...)
+        if not restricted() then return real(...) end
+        local out = table.pack(real(...))
+        for i = 1, out.n do out[i] = __Secret(out[i]) end
+        return table.unpack(out, 1, out.n)
+    end
+end
 -- Slot -> spell ID, or { actionType, id, subType } as Mainline's GetActionInfo returns them: a macro
 -- reports its current spell ({ "macro", spellId, "spell" }); only GetMacroSpell takes the macro index.
 __ACTION_SLOTS = {}
@@ -650,7 +676,11 @@ GetActionBarPage = function() return 1 end
 GetBonusBarOffset = function() return 0 end
 
 C_UnitAuras = namespace("C_UnitAuras", {
-    GetAuraDataByIndex = function(unit, index) local l = __AURAS[unit]; return l and l[index] end,
+    GetAuraDataByIndex = function(unit, index)
+        if restricted() then error("GetAuraDataByIndex(): Auras cannot be accessed when secret while tainted by '" .. __ADDON_NAME .. "'") end
+        local l = __AURAS[unit]
+        return l and l[index]
+    end,
     GetPlayerAuraBySpellID = function(id) for _, a in ipairs(__AURAS.player) do if a.spellId == id then return a end end end,
     GetAuraDataBySpellName = function() return nil end,
 })

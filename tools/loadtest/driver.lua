@@ -488,4 +488,34 @@ if A.Target.level ~= defaultLevel or A.Target.creatureType ~= nil or A.Target.cl
 end
 selectTarget(nil)
 
+-- A Mythic+ run: an addon restriction outside combat. Auras and stats turn secret and the aura API raises
+-- an error. The addon must keep its last snapshot, then resync when the restriction lifts, without
+-- combat ending.
+local CHALLENGE = Enum.AddOnRestrictionType.ChallengeMode
+local beforeRestriction = runAll("before restriction")
+__RESTRICTIONS[CHALLENGE] = true
+__FireEvent("ADDON_RESTRICTION_STATE_CHANGED", CHALLENGE, Enum.AddOnRestrictionState.Active)
+__AURAS.player = {} -- the buffs run out meanwhile
+for _, event in ipairs({ "UNIT_AURA", "UNIT_STATS", "SPELL_POWER_CHANGED", "COMBAT_RATING_UPDATE", "UNIT_ATTACK_POWER" }) do
+    __FireEvent(event, "player")
+end
+settle()
+local underRestriction = runAll("restricted (Mythic+)")
+local changedUnder = 0
+for id, v in pairs(underRestriction) do
+    if beforeRestriction[id] and math.abs(beforeRestriction[id] - v) > 1e-6 then changedUnder = changedUnder + 1 end
+end
+__RESTRICTIONS = {}
+__FireEvent("ADDON_RESTRICTION_STATE_CHANGED", CHALLENGE, Enum.AddOnRestrictionState.Inactive)
+settle()
+local lifted = runAll("restriction lifted")
+local notResynced = 0
+for id, v in pairs(lifted) do
+    if cleared[id] and math.abs(cleared[id] - v) > 1e-6 then notResynced = notResynced + 1 end
+end
+emit(("restriction: %d spells changed while restricted, %d differ from the unbuffed numbers after it lifted"):format(changedUnder, notResynced))
+if changedUnder > 0 then emit("FAIL numbers changed while restricted instead of keeping the last snapshot") end
+if notResynced > 0 then emit("FAIL no resync after the restriction lifted (buffs that ran out still count)") end
+__AURAS.player = auraList
+
 return table.concat(out, "\n")
