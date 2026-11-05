@@ -32,6 +32,10 @@ from upstream SpellCalc in more than the TOC:
   lookups go through thin wrappers in `compat.lua` (`_addon.api.*`) over `C_Spell`, `C_Item` and `C_SpellBook`.
 - **Tooltips** hook `TooltipDataProcessor.AddTooltipPostCall(Enum.TooltipDataType.Spell, ...)` instead of
   the removed `OnTooltipSetSpell` script.
+- **Macros.** A macro button's tooltip is of type `Macro`, not `Spell`, so a second hook resolves the macro's
+  current spell: from the button's action, or from `GetMacroSpell` anywhere else. `GetActionInfo` reports a
+  macro's current spell itself (`"macro", spellId, "spell"`), not the macro index, and fires
+  `ACTIONBAR_SLOT_CHANGED` (slot 0 for every slot) when macro conditions switch the spell.
 - **Player buffs** are scanned with `C_UnitAuras.GetAuraDataByIndex` instead of `UnitAura`, out of combat only.
 - **Target auras are assumed, not scanned.** Aura data is secret in combat, and debuffs on a target almost
   only exist in combat, so the addon doesn't read the target's auras. Settings > Target Auras lists the
@@ -178,7 +182,8 @@ npm test
   checks they change the numbers, and checks that clearing them restores the previous numbers. Warrior,
   hunter and rogue are loaded too, to check the tooltip hook copes with a class that has no data. It puts
   spells on the stock action bar and checks their values show, sit above the cooldown frame, and follow every
-  anchor, outline and shadow setting, validates the settings table with AceConfig, and checks old saved
+  anchor, outline and shadow setting. It checks macro slots and Macro tooltips show the macro's current spell,
+  including after the spell switches. It validates the settings table with AceConfig, and checks old saved
   settings migrate. Finally it equips the class's tier 0 set (hotfix-only items) and checks its set bonus
   applies, equips every item that has effects in the data, then unequips everything and checks the numbers
   return to what they were. Last, it selects a target, then the same target with every identity value secret

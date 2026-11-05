@@ -206,14 +206,15 @@ end
 local function SlotUpdate(slot)
     _addon.util.PrintDebug("Action slot update " .. slot);
 
-    local aType, aId = GetActionInfo(slot);
+    local aType, aId, aSubType = GetActionInfo(slot);
 
     for mappedSlot, _ in pairs(slotMap[slot]) do
         _addon.util.PrintDebug("Slot is mapped to " .. mappedSlot);
         if aType == "spell" then
             SetSlotSpell(mappedSlot, aId);
         elseif aType == "macro" then
-            SetSlotSpell(mappedSlot, GetMacroSpell(aId));
+            -- Mainline reports a macro's current spell itself (subType "spell"), not the macro index.
+            SetSlotSpell(mappedSlot, aSubType == "spell" and aId or nil);
         else
             SetSlotSpell(mappedSlot, nil);
         end
@@ -401,12 +402,23 @@ end
 _addon.events.Register("ACTIVE_TALENT_GROUP_CHANGED", DelayedFullSlotUpdate);
 _addon.events.Register("TRAIT_CONFIG_UPDATED", DelayedFullSlotUpdate);
 
+local function FullSlotUpdate()
+    for i = 1, 120 do
+        SlotUpdate(i);
+    end
+end
+
 _addon.events.Register("PLAYER_ENTERING_WORLD", function (isLogin, isReload)
     if isLogin or isReload then
+        -- Also fires when a macro's spell changes with its conditions; slot 0 means every slot.
         _addon.events.Register("ACTIONBAR_SLOT_CHANGED", function (slot)
-            if slot >= 1 and slot <= 120 then
+            if slot == 0 then
+                FullSlotUpdate();
+            elseif slot >= 1 and slot <= 120 then
                 SlotUpdate(slot);
             end
         end);
+        -- A macro was created, edited or deleted.
+        _addon.events.Register("UPDATE_MACROS", FullSlotUpdate);
     end
 end);

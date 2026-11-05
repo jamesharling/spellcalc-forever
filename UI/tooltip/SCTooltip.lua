@@ -363,8 +363,46 @@ local function OnSpellTooltip(tooltip, data)
     TooltipHandler(tooltip, spellID);
 end
 
+--- Spell a macro tooltip shows. Macro buttons get Macro tooltips (data.id is the macro), not Spell ones.
+---@param tooltip GameTooltip
+---@param data table TooltipData
+---@return integer|nil
+local function MacroTooltipSpell(tooltip, data)
+    local IsSecret = _addon.api.IsSecret;
+    -- The action on the button the tooltip belongs to: a macro reports its current spell, same as the bar value.
+    local owner = tooltip.GetOwner and tooltip:GetOwner();
+    local slot = owner and (owner.action or owner._state_action);
+    if type(slot) == "number" and not IsSecret(slot) then
+        local actionType, id, subType = GetActionInfo(slot);
+        if actionType == "macro" and subType == "spell" and type(id) == "number" and not IsSecret(id) then
+            return id;
+        end
+    end
+    -- Anywhere else (macro frame, action bar addons without an action field): the macro's current spell.
+    local macroId = data and data.id;
+    if macroId ~= nil and not IsSecret(macroId) then
+        local spellID = GetMacroSpell(macroId);
+        if type(spellID) == "number" and not IsSecret(spellID) then
+            return spellID;
+        end
+    end
+end
+
+---@param tooltip GameTooltip
+---@param data table TooltipData
+local function OnMacroTooltip(tooltip, data)
+    if not tooltip or (tooltip.IsForbidden and tooltip:IsForbidden()) then return end
+    if not tooltip.AddLine or not tooltip.AddDoubleLine then return end
+
+    local spellID = MacroTooltipSpell(tooltip, data);
+    if spellID then TooltipHandler(tooltip, spellID) end
+end
+
 if TooltipDataProcessor and Enum.TooltipDataType then
     TooltipDataProcessor.AddTooltipPostCall(Enum.TooltipDataType.Spell, OnSpellTooltip);
+    if Enum.TooltipDataType.Macro then
+        TooltipDataProcessor.AddTooltipPostCall(Enum.TooltipDataType.Macro, OnMacroTooltip);
+    end
 else
     _addon.util.PrintError("TooltipDataProcessor is missing, spell tooltips can't be extended.");
 end

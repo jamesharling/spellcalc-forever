@@ -328,7 +328,8 @@ function FrameMethods:AddDoubleLine(l, r) self.__lines[#self.__lines + 1] = tost
 function FrameMethods:NumLines() return #self.__lines end
 function FrameMethods:ClearLines() self.__lines = {} end
 function FrameMethods:IsOwned() return true end
-function FrameMethods:GetOwner() return UIParent end
+function FrameMethods:SetOwner(owner) self.__owner = owner end
+function FrameMethods:GetOwner() return self.__owner or UIParent end
 function FrameMethods:GetSpell() return nil end
 function FrameMethods:GetItem() return nil end
 function FrameMethods:GetUnit() return nil end
@@ -450,7 +451,7 @@ Settings = namespace("Settings", {
 -- Tooltips
 ----------------------------------------------------------------------------------------------
 Enum = {
-    TooltipDataType = { Item = 0, Spell = 1, Unit = 2 },
+    TooltipDataType = { Item = 0, Spell = 1, Unit = 2, Macro = 25 },
     ItemClass = { Consumable = 0, Container = 1, Weapon = 2, Gem = 3, Armor = 4, Reagent = 5, Projectile = 6 },
     ItemWeaponSubclass = { Axe1H = 0, Axe2H = 1, Bows = 2, Guns = 3, Mace1H = 4, Mace2H = 5, Polearm = 6,
         Sword1H = 7, Sword2H = 8, Warglaive = 9, Staff = 10, Bearclaw = 11, Catclaw = 12, Unarmed = 13,
@@ -633,10 +634,17 @@ GetComboPoints = function() return 0 end
 GetShapeshiftForm = function() return 0 end
 GetShapeshiftFormInfo = function() return nil end
 GetNumShapeshiftForms = function() return 0 end
+-- Slot -> spell ID, or { actionType, id, subType } as Mainline's GetActionInfo returns them: a macro
+-- reports its current spell ({ "macro", spellId, "spell" }); only GetMacroSpell takes the macro index.
 __ACTION_SLOTS = {}
-GetActionInfo = function(slot) local id = __ACTION_SLOTS[slot]; if id then return "spell", id end end
+__MACROS = {} -- macro index -> current spell
+GetActionInfo = function(slot)
+    local a = __ACTION_SLOTS[slot]
+    if type(a) == "table" then return a[1], a[2], a[3] end
+    if a then return "spell", a end
+end
+GetMacroSpell = function(macro) return __MACROS[macro] end
 HasAction = function(slot) return __ACTION_SLOTS[slot] ~= nil end
-GetMacroSpell = function() return nil end
 GetActionBarPage = function() return 1 end
 GetBonusBarOffset = function() return 0 end
 

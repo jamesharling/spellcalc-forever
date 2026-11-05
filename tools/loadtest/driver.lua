@@ -79,9 +79,10 @@ local function checkSpell(id)
     return "ok", cs
 end
 
-local spellPostCalls = {}
+local spellPostCalls, macroPostCalls = {}, {}
 for _, pc in ipairs(__TOOLTIP_POSTCALLS) do
     if pc.kind == Enum.TooltipDataType.Spell then spellPostCalls[#spellPostCalls + 1] = pc.fn end
+    if pc.kind == Enum.TooltipDataType.Macro then macroPostCalls[#macroPostCalls + 1] = pc.fn end
 end
 
 ---Run the spell tooltip hooks for a spell, return number of lines added or an error.
@@ -240,6 +241,53 @@ do
         end
         emit(("action bar styles: %d anchor/outline/shadow combinations checked, %d wrong"):format(9 * 6 * 2, styleErrors))
     end
+end
+
+-- Macros: bar values and Macro tooltips must show the macro's current spell
+do
+    local abv = A.ActionBarValues
+    local spellA, spellB = __ACTION_SLOTS[1], __ACTION_SLOTS[2]
+    local textA, textB = abv:GetSlotText(1), abv:GetSlotText(2)
+    __MACROS[3] = spellA
+    __ACTION_SLOTS[25] = { "macro", spellA, "spell" } -- macro 3, currently casting spell A
+    __ACTION_SLOTS[26] = { "macro", 3, "" }            -- a macro that casts no spell right now
+    __FireEvent("ACTIONBAR_SLOT_CHANGED", 25)
+    __FireEvent("ACTIONBAR_SLOT_CHANGED", 26)
+    __TickOnUpdate(10, 0.1)
+    local macroText, emptyText = abv:GetSlotText(25), abv:GetSlotText(26)
+    -- The macro's conditions switch it to spell B; the client signals that with slot 0 (every slot)
+    __ACTION_SLOTS[25] = { "macro", spellB, "spell" }
+    __FireEvent("ACTIONBAR_SLOT_CHANGED", 0)
+    __TickOnUpdate(10, 0.1)
+    local switchedText = abv:GetSlotText(25)
+    emit(("macros: bar value %s (spell %s), %s after switching (spell %s), %q for a macro without a spell")
+        :format(tostring(macroText), tostring(textA), tostring(switchedText), tostring(textB), tostring(emptyText or "")))
+    if not macroText or macroText == "" or macroText ~= textA then emit("FAIL macro slot doesn't show its spell's value") end
+    if switchedText ~= textB then emit("FAIL macro slot not updated after ACTIONBAR_SLOT_CHANGED 0") end
+    if emptyText and emptyText ~= "" then emit("FAIL macro without a spell shows a value") end
+
+    -- Tooltips: on the button (its action reports spell B), and elsewhere (macro 3 -> GetMacroSpell -> spell A)
+    local function macroTooltip(owner)
+        GameTooltip:ClearLines()
+        GameTooltip:SetOwner(owner)
+        for _, fn in ipairs(macroPostCalls) do
+            local ok, err = xpcall(fn, debug.traceback, GameTooltip, { id = 3, type = Enum.TooltipDataType.Macro })
+            if not ok then return nil, err end
+        end
+        return GameTooltip:NumLines()
+    end
+    local button = CreateFrame("Button")
+    button.action = 25
+    local onButton, err1 = macroTooltip(button)
+    local elsewhere, err2 = macroTooltip(UIParent)
+    GameTooltip:SetOwner(nil)
+    local linesA, linesB = tooltipFor(spellA), tooltipFor(spellB)
+    emit(("macro tooltips: %s lines on the button (spell %d lines), %s elsewhere (spell %d lines)")
+        :format(tostring(onButton), linesB, tostring(elsewhere), linesA))
+    if err1 or err2 then emit("FAIL macro tooltip error: " .. (tostring(err1 or err2):gsub("\n.*", ""))) end
+    if onButton ~= linesB or elsewhere ~= linesA or linesA == 0 then emit("FAIL macro tooltips don't show the macro's spell") end
+    __ACTION_SLOTS[25], __ACTION_SLOTS[26], __MACROS[3] = nil, nil, nil
+    __FireEvent("ACTIONBAR_SLOT_CHANGED", 0)
 end
 
 local baseSamples = {}
