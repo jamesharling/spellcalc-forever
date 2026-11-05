@@ -64,6 +64,8 @@ from upstream SpellCalc in more than the TOC:
   combat. The aura API then raises an error rather than returning secrets. `system/combat.lua` makes every
   read skip while in combat, while a restriction is active (`C_RestrictedActions.IsAddOnRestrictionActive`),
   or, for auras, while `C_Secrets.ShouldAurasBeSecret()` is true. It keeps the last snapshot meanwhile.
+  A stat, weapon enchant or action that comes back secret anyway (no restriction reported, or not yet) is
+  skipped the same way and keeps its last value instead of turning into 0.
   It re-reads everything on `PLAYER_REGEN_ENABLED`, or on `ADDON_RESTRICTION_STATE_CHANGED` when a
   restriction lifts. Tooltips and action-bar numbers show the last unrestricted state.
   Target identity that comes back secret (inside instances, and in combat) is treated as unknown: no class or
@@ -77,7 +79,8 @@ Nothing here has run on a live Forever client (the beta closed before this port 
 
 1. Secret values: which stat and aura APIs are secret, and only in combat or also elsewhere. Known so far:
    `GetAuraDataByIndex` raises an error for addons while auras are secret, which happened at least once
-   outside `InCombatLockdown()`.
+   outside `InCombatLockdown()`. Target identity (`UnitCreatureType`, `UnitLevel`, ...) is secret in combat.
+   Whether `GetWeaponEnchantInfo` and `GetActionInfo` ever are is unknown; both are guarded.
 2. Talent reading: tree IDs and ranks from `C_Traits` (`/sc debugtalents` also prints which API returned the
    config ID). The config comes from `C_SpecializationInfo.GetCombatConfigIDForSpecGroup`, as in StatLogic and
    RatingBuster on Forever, with `C_ClassTalents.GetActiveConfigID` as a fallback.
@@ -197,8 +200,11 @@ npm test
   return to what they were. Last, it selects a target, then the same target with every identity value secret
   (the stub's secret values raise an error when used, like the client's), and checks the secret one is
   treated as unknown and no secret value is stored. Then it simulates a Mythic+ restriction outside combat.
-  Stats turn secret, the aura API raises errors, and the buffs run out meanwhile. It checks the numbers stay
-  as they were, then resync without the buffs once the restriction lifts. Lua errors,
+  Stats and the weapon enchant turn secret, the aura API raises errors, and the buffs run out meanwhile. It
+  checks the numbers stay as they were, then resync without the buffs once the restriction lifts. Last, the
+  stat APIs return secret values while no restriction is reported: the stored stats must keep their values
+  and be re-read once a restriction state clears. Throughout, the addon's lookup tables raise an error when
+  indexed with a secret value, as they do on the client. Lua errors,
   `NaN` or infinite results, min above max, and talents not read back fail the run.
 
 It catches load errors, broken data references and crashes in the calculation and tooltip code. The stub

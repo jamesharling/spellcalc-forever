@@ -280,6 +280,9 @@ local SETTINGS_TABLE = {
 						SpellCalc_settings.abShow = val;
 						if not val then
 							_addon.ActionBarValues:Clear();
+						else
+							-- Shown again: recalculate, which repopulates the cleared buttons.
+							_addon:TriggerUpdate();
 						end
 					end
 				},

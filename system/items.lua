@@ -262,16 +262,17 @@ end
 _addon.events.Register("UPDATE_INVENTORY_DURABILITY", function () UpdateItems() end);
 _addon.events.Register("PLAYER_ENTERING_WORLD", function() UpdateItems() end);
 _addon.events.Register("UNIT_INVENTORY_CHANGED", function(unit) if unit == "player" then UpdateItems() end end);
----Handle item update after recieved item data.
+---Handle item update after received item data. The event fires for every item whose data arrives, and
+---again for the same item when something queried it meanwhile; only the first arrival of an item still
+---waited for counts, or _count would go negative and never reach 0 again.
 ---@param itemId integer
 _addon.events.Register("GET_ITEM_INFO_RECEIVED", function (itemId)
-    if missingItems[itemId] then
-        missingItems[itemId] = 0;
-        missingItems._count = missingItems._count - 1;
-        if missingItems._count == 0 then
-            _addon.util.PrintDebug("Data for all items recieved, updating items");
-            UpdateItems();
-        end
+    if missingItems[itemId] ~= true then return end
+    missingItems[itemId] = nil;
+    missingItems._count = missingItems._count - 1;
+    if missingItems._count == 0 then
+        _addon.util.PrintDebug("Data for all items received, updating items");
+        UpdateItems();
     end
 end);
 

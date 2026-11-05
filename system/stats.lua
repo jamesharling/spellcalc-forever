@@ -265,7 +265,21 @@ local function SkipIfRestricted()
     return false;
 end
 
----Return the value, or 0 if the API handed back nil or a secret value.
+---True if any of the values is a secret value. The read is then skipped so the old values stay, and it
+---is redone when combat ends or the restriction lifts. This catches stats that come back secret while no
+---restriction is reported (yet, or any more); storing them as 0 would stick until the next stat event.
+---@return boolean secret
+local function AnySecret(...)
+    for i = 1, select("#", ...) do
+        if IsSecret((select(i, ...))) then
+            combat.MarkStale();
+            return true;
+        end
+    end
+    return false;
+end
+
+---Return the value, or 0 for nil (and, as a last resort, for a secret value a caller did not check).
 ---@param v number|nil
 ---@return number
 local function Num(v)
@@ -291,10 +305,16 @@ end
 --- Update spell power stats from API
 local function UpdateSpellPower()
     if SkipIfRestricted() then return end
+    local power = {};
+    for i = 1, 7, 1 do
+        local v = GetSpellBonusDamage(i);
+        if AnySecret(v) then return end
+        power[i] = v;
+    end
     _addon.util.PrintDebug("Updating spell power");
 
     for i = 1, 7, 1 do
-        stats.spellPower[i] = Num(GetSpellBonusDamage(i));
+        stats.spellPower[i] = Num(power[i]);
     end
 
     _addon:TriggerUpdate();
@@ -304,6 +324,7 @@ end
 local function UpdateAttackPower()
     if SkipIfRestricted() then return end
     local base, posBuff, negBuff = UnitAttackPower("player");
+    if AnySecret(base, posBuff, negBuff) then return end
     stats.attackPower = Num(base) + Num(posBuff) + Num(negBuff);
     _addon:TriggerUpdate();
 end
@@ -312,6 +333,7 @@ end
 local function UpdateRangedAttackPower()
     if SkipIfRestricted() then return end
     local base, posBuff, negBuff = UnitRangedAttackPower("player");
+    if AnySecret(base, posBuff, negBuff) then return end
     stats.attackPowerRanged = Num(base) + Num(posBuff) + Num(negBuff);
     _addon:TriggerUpdate();
 end
@@ -319,7 +341,17 @@ end
 --- Update dmg done mods
 local function UpdateDmgDoneMods()
     if SkipIfRestricted() then return end
-    local spellHealing = Num(GetSpellBonusHealing());
+    local spellHealing = GetSpellBonusHealing();
+    local meleeCrit, rangedCrit = GetCritChance(), GetRangedCritChance();
+    if AnySecret(spellHealing, meleeCrit, rangedCrit) then return end
+    local spellCrit = {};
+    for i = 1, 7, 1 do
+        local v = GetSpellCritChance(i);
+        if AnySecret(v) then return end
+        spellCrit[i] = v;
+    end
+
+    spellHealing = Num(spellHealing);
     if spellHealing ~= stats.spellHealing then
         _addon.util.PrintDebug("Updating healing");
         stats.spellHealing = spellHealing;
@@ -327,11 +359,11 @@ local function UpdateDmgDoneMods()
 
     _addon.util.PrintDebug("Updating dmg done mods");
     for i = 1, 7, 1 do
-        stats.spellCrit[i] = Num(GetSpellCritChance(i));
+        stats.spellCrit[i] = Num(spellCrit[i]);
     end
 
-    stats.attackCrit.mainhand = Num(GetCritChance());
-    stats.attackCrit.ranged = Num(GetRangedCritChance());
+    stats.attackCrit.mainhand = Num(meleeCrit);
+    stats.attackCrit.ranged = Num(rangedCrit);
 
     _addon:TriggerUpdate();
 end
@@ -345,12 +377,14 @@ end
 function _addon:UpdateManaRegen()
     if SkipIfRestricted() then return end
     local _, spirit = UnitStat("player", 5);
+    local apiRegen = GetManaRegen();
+    if AnySecret(spirit, apiRegen) then return end
     spirit = Num(spirit);
 
     local spiritRegen = (12.5 + spirit / 4) / 2;
 
     local newmanaRegCasting = spiritRegen * (stats.fsrRegenMult.val / 100);
-    local newmanaRegAura = math.max(0, Num(GetManaRegen()) - spiritRegen);
+    local newmanaRegAura = math.max(0, Num(apiRegen) - spiritRegen);
     -- Remove minor errors in spirit regen calculation if mp5 should be 0.
     if newmanaRegAura < 0.1 then newmanaRegAura = 0 end
 
@@ -367,8 +401,10 @@ end
 --- Update general stats from API
 local function UpdateStats()
     if SkipIfRestricted() then return end
+    local manaMax = UnitPowerMax("player", 0);
+    if AnySecret(manaMax) then return end
     _addon.util.PrintDebug("Updating stats");
-    stats.manaMax = Num(UnitPowerMax("player", 0));
+    stats.manaMax = Num(manaMax);
     _addon:TriggerUpdate();
 end
 
@@ -377,6 +413,7 @@ local function UpdateAttackSpeeds()
     if SkipIfRestricted() then return end
     local m, o = UnitAttackSpeed("player");
     local r = UnitRangedDamage("player");
+    if AnySecret(m, o, r) then return end
 
     stats.attackSpeed.mainhand = Num(m);
     stats.attackSpeed.offhand = Num(o);
@@ -436,10 +473,10 @@ local function GetEquippedWeaponSkillLine(slotID)
     return WEAPON_SUBCLASS_TO_SKILL_LINE[subclassID];
 end
 
----Weapon skill rank and modifier for an inventory slot.
+---Weapon skill rank and modifier for an inventory slot, as the API reports them (possibly nil or secret).
 ---@param slotID integer
----@return number rank
----@return number modifier
+---@return number|nil rank
+---@return number|nil modifier
 local function GetWeaponSkill(slotID)
     local skillLine = GetEquippedWeaponSkillLine(slotID);
     if not skillLine or not C_SkillInfo or not C_SkillInfo.GetSkillLineInfoByID then
@@ -449,7 +486,7 @@ local function GetWeaponSkill(slotID)
     if not info then
         return 0, 0;
     end
-    return Num(info.rank), Num(info.modifier);
+    return info.rank, info.modifier;
 end
 
 --- Update weapon attack skill
@@ -458,6 +495,8 @@ local function UpdateWeaponAttack()
     local mh, mhMod = GetWeaponSkill(SLOT_MAINHAND);
     local oh, ohMod = GetWeaponSkill(SLOT_OFFHAND);
     local r, rMod = GetWeaponSkill(SLOT_RANGED);
+    if AnySecret(mh, mhMod, oh, ohMod, r, rMod) then return end
+    mh, mhMod, oh, ohMod, r, rMod = Num(mh), Num(mhMod), Num(oh), Num(ohMod), Num(r), Num(rMod);
 
     stats.attack.mainhand = mh + mhMod;
     stats.attack.offhand = oh + ohMod;
@@ -471,8 +510,9 @@ end
 --- Update melee attack damage
 local function UpdateAttackDmg()
     if SkipIfRestricted() then return end
-    _addon.util.PrintDebug("Updated melee dmg");
     local low, high, offLow, offHigh, _, _, pctMod = UnitDamage("player");
+    if AnySecret(low, high, offLow, offHigh, pctMod) then return end
+    _addon.util.PrintDebug("Updated melee dmg");
     pctMod = Num(pctMod);
     if pctMod == 0 then pctMod = 1 end
     stats.attackDmg.mainhand.min = Num(low) / pctMod;
@@ -485,8 +525,9 @@ end
 --- Update ranged attack damage
 local function UpdateRangedAttackDmg()
     if SkipIfRestricted() then return end
-    _addon.util.PrintDebug("Updated ranged dmg");
     local _, lowDmg, hiDmg, _, _, pctMod = UnitRangedDamage("player");
+    if AnySecret(lowDmg, hiDmg, pctMod) then return end
+    _addon.util.PrintDebug("Updated ranged dmg");
     pctMod = Num(pctMod);
     if pctMod == 0 then pctMod = 1 end
     stats.attackDmg.ranged.min = Num(lowDmg) / pctMod;

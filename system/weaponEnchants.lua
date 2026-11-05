@@ -1,5 +1,7 @@
 ---@class AddonEnv
 local _addon = select(2, ...);
+local combat = _addon.combat;
+local IsSecret = _addon.api.IsSecret;
 
 local activeEnchants = {
     MH = 0,
@@ -47,8 +49,14 @@ end
 
 --- Update player weapon enchants
 local function UpdateWeaponEnchants()
-    _addon.util.PrintDebug("Updating weapon enchants");
     local _, _, _, mhEnchId, _, _, _, ohEnchId = GetWeaponEnchantInfo();
+    -- A secret ID (combat restrictions, see system/combat.lua) can't be compared or looked up; keep the
+    -- current enchants and read again once the restriction lifts.
+    if IsSecret(mhEnchId) or IsSecret(ohEnchId) then
+        combat.MarkStale();
+        return;
+    end
+    _addon.util.PrintDebug("Updating weapon enchants");
     local mhchanged = HandleWeaponTempEnchant("MH", mhEnchId);
     local ohchanged = HandleWeaponTempEnchant("OH", ohEnchId);
     if mhchanged or ohchanged then
@@ -58,3 +66,4 @@ end
 
 _addon.events.Register("PLAYER_ENTERING_WORLD", function() UpdateWeaponEnchants() end);
 _addon.events.Register("UNIT_AURA", function(unit) if unit == "player" then UpdateWeaponEnchants() end end);
+combat.OnResync(UpdateWeaponEnchants);

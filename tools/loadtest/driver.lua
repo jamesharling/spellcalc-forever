@@ -31,6 +31,19 @@ if not A.spellInfo then
     return table.concat(out, "\n")
 end
 
+-- Indexing a table with a secret value raises an error on the client; make the addon's lookup tables do the
+-- same here (see __TrapSecretKeys in wow_env.lua).
+for _, t in pairs({ A.spellInfo, A.aurasPlayer, A.aurasTarget, A.enchantData, A.itemEffects, A.itemSetData, A.setItemData,
+    A.levelDefaultArmor, A.CONST.JUDGEMENT_IDS, A.CONST.STANCE_SPELLS, A.Target and A.Target.resistanceBase }) do
+    __TrapSecretKeys(t)
+end
+for _, t in pairs(A.stats or {}) do
+    if type(t) == "table" then
+        __TrapSecretKeys(t)
+        for _, inner in pairs(t) do __TrapSecretKeys(inner) end
+    end
+end
+
 if __UNSUPPORTED then
     -- Warrior, hunter and rogue have no data; the addon disables its events for them. The tooltip hook is
     -- still registered, so it must cope with any spell.
@@ -492,10 +505,15 @@ selectTarget(nil)
 -- an error. The addon must keep its last snapshot, then resync when the restriction lifts, without
 -- combat ending.
 local CHALLENGE = Enum.AddOnRestrictionType.ChallengeMode
+__ENCHANT = 2628 -- a wizard oil on the weapon; its ID comes back secret while restricted
+__FireEvent("UNIT_AURA", "player")
+settle()
 local beforeRestriction = runAll("before restriction")
 __RESTRICTIONS[CHALLENGE] = true
 __FireEvent("ADDON_RESTRICTION_STATE_CHANGED", CHALLENGE, Enum.AddOnRestrictionState.Active)
+__FireEvent("UNIT_AURA", "player") -- the enchant ID comes back secret now
 __AURAS.player = {} -- the buffs run out meanwhile
+__ENCHANT = false   -- and so does the oil
 for _, event in ipairs({ "UNIT_AURA", "UNIT_STATS", "SPELL_POWER_CHANGED", "COMBAT_RATING_UPDATE", "UNIT_ATTACK_POWER" }) do
     __FireEvent(event, "player")
 end
@@ -516,6 +534,50 @@ end
 emit(("restriction: %d spells changed while restricted, %d differ from the unbuffed numbers after it lifted"):format(changedUnder, notResynced))
 if changedUnder > 0 then emit("FAIL numbers changed while restricted instead of keeping the last snapshot") end
 if notResynced > 0 then emit("FAIL no resync after the restriction lifted (buffs that ran out still count)") end
+
+-- Stats that come back secret while no restriction is reported (the restriction state lagging behind the
+-- values): the read must keep the old values rather than store 0, and happen again once a restriction clears.
+do
+    local watched = {
+        { "spell power", function() return A.stats.spellPower[2] end },
+        { "spell crit", function() return A.stats.spellCrit[2] end },
+        { "healing", function() return A.stats.spellHealing end },
+        { "attack power", function() return A.stats.attackPower end },
+        { "max mana", function() return A.stats.manaMax end },
+        { "spirit regen", function() return A.stats.manaRegBase end },
+        { "melee damage", function() return A.stats.attackDmg.mainhand.max end },
+        { "attack speed", function() return A.stats.attackSpeed.mainhand end },
+        { "weapon skill", function() return A.stats.attack.mainhand end },
+    }
+    local before = {}
+    for i, w in ipairs(watched) do before[i] = w[2]() end
+    __STATS_SECRET = true
+    __SPELL_POWER = 450 -- changes while the addon cannot read it
+    for _, event in ipairs({ "SPELL_POWER_CHANGED", "UNIT_STATS", "PLAYER_DAMAGE_DONE_MODS", "UNIT_ATTACK_POWER",
+        "UNIT_RANGED_ATTACK_POWER", "UNIT_DAMAGE", "UNIT_RANGEDDAMAGE", "UNIT_ATTACK_SPEED", "UNIT_ATTACK", "UNIT_AURA" }) do
+        __FireEvent(event, "player")
+    end
+    settle()
+    local kept = 0
+    for i, w in ipairs(watched) do
+        local v = w[2]()
+        if v == before[i] and not issecretvalue(v) then
+            kept = kept + 1
+        else
+            emit(("FAIL %s became %s while the API returned secret values (was %s)"):format(w[1], tostring(v), tostring(before[i])))
+        end
+    end
+    __STATS_SECRET = false
+    __FireEvent("ADDON_RESTRICTION_STATE_CHANGED", Enum.AddOnRestrictionType.Combat, Enum.AddOnRestrictionState.Inactive)
+    settle()
+    local after = A.stats.spellPower[2]
+    emit(("secret stats without a restriction: %d of %d values kept; spell power %s once a restriction state cleared (450 meanwhile)")
+        :format(kept, #watched, tostring(after)))
+    if after ~= 450 then emit("FAIL stats not re-read once the restriction state cleared") end
+    __SPELL_POWER = 400
+    __FireEvent("SPELL_POWER_CHANGED")
+    settle()
+end
 __AURAS.player = auraList
 
 return table.concat(out, "\n")

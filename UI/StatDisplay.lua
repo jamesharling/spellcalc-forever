@@ -322,7 +322,7 @@ end);
 -------------------------------------------------------
 -- Add stats to UI
 
-AddSingleStat("Mana", stats, "mana");
+AddSingleStat("Mana", stats, "manaMax");
 AddSingleStat("Spirit/Int base regen", stats, "manaRegBase", " mana/s");
 AddSingleStat("While casting", stats, "manaRegCasting", " mana/s");
 AddUniformStatTable(stats.fsrRegenMult, "FSR regen mult", "%");

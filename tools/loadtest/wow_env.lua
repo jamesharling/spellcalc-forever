@@ -544,7 +544,12 @@ GetInventoryItemLink = function(unit, slot)
 end
 GetInventoryItemID = function(unit, slot) if unit == "player" then return __INVENTORY[slot] end end
 GetInventoryItemDurability = function() return nil end
-GetWeaponEnchantInfo = function() return false end
+-- Temporary enchant on the main hand weapon, set by the driver (enchant ID or false).
+__ENCHANT = false
+GetWeaponEnchantInfo = function()
+    if __ENCHANT then return true, 1800000, 0, __ENCHANT, false, nil, nil, nil end
+    return false, nil, nil, nil, false, nil, nil, nil
+end
 
 ----------------------------------------------------------------------------------------------
 -- Unit and stats (plausible level 60 caster values)
@@ -566,6 +571,19 @@ function __Secret(v)
     return proxy
 end
 issecretvalue = function(v) return secrets[v] == true end
+-- The client raises "attempted to index a table that cannot be indexed with secret keys". Plain Lua cannot
+-- trap a table index, but a secret key is never present, so a metatable sees every such lookup; the driver
+-- installs it on the addon's data and stat tables (those without a metatable of their own).
+function __TrapSecretKeys(t)
+    if type(t) ~= "table" or getmetatable(t) then return end
+    local function check(k)
+        if secrets[k] then error("attempted to index a table that cannot be indexed with secret keys", 3) end
+    end
+    setmetatable(t, {
+        __index = function(_, k) check(k) end,
+        __newindex = function(self, k, v) check(k); rawset(self, k, v) end,
+    })
+end
 InCombatLockdown = function() return false end
 
 -- The target, set by the driver: { name, level, creatureType = { name, id }, class, isPlayer, secret }.
@@ -623,7 +641,8 @@ UnitDamage = function() return 100, 150, 0, 0, 0, 0, 1 end
 UnitRangedDamage = function() return 0, 0, 0, 0, 0, 1 end
 UnitAttackSpeed = function() return 2.6, nil end
 UnitAffectingCombat = function() return false end
-GetSpellBonusDamage = function() return 400 end
+__SPELL_POWER = 400 -- the driver changes it to check stats are re-read
+GetSpellBonusDamage = function() return __SPELL_POWER end
 GetSpellBonusHealing = function() return 700 end
 GetSpellCritChance = function() return 8.5 end
 GetCritChance = function() return 7 end
@@ -640,9 +659,12 @@ GetNumShapeshiftForms = function() return 0 end
 
 -- Addon restrictions, set by the driver: __RESTRICTIONS[Enum.AddOnRestrictionType.X] = true. While one is
 -- active, aura data is secret (the aura API raises an error, as it does for addon code on the client) and
--- the stat APIs return secret values.
+-- the stat APIs return secret values. __STATS_SECRET makes the stat APIs return secrets on their own, for a
+-- restriction state that lags behind the values.
 __RESTRICTIONS = {}
+__STATS_SECRET = false
 local function restricted() return next(__RESTRICTIONS) ~= nil end
+local function statsSecret() return restricted() or __STATS_SECRET end
 C_RestrictedActions = namespace("C_RestrictedActions", {
     IsAddOnRestrictionActive = function(t) return __RESTRICTIONS[t] == true end,
 })
@@ -652,10 +674,10 @@ C_Secrets = namespace("C_Secrets", {
 for _, name in ipairs({ "UnitStat", "UnitPower", "UnitPowerMax", "UnitArmor", "UnitResistance", "UnitAttackPower",
     "UnitRangedAttackPower", "UnitDamage", "UnitRangedDamage", "UnitAttackSpeed", "GetSpellBonusDamage", "GetSpellBonusHealing",
     "GetSpellCritChance", "GetCritChance", "GetRangedCritChance", "GetHitModifier", "GetSpellHitModifier", "GetManaRegen",
-    "GetCombatRatingBonus" }) do
+    "GetCombatRatingBonus", "GetWeaponEnchantInfo" }) do
     local real = _G[name]
     _G[name] = function(...)
-        if not restricted() then return real(...) end
+        if not statsSecret() then return real(...) end
         local out = table.pack(real(...))
         for i = 1, out.n do out[i] = __Secret(out[i]) end
         return table.unpack(out, 1, out.n)

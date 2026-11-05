@@ -3,6 +3,7 @@ local _addon = select(2, ...);
 
 local ADDON_EFFECT_FLAGS = _addon.CONST.ADDON_EFFECT_FLAGS;
 local GetSpellInfo = _addon.api.GetSpellInfo;
+local IsSecret = _addon.api.IsSecret;
 local SEAL_OF_RIGHTEOUSNESS = GetSpellInfo(20154);
 local SEAL_OF_COMMAND = GetSpellInfo(20375);
 local PRAYER_OF_MENDING = GetSpellInfo(401859);
@@ -210,6 +211,8 @@ local function SlotUpdate(slot)
     _addon.util.PrintDebug("Action slot update " .. slot);
 
     local aType, aId, aSubType = GetActionInfo(slot);
+    -- Should the action come back secret (combat restrictions), keep what the slot shows.
+    if IsSecret(aType) or IsSecret(aId) or IsSecret(aSubType) then return end
 
     for mappedSlot, _ in pairs(slotMap[slot]) do
         _addon.util.PrintDebug("Slot is mapped to " .. mappedSlot);
