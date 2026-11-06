@@ -93,7 +93,9 @@ Nothing here has run on a live Forever client (the beta closed before this port 
    whatever `GetManaRegen` reports above its spirit formula as mp5 and uses the larger of that and the mp5 it
    knows from aura data, so mp5 is not counted twice. Spirit regen uses 0.125 mana per spirit per second for
    every caster, as StatLogic's Forever tables do. Compare `/sc info` ("Spirit/Int base regen", "Mp5 from API")
-   with the character sheet.
+   with the character sheet. The mana oils (5/10/15 mp5 on Forever) are tracked through
+   `data/forever/enchants.lua` in case `GetManaRegen` leaves temporary enchants out; the larger-value rule
+   covers them too.
 8. Conditional talents (Fire Power per Fire effect on the target, Shadow Weaving, Eclipse, Maelstrom Weapon,
    procs and target-state bonuses) are listed in `generation_report.txt` and have no effect in the calculator,
    same as upstream. Active talents (Arcane Power, Inner Focus, ...) only count while their buff is up.
@@ -200,8 +202,9 @@ npm test
   return to what they were. Last, it selects a target, then the same target with every identity value secret
   (the stub's secret values raise an error when used, like the client's), and checks the secret one is
   treated as unknown and no secret value is stored. Then it simulates a Mythic+ restriction outside combat.
-  Stats and the weapon enchant turn secret, the aura API raises errors, and the buffs run out meanwhile. It
-  checks the numbers stay as they were, then resync without the buffs once the restriction lifts. Last, the
+  Stats and the weapon enchant (a mana oil whose mp5 comes from `data/forever/enchants.lua`) turn secret,
+  the aura API raises errors, and the buffs and the oil run out meanwhile. It checks the numbers stay as they
+  were, then resync without them once the restriction lifts. Last, the
   stat APIs return secret values while no restriction is reported: the stored stats must keep their values
   and be re-read once a restriction state clears. Throughout, the addon's lookup tables raise an error when
   indexed with a secret value, as they do on the client. Lua errors,

@@ -403,6 +403,7 @@ for i = 1, math.min(25, #auraIds) do
     auraList[#auraList + 1] = { name = __SPELL_NAMES[id] or ("spell " .. id), spellId = id, applications = 1,
         sourceUnit = "player", auraInstanceID = i, duration = 0, expirationTime = 0, isHelpful = true }
 end
+local mp5NoBuffs = A.stats.mp5.val -- the enchant check after the restriction expects this again
 __AURAS.player = auraList
 __FireEvent("UNIT_AURA", "player", { isFullUpdate = true })
 settle()
@@ -505,9 +506,15 @@ selectTarget(nil)
 -- an error. The addon must keep its last snapshot, then resync when the restriction lifts, without
 -- combat ending.
 local CHALLENGE = Enum.AddOnRestrictionType.ChallengeMode
-__ENCHANT = 2628 -- a wizard oil on the weapon; its ID comes back secret while restricted
+-- Brilliant Mana Oil on the weapon: its mp5 comes from the enchant data, and its ID comes back secret while
+-- restricted.
+local mp5BeforeOil = A.stats.mp5.val
+__ENCHANT = 2629
 __FireEvent("UNIT_AURA", "player")
 settle()
+local oilMp5 = A.enchantData[2629] and A.enchantData[2629].value or 0
+emit(("weapon enchant: Brilliant Mana Oil gives mp5 +%d (enchant data says %d)"):format(A.stats.mp5.val - mp5BeforeOil, oilMp5))
+if oilMp5 == 0 or math.abs(A.stats.mp5.val - mp5BeforeOil - oilMp5) > 1e-6 then emit("FAIL the weapon enchant did not apply its mp5") end
 local beforeRestriction = runAll("before restriction")
 __RESTRICTIONS[CHALLENGE] = true
 __FireEvent("ADDON_RESTRICTION_STATE_CHANGED", CHALLENGE, Enum.AddOnRestrictionState.Active)
@@ -527,6 +534,7 @@ __RESTRICTIONS = {}
 __FireEvent("ADDON_RESTRICTION_STATE_CHANGED", CHALLENGE, Enum.AddOnRestrictionState.Inactive)
 settle()
 local lifted = runAll("restriction lifted")
+if math.abs(A.stats.mp5.val - mp5NoBuffs) > 1e-6 then emit(("FAIL mp5 is %d after the oil and buffs ran out, expected %d"):format(A.stats.mp5.val, mp5NoBuffs)) end
 local notResynced = 0
 for id, v in pairs(lifted) do
     if cleared[id] and math.abs(cleared[id] - v) > 1e-6 then notResynced = notResynced + 1 end
