@@ -3,6 +3,7 @@ local _addon = select(2, ...);
 
 local GetSpellInfo = _addon.api.GetSpellInfo;
 local GetSpellPowerCost = _addon.api.GetSpellPowerCost;
+local Unsecret = _addon.api.Unsecret;
 local ADDON_EFFECT_FLAGS = _addon.CONST.ADDON_EFFECT_FLAGS;
 local NewCalcedSpell = _addon.NewCalcedSpell;
 local SCHOOL = _addon.CONST.SCHOOL;
@@ -224,8 +225,8 @@ end
 ---@return CalcedSpell
 local function CalcSpell(spellId, calcedSpell, parentSpellData, parentValue)
     local spellName, _, _, castTime = GetSpellInfo(spellId);
-    spellName = spellName or ("spell " .. spellId);
-    castTime = castTime or 0;
+    spellName = Unsecret(spellName, "spell " .. spellId);
+    castTime = Unsecret(castTime, 0);
     _addon.util.PrintDebug("Calculating spell " .. spellId .. " " .. spellName);
     local spellInfo = _addon.spellInfo[spellId];
 
@@ -579,8 +580,9 @@ local function CalcSpell(spellId, calcedSpell, parentSpellData, parentValue)
         if costs and #costs > 0 then
             ---@type SpellPowerEntry
             local entry = costs[1];
-            spellCost = entry.cost;
-            calcedSpell.costType = entry.type;
+            -- Resource values can be secret in combat on Forever; a secret cost would break the arithmetic below.
+            spellCost = Unsecret(entry.cost, 0);
+            calcedSpell.costType = Unsecret(entry.type, 0);
         end
 
         calcedSpell.baseCost = spellCost;

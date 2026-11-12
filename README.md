@@ -67,7 +67,8 @@ from upstream SpellCalc in more than the TOC:
   A stat, weapon enchant or action that comes back secret anyway (no restriction reported, or not yet) is
   skipped the same way and keeps its last value instead of turning into 0.
   It re-reads everything on `PLAYER_REGEN_ENABLED`, or on `ADDON_RESTRICTION_STATE_CHANGED` when a
-  restriction lifts. Tooltips and action-bar numbers show the last unrestricted state.
+  restriction lifts, and retries a skipped read every 5 seconds while nothing is restricted. Tooltips and
+  action-bar numbers show the last unrestricted state.
   Target identity that comes back secret (inside instances, and in combat) is treated as unknown: no class or
   creature type, and the default level difference instead of the target's level.
 - **No downranking penalty** on coefficients: Forever's spell data carries the full coefficient on every rank.

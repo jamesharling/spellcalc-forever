@@ -86,21 +86,28 @@ local function UpdateSet(setId, change)
 
     _addon.util.PrintDebug(("Updating set: %s (%d -> %d)"):format(setData.name, oldCount, newCount));
 
+    local changed = false;
     for k, effectData in ipairs(setData.effects) do
         local bname = string.format("%s%d-%dp", setData.name, k, effectData.need);
         if effectData.need <= newCount then
             if effectData.need > oldCount then
                 _addon.util.PrintDebug(("Add set bonus %s"):format(bname));
                 _addon:ApplyAuraEffect(bname, effectData, effectData.value, -1, true);
+                changed = true;
             end
         else
             if effectData.need <= oldCount then
                 _addon.util.PrintDebug(("Remove set bonus %s"):format(bname));
                 _addon:RemoveAuraEffect(bname, effectData, effectData.value, -1, true);
+                changed = true;
             end
         end
     end
 
+    -- The item itself may have no effects of its own, so this is the only recalculation for a set bonus.
+    if changed then
+        _addon:TriggerUpdate();
+    end
 end
 
 --- Equip item for slot

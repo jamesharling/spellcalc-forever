@@ -599,7 +599,11 @@ _addon.events.Register("UNIT_ATTACK_SPEED", function (unit) if unit == "player" 
 _addon.events.Register("COMBAT_RATING_UPDATE", function () CombatRatingUpdate() end);
 _addon.events.Register("PLAYER_DAMAGE_DONE_MODS", function (unit) if unit == "player" then UpdateDmgDoneMods() end end);
 _addon.events.Register("SPELL_POWER_CHANGED", function () UpdateSpellPower() end);
-_addon.events.Register("PLAYER_LEVEL_UP", function (level) UpdateBaseMana(level) end);
+_addon.events.Register("PLAYER_LEVEL_UP", function (level)
+    UpdateBaseMana(level);
+    -- Base spell values scale with the player's level, whether or not the base mana changed.
+    _addon:TriggerUpdate();
+end);
 _addon.events.Register("PLAYER_ENTERING_WORLD", function() UpdateAll() end);
 combat.OnResync(UpdateAll);
 

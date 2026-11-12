@@ -87,6 +87,17 @@ if Enum.AddOnRestrictionState then
     end);
 end
 
+-- A read skipped because a value came back secret while no restriction was reported (see stats.lua) has
+-- no event to follow it. Retry every few seconds while nothing is restricted, so the numbers never stay
+-- stale until the next combat ends.
+if C_Timer and C_Timer.NewTicker then
+    C_Timer.NewTicker(5, function()
+        if resyncPending and not combat.AurasRestricted() then
+            combat.Resync();
+        end
+    end);
+end
+
 _addon:RegisterSlashCommand("resync", function()
     _addon.util.PrintWarn("Re-reading stats, auras and talents.");
     combat.Resync();

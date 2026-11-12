@@ -274,7 +274,7 @@ end
 --- Append data to tooltip if spell is known to the addon.
 ---@param toolTipFrame GameTooltip
 ---@param spellID integer
-local function TooltipHandler(toolTipFrame, spellID)
+local function TooltipHandlerUnsafe(toolTipFrame, spellID)
     local calcedSpell = _addon:GetCalcedSpell(spellID);
 
     if calcedSpell == nil then return end
@@ -341,6 +341,18 @@ local function TooltipHandler(toolTipFrame, spellID)
         if calcedSpell.effects[2] and calcedSpell.effects[2].spellData and #calcedSpell.effects[2].spellData.buffs then
             toolTipFrame:AddLine(TTC_DEFAULT .. table.concat(calcedSpell.effects[2].spellData.buffs, ", "));
         end
+    end
+end
+
+--- TooltipHandlerUnsafe, with errors reported instead of raised. The post call runs inside Blizzard's tooltip
+--- processing; an error there leaves the tooltip half built or hidden, so report it (BugSack still shows it)
+--- and let the tooltip finish without the addon's lines.
+---@param toolTipFrame GameTooltip
+---@param spellID integer
+local function TooltipHandler(toolTipFrame, spellID)
+    local ok, err = pcall(TooltipHandlerUnsafe, toolTipFrame, spellID);
+    if not ok then
+        geterrorhandler()(err);
     end
 end
 
