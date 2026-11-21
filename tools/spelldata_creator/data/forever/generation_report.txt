@@ -1,6 +1,6 @@
 SpellCalc Forever data generation report
 Client build: wowf 1.60.1.71037
-Generated: 2026-11-21T12:27:41.247Z
+Generated: 2026-11-21T12:56:21.010Z
 
 Everything listed here was skipped or guessed by the generator and should be reviewed.
 

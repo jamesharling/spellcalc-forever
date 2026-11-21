@@ -41,9 +41,10 @@ from upstream SpellCalc in more than the TOC:
 - **Target auras are assumed, not scanned.** Aura data is secret in combat, and debuffs on a target almost
   only exist in combat, so the addon doesn't read the target's auras. Settings > Target Auras lists the
   class debuffs and heal-target buffs the calculator models (Curse of the Elements, Sunder Armor, Faerie
-  Fire, Judgement of the Crusader, Mortal Strike, Amplify Magic, Blessing of Light, ...). The ones you pick
-  apply to every target. Debuffs that only boost their caster's own damage (Shadow Weaving, Improved Scorch,
-  Stormstrike, Winter's Chill, Improved Shadow Bolt) are only offered to that class.
+  Fire, Judgement of the Crusader, Mortal Strike, Amplify Magic, ...). The ones you pick apply to every
+  target. Debuffs that only boost their caster's own damage (Shadow Weaving, Improved Scorch, Stormstrike,
+  Winter's Chill, Improved Shadow Bolt) are only offered to that class, and a spell the client doesn't know
+  (removed from Forever) is not offered at all.
 - **Fixed assumptions instead of live state** where the live value is only readable when it doesn't matter:
   the mana pool always starts full (current mana is secret in combat), finishing moves use an assumed
   combo point count (Settings > Target), and the table of raid boss resistances by NPC ID is gone (unit
@@ -197,8 +198,10 @@ npm test
   on a stubbed WoW API (`wow_env.lua`), once per supported class. `driver.lua` then fires the login events and
   calculates every spell in the generated data, with no talents, with every talent at max rank (through a
   simulated trait API), and with a sample of buffs from `auras.lua`. It runs the spell tooltip hook for each
-  spell too. It then enables every target aura offered in the settings through the real settings options,
-  checks they change the numbers, and checks that clearing them restores the previous numbers. Warrior,
+  spell too. It applies every player aura in the data in batches and checks for Lua errors and that removing
+  them restores the numbers. It then enables every target aura offered in the settings through the real
+  settings options, checks they have spell names and change the numbers, and checks that clearing them
+  restores the previous numbers; a target aura whose spell the client doesn't know must not be offered. Warrior,
   hunter and rogue are loaded too, to check the tooltip hook copes with a class that has no data. It puts
   spells on the stock action bars (6–8 included) and checks their values show, sit above the cooldown frame,
   and follow every anchor, outline and shadow setting. It checks macro slots and Macro tooltips show the

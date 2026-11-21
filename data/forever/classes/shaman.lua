@@ -21,6 +21,7 @@ _addon.aurasPlayer[16188] = {
 _addon.aurasPlayer[408510] = {
     {
         type = _addon.CONST.EFFECT_TYPE.SCRIPT_AURASCRIPT,
+        value = 0, -- the script works out the mana itself; aura effects need a value or a scriptValue
         scriptKey = "Water_Shield",
     }
 };

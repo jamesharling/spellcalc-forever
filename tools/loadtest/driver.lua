@@ -456,6 +456,9 @@ for key, group in pairs(settingsArgs) do
     if type(group) == "table" and group.type == "group" then
         for _, option in pairs(group.args) do
             offered = offered + 1
+            if type(option.name) ~= "string" or option.name:match("^spell %d+") then
+                emit(("FAIL target aura option in %s has no spell name: %s"):format(key, tostring(option.name)))
+            end
             local ok, err = pcall(function()
                 if option.type == "range" then option.set(nil, option.max) else option.set(nil, true) end
                 local v = option.get()
@@ -489,6 +492,32 @@ for id, v in pairs(cleared) do
 end
 if notRestored > 0 then emit(("FAIL %d spells differ after clearing the target auras"):format(notRestored)) end
 
+-- A target aura whose spell the client doesn't know (removed by a patch or hotfix): neither offered nor applied
+do
+    local GHOST = 99999901
+    A.aurasTarget[GHOST] = { { type = A.CONST.EFFECT_TYPE.TARGET_SCHOOLMOD_DMG_TAKEN_PCT, affectMask = 126, value = 50 } }
+    table.insert(A.assumableTargetAuras, { spellId = GHOST, class = __CLASS, maxStacks = 1 })
+    local offeredGhost = false
+    for _, group in pairs(A.AssumedTargetAuraSettings()) do
+        if type(group) == "table" and group.type == "group" and group.args["aura" .. GHOST] then offeredGhost = true end
+    end
+    SpellCalc_settings.assumedTargetAuras[GHOST] = 1
+    A:UpdateAssumedTargetAuras()
+    settle()
+    local changedByGhost = 0
+    for id, v in pairs(runAll("unknown target aura selected")) do
+        if cleared[id] and math.abs(cleared[id] - v) > 1e-6 then changedByGhost = changedByGhost + 1 end
+    end
+    emit(("unknown target aura: offered %s, changed %d spells"):format(tostring(offeredGhost), changedByGhost))
+    if offeredGhost then emit("FAIL a target aura whose spell the client doesn't know is offered") end
+    if changedByGhost > 0 then emit("FAIL a target aura whose spell the client doesn't know is applied") end
+    SpellCalc_settings.assumedTargetAuras[GHOST] = nil
+    A:UpdateAssumedTargetAuras()
+    table.remove(A.assumableTargetAuras)
+    A.aurasTarget[GHOST] = nil
+    settle()
+end
+
 -- A few player buffs from the generated aura data through the C_UnitAuras path
 local auraIds = {}
 for id in pairs(A.aurasPlayer or {}) do auraIds[#auraIds + 1] = id end
@@ -504,6 +533,39 @@ __AURAS.player = auraList
 __FireEvent("UNIT_AURA", "player", { isFullUpdate = true })
 settle()
 local buffed = runAll("with " .. #auraList .. " buffs")
+
+-- Every player aura in the data, applied in batches through the aura API and removed again: no Lua errors, and
+-- the numbers return to the buffed state afterwards. Batches overlap for one scan (the new batch is applied
+-- before the old one is removed), like a buff replaced by another rank or Master Demonologist by another demon.
+do
+    local ids = {}
+    for id in pairs(A.aurasPlayer or {}) do ids[#ids + 1] = id end
+    table.sort(ids)
+    local errorsBefore = #__ERRORS
+    local batches = 0
+    for first = 1, #ids, 40 do
+        local batch = {}
+        for i = first, math.min(first + 39, #ids) do
+            local id = ids[i]
+            batch[#batch + 1] = { name = __SPELL_NAMES[id] or ("spell " .. id), spellId = id, applications = 1,
+                sourceUnit = "player", auraInstanceID = 5000 + i, duration = 0, expirationTime = 0, isHelpful = true }
+        end
+        __AURAS.player = batch
+        __FireEvent("UNIT_AURA", "player", { isFullUpdate = true })
+        batches = batches + 1
+    end
+    __AURAS.player = auraList
+    __FireEvent("UNIT_AURA", "player", { isFullUpdate = true })
+    settle()
+    local notRestored = 0
+    for id, v in pairs(runAll("after every player aura")) do
+        if buffed[id] and math.abs(buffed[id] - v) > 1e-6 then notRestored = notRestored + 1 end
+    end
+    local newErrors = #__ERRORS - errorsBefore
+    emit(("player auras: %d applied in %d batches and removed, %d Lua errors, %d spells differ afterwards"):format(#ids, batches, newErrors, notRestored))
+    if newErrors > 0 then emit("FAIL Lua error while applying player auras: " .. (tostring(__ERRORS[errorsBefore + 1]):gsub("\n.*", ""))) end
+    if notRestored > 0 then emit(("FAIL %d spells differ after applying and removing every player aura"):format(notRestored)) end
+end
 
 -- Equipped items: the class's tier 0 set (hotfix-only items, see hotfixItems.json), then every item with
 -- effects in the data, then nothing again, which must restore the numbers.

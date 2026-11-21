@@ -905,6 +905,13 @@ _addon.aurasPlayer = {
             value = 300,
         },
     },
+    [23759] = { -- Master Demonologist
+        {
+            type = _addon.CONST.EFFECT_TYPE.SCHOOLMOD_PCT_DAMAGE,
+            affectMask = 4,
+            value = 10,
+        },
+    },
     [23108] = { -- Blessing of Nordrassil
         {
             type = _addon.CONST.EFFECT_TYPE.MOD_MANA_PER_5,
@@ -943,6 +950,13 @@ _addon.aurasPlayer = {
             type = _addon.CONST.EFFECT_TYPE.SCHOOLMOD_PCT_DAMAGE,
             affectMask = 1,
             value = 50,
+        },
+    },
+    [23761] = { -- Master Demonologist
+        {
+            type = _addon.CONST.EFFECT_TYPE.SCHOOLMOD_PCT_DAMAGE,
+            affectMask = 32,
+            value = 10,
         },
     },
     [23550] = { -- Increased Prayer of Healing Criticals
@@ -1284,6 +1298,13 @@ _addon.aurasPlayer = {
             type = _addon.CONST.EFFECT_TYPE.SCHOOLMOD_PCT_DAMAGE,
             affectMask = 127,
             value = 200,
+        },
+    },
+    [25228] = { -- Soul Link
+        {
+            type = _addon.CONST.EFFECT_TYPE.SCHOOLMOD_PCT_DAMAGE,
+            affectMask = 127,
+            value = 3,
         },
     },
     [25696] = { -- Drink
@@ -1987,6 +2008,97 @@ _addon.aurasPlayer = {
             affectMask = 127,
             value = 10,
             hasStacks = true,
+        },
+    },
+    [426811] = { -- Battlefield Inspiration
+        {
+            type = _addon.CONST.EFFECT_TYPE.SCHOOLMOD_PCT_DAMAGE,
+            affectMask = 127,
+            value = 20,
+        },
+    },
+    [427086] = { -- Battlefield Genius
+        {
+            type = _addon.CONST.EFFECT_TYPE.SCHOOLMOD_PCT_DAMAGE,
+            affectMask = 127,
+            value = 50,
+        },
+    },
+    [427087] = { -- Battlefield Genius
+        {
+            type = _addon.CONST.EFFECT_TYPE.SCHOOLMOD_PCT_DAMAGE,
+            affectMask = 127,
+            value = 100,
+        },
+    },
+    [427088] = { -- Battlefield Genius
+        {
+            type = _addon.CONST.EFFECT_TYPE.SCHOOLMOD_PCT_DAMAGE,
+            affectMask = 127,
+            value = 150,
+        },
+    },
+    [427089] = { -- Battlemaster Supreme
+        {
+            type = _addon.CONST.EFFECT_TYPE.SCHOOLMOD_PCT_DAMAGE,
+            affectMask = 127,
+            value = 50,
+        },
+    },
+    [427090] = { -- Battlemaster Supreme
+        {
+            type = _addon.CONST.EFFECT_TYPE.SCHOOLMOD_PCT_DAMAGE,
+            affectMask = 127,
+            value = 100,
+        },
+    },
+    [427091] = { -- Battlemaster Supreme
+        {
+            type = _addon.CONST.EFFECT_TYPE.SCHOOLMOD_PCT_DAMAGE,
+            affectMask = 127,
+            value = 150,
+        },
+    },
+    [427116] = { -- Battlefield Genius
+        {
+            type = _addon.CONST.EFFECT_TYPE.SCHOOLMOD_PCT_DAMAGE,
+            affectMask = 127,
+            value = 50,
+        },
+    },
+    [427117] = { -- Battlefield Genius
+        {
+            type = _addon.CONST.EFFECT_TYPE.SCHOOLMOD_PCT_DAMAGE,
+            affectMask = 127,
+            value = 100,
+        },
+    },
+    [427118] = { -- Battlefield Genius
+        {
+            type = _addon.CONST.EFFECT_TYPE.SCHOOLMOD_PCT_DAMAGE,
+            affectMask = 127,
+            value = 1000,
+        },
+    },
+    [427119] = { -- Battlefield Genius
+        {
+            type = _addon.CONST.EFFECT_TYPE.SCHOOLMOD_PCT_DAMAGE,
+            affectMask = 127,
+            value = 50,
+        },
+    },
+    [427120] = { -- Battlefield Genius
+        {
+            type = _addon.CONST.EFFECT_TYPE.SCHOOLMOD_PCT_DAMAGE,
+            affectMask = 127,
+            value = 100,
+        },
+    },
+    [427121] = { -- Battlefield Genius
+        {
+            type = _addon.CONST.EFFECT_TYPE.SCHOOLMOD_PCT_DAMAGE,
+            affectMask = 127,
+            value = 1000,
         },
     },
     [427726] = { -- Immolation Aura

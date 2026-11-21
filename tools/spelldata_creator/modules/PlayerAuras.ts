@@ -19,6 +19,19 @@ const DO_AURAS: { [index: number]: true | undefined } = {
     [AURA_TYPE.SPELL_AURA_ADD_PCT_MODIFIER]: true,
 }
 
+/**
+ * Effects that put an aura on the player: their own auras, and area auras that reach the player from a
+ * party member, the player's pet (Master Demonologist, Soul Link), a friendly caster or the pet's owner.
+ */
+const PLAYER_AURA_EFFECTS = new Set<number>([
+    EFFECT_TYPE.SPELL_EFFECT_APPLY_AURA,
+    EFFECT_TYPE.SPELL_EFFECT_PERSISTENT_AREA_AURA,
+    EFFECT_TYPE.SPELL_EFFECT_APPLY_AREA_AURA_PARTY,
+    EFFECT_TYPE.SPELL_EFFECT_APPLY_AREA_AURA_PET,
+    EFFECT_TYPE.SPELL_EFFECT_APPLY_AREA_AURA_FRIEND,
+    EFFECT_TYPE.SPELL_EFFECT_APPLY_AREA_AURA_OWNER,
+]);
+
 export class PlayerAuras
 {
     private readonly spellData: SpellData;
@@ -48,9 +61,7 @@ export class PlayerAuras
 
         for (let spellEffect of spellEffects)
         {
-            if (spellEffect.Effect !== EFFECT_TYPE.SPELL_EFFECT_APPLY_AURA 
-                && spellEffect.Effect !== EFFECT_TYPE.SPELL_EFFECT_PERSISTENT_AREA_AURA
-                && spellEffect.Effect !== EFFECT_TYPE.SPELL_EFFECT_APPLY_AREA_AURA_PARTY) continue;
+            if (!PLAYER_AURA_EFFECTS.has(spellEffect.Effect)) continue;
             if (!DO_AURAS[spellEffect.EffectAura]) continue;
             if (!this.auraHandlers.handlers[spellEffect.EffectAura])
             {

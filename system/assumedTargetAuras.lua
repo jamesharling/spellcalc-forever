@@ -26,6 +26,14 @@ local CLASS_ORDER = { "DRUID", "HUNTER", "MAGE", "PALADIN", "PRIEST", "ROGUE", "
 ---@type table<integer, integer> stacks currently applied per spell ID
 local applied = {};
 
+---True if the client knows the spell. A spell Forever removed in a patch or hotfix has no name; its aura can't
+---be on a target, so it is neither offered nor applied (and never shows up as "spell 12345").
+---@param spellId integer
+---@return boolean
+local function SpellExists(spellId)
+    return GetSpellName(spellId) ~= nil;
+end
+
 ---@param spellId integer
 ---@param stacks integer
 ---@param apply boolean
@@ -60,7 +68,7 @@ function _addon:UpdateAssumedTargetAuras()
     end
 
     for spellId, stacks in pairs(wanted) do
-        if type(stacks) == "number" and stacks > 0 and applied[spellId] == nil and self.aurasTarget[spellId] then
+        if type(stacks) == "number" and stacks > 0 and applied[spellId] == nil and self.aurasTarget[spellId] and SpellExists(spellId) then
             SetAura(spellId, stacks, true);
             applied[spellId] = stacks;
             changed = true;
@@ -114,7 +122,9 @@ function _addon.AssumedTargetAuraSettings()
     for _, aura in ipairs(_addon.assumableTargetAuras or {}) do
         -- "From caster" debuffs (Shadow Weaving, Improved Scorch, Stormstrike, ...) only boost the
         -- caster's own damage, so another class assuming them would get a bonus it never has.
-        if not aura.fromCaster or aura.class == playerClass then
+        if not SpellExists(aura.spellId) then
+            _addon.util.PrintDebug("Target aura " .. aura.spellId .. " doesn't exist on this client, not offered");
+        elseif not aura.fromCaster or aura.class == playerClass then
             byClass[aura.class] = byClass[aura.class] or {};
             table.insert(byClass[aura.class], aura);
         end

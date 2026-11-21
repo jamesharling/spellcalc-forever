@@ -263,7 +263,7 @@ local effectCustom = {
     [EFFECT_TYPE.JUDGEMENT_SPELL] = function(apply, name, value)
         if value > 0 then
             _addon.judgementSpell = value;
-        elseif -_addon.judgementSpell == value then
+        elseif _addon.judgementSpell and -_addon.judgementSpell == value then
             _addon.judgementSpell = nil;
         end
         _addon.util.PrintDebug("Set judgement spell to " .. tostring(_addon.judgementSpell));

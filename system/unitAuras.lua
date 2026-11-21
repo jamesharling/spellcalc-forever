@@ -25,6 +25,19 @@ local aurasByNamePersonal = {};
 ---@type table<string, integer>
 local scriptedValueCache = {};
 
+---Name an aura effect is applied under. Unique per spell and effect: two auras can share a name (ranks of a
+---buff, Master Demonologist from different demons) and be up at the same time while one replaces the other.
+---@param name string
+---@param spellId integer
+---@param effectSlot integer|nil
+---@return string
+local function EffectName(name, spellId, effectSlot)
+    if effectSlot then
+        name = name .. "-" .. effectSlot;
+    end
+    return name .. "-" .. spellId;
+end
+
 ---Apply unit aura effect.
 ---@param spellId integer
 ---@param auraEffect UnitAuraEffect
@@ -33,14 +46,11 @@ local scriptedValueCache = {};
 ---@param effectSlot integer
 ---@param personal boolean
 local function ApplyUnitAuraEffect(spellId, auraEffect, name, stacks, effectSlot, personal)
-    if effectSlot then
-        name = name .. "-" .. effectSlot;
-    end
+    name = EffectName(name, spellId, effectSlot);
 
     assert(auraEffect.value or auraEffect.scriptValue, "Aura effect " .. name .. " has no value or scriptValue defined!");
     local value = auraEffect.value or _addon.scripting.GetValue(auraEffect.scriptValue);
     if auraEffect.scriptValue then
-        name = name.."-"..spellId;
         scriptedValueCache[name] = value;
     end
 
@@ -59,14 +69,11 @@ end
 ---@param effectSlot number|nil
 ---@param personal boolean
 local function RemoveUnitAuraEffect(spellId, auraEffect, name, stacks, effectSlot, personal)
-    if effectSlot then
-        name = name .. "-" .. effectSlot;
-    end
+    name = EffectName(name, spellId, effectSlot);
 
     local value = auraEffect.value;
 
     if value == nil then
-        name = name.."-"..spellId;
         if not auraEffect.scriptValue then
             error("Aura effect " .. name .. " has no value or scriptValue defined!");
         end

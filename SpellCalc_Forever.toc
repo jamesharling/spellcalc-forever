@@ -27,7 +27,6 @@ system/scriptEffects.lua
 
 data/forever/auras.lua
 data/forever/aurasTarget.lua
-data/forever/auraScripts.lua
 data/forever/enchants.lua
 
 data/forever/itemEffects.lua

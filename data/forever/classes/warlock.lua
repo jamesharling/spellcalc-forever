@@ -9,51 +9,9 @@ end
 -- Player auras
 --------------------------------------------------------------------------
 
--- Master Demonologist dmg done
-_addon.aurasPlayer[23761] = {
-    {
-        effect = _addon.CONST.EFFECT_TYPE.SCHOOLMOD_PCT_DAMAGE,
-        affectMask = _addon.CONST.SCHOOL_MASK.ALL,
-        value = 2,
-    }
-};
-_addon.aurasPlayer[23833] = {
-    {
-        effect = _addon.CONST.EFFECT_TYPE.SCHOOLMOD_PCT_DAMAGE,
-        affectMask = _addon.CONST.SCHOOL_MASK.ALL,
-        value = 4,
-    }
-};
-_addon.aurasPlayer[23834] = {
-    {
-        effect = _addon.CONST.EFFECT_TYPE.SCHOOLMOD_PCT_DAMAGE,
-        affectMask = _addon.CONST.SCHOOL_MASK.ALL,
-        value = 6,
-    }
-};
-_addon.aurasPlayer[23835] = {
-    {
-        effect = _addon.CONST.EFFECT_TYPE.SCHOOLMOD_PCT_DAMAGE,
-        affectMask = _addon.CONST.SCHOOL_MASK.ALL,
-        value = 8,
-    }
-};
-_addon.aurasPlayer[23836] = {
-    {
-        effect = _addon.CONST.EFFECT_TYPE.SCHOOLMOD_PCT_DAMAGE,
-        affectMask = _addon.CONST.SCHOOL_MASK.ALL,
-        value = 10,
-    }
-};
-
--- Soul Link
-_addon.aurasPlayer[25228] = {
-    {
-        effect = _addon.CONST.EFFECT_TYPE.SCHOOLMOD_PCT_DAMAGE,
-        affectMask = _addon.CONST.SCHOOL_MASK.ALL,
-        value = 3,
-    }
-};
+-- Master Demonologist (23759 Imp: Fire damage, 23761 Succubus: Shadow damage) and Soul Link (25228) come from
+-- the generated player aura data (area auras from the pet). Forever's Master Demonologist aura spells carry
+-- the 5-rank value (10%); the talent gives 2% per rank.
 
 --------------------------------------------------------------------------
 -- Scripts
