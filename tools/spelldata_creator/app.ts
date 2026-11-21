@@ -1,6 +1,6 @@
 import { SpellData, SpellEffect, SpellMisc, SpellLevel, SpellCategory, SpellCooldown, SpellPower, SpellEquippedItems, SpellAuraOptions } from "./SpellData";
 import * as fs from "fs";
-import { isSeal, SealType } from "./paladinCrap";
+import { getListedSealProc, isSeal, SealType } from "./paladinCrap";
 import { ItemSetCreator } from "./ItemSetCreator";
 import { ClassSpellLists } from "./ClassSpellLists";
 import { ClassSpellSets } from "./ClassSpellSets";
@@ -85,12 +85,51 @@ function shouldDoClass(pclass: string)
     return isPlayerClass(pclass) && DO_CLASSES.indexOf(pclass) !== -1;
 }
 
+/**
+ * The proc spell that deals a Seal of Fury rank's damage: the aura's trigger spell, or, where the data has
+ * none (rank 5), the spell its tooltip takes the damage from ("$20416s1").
+ */
+function getSealOfFuryProc(effect: SpellEffect)
+{
+    let procId = effect.EffectTriggerSpell;
+    if (!procId)
+    {
+        const spell = spellData.getSpell(effect.SpellID);
+        const m = (spell.AuraDescription_lang || spell.Description_lang || "").match(/\$(\d+)s1/);
+        if (m) procId = Number(m[1]);
+    }
+    if (!procId) throw new Error("No proc spell found for Seal of Fury " + effect.SpellID);
+    if (spellData.getSpellName(procId).Name_lang != spellData.getSpellName(effect.SpellID).Name_lang)
+    {
+        throw new Error(`Proc ${procId} of Seal of Fury ${effect.SpellID} has a different name`);
+    }
+    return procId;
+}
+
 function handleDummyAura(effect: SpellEffect, ei: EffectInfo, ri: RankInfo) {
     const sealType = isSeal(effect.SpellID);
     if (sealType !== false)
     {
         if (sealType == SealType.SOR) {
+            // Base points that scale with weapon speed (core/effectHandlers.lua); the damage itself is dealt by
+            // a proc spell, which is what talents like Improved Seals modify.
             fillBaseAndRange(ei, effect);
+            const procId = getListedSealProc(effect.SpellID);
+            if (!procId) throw new Error("No proc spell listed in sealData.json for Seal of Righteousness " + effect.SpellID);
+            ei.procSpell = procId;
+            return;
+        }
+        if (sealType == SealType.SOF) {
+            // Constant damage per swing, the proc spell's own value (the seal's tooltip shows it as $<proc>s1).
+            // The aura's own base points and coefficient aren't used, and its coefficient differs between ranks.
+            const procId = getSealOfFuryProc(effect);
+            const proc = spellData.getSpellEffects(procId)[0];
+            if (proc.Effect != EFFECT_TYPE.SPELL_EFFECT_SCHOOL_DAMAGE) throw new Error("Seal of Fury proc " + procId + " isn't school damage");
+            fillBaseAndRange(ei, proc);
+            ei.valuePerLevel = proc.EffectRealPointsPerLevel;
+            ei.coef = proc.EffectBonusCoefficient;
+            ei.coefAP = proc.BonusCoefficientFromAP;
+            ei.procSpell = procId;
             return;
         }
     }
@@ -113,7 +152,9 @@ function handleDummyAura(effect: SpellEffect, ei: EffectInfo, ri: RankInfo) {
 
 function handleDummyEffect(_rankInfo: RankInfo, _effect: SpellEffect, _effectNum: number, spellName: string)
 {
-    if (spellName == "Judgement of Righteousness") return;
+    // Judgement of Righteousness and Judgement of Fury carry their seal's values in dummy effects; their
+    // damage is the school damage effect.
+    if (spellName == "Judgement of Righteousness" || spellName == "Judgement of Fury") return;
 
     throw new Error("Dummy effect not handled!");
 }
@@ -614,6 +655,7 @@ function rankInfoToLua(sid: string | number, ri: RankInfo): string {
         if (eff.valuePerLevel) str += `\t\t\t\tvaluePerLevel = ${eff.valuePerLevel},\n`;
         if (eff.perResource) str += `\t\t\t\tperResouce = ${eff.perResource},\n`;
         if (eff.triggeredSpell) str += `\t\t\t\ttriggeredSpell = ${eff.triggeredSpell},\n`;
+        if (eff.procSpell) str += `\t\t\t\tprocSpell = ${eff.procSpell},\n`;
         str += `\t\t\t\tcoef = ${eff.coef},\n`;
         str += `\t\t\t\tcoefAP = ${eff.coefAP},\n`;
         if (eff.chainInfo)

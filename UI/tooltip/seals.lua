@@ -31,6 +31,8 @@ local function SoC(calcedSpell, effectNum)
         SCT:AppendMinMaxAvgLine(L["Damage"], calcedEffect.min, calcedEffect.max, calcedEffect.avg);
     end
 
+    SCT:AppendCoefData(calcedSpell, calcedEffect, nil, 0);
+
     if SpellCalc_settings.ttCrit then
         SCT:AppendMinMaxAvgLine(L["Critical"], calcedEffect.minCrit, calcedEffect.maxCrit, calcedEffect.avgCrit, nil,
             nil, SCT:CritStr(calcedSpell.critChance));
@@ -45,3 +47,4 @@ end
 
 SCT:AddDummyHandler(GetSpellInfo(20375), SoC);
 SCT:AddDummyHandler(GetSpellInfo(21084), SoR);
+SCT:AddDummyHandler(GetSpellInfo(1311649), SoR); -- Seal of Fury: also one value per swing

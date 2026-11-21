@@ -181,6 +181,128 @@ end
 
 local base = runAll("no talents")
 
+-- Paladin seals. Seal of Righteousness: the rank's base points / 100 * weapon speed * 0.85 with a one-hander or
+-- * 1.2 with a two-hander, plus 7.65% or 12% of spell power. Seal of Fury: its proc's base value plus 10% of spell
+-- power on every swing, whatever the weapon. Seal of Command: 70% of a weapon hit plus 29% of spell power. Improved
+-- Seals multiplies the Seal of Righteousness and Seal of Fury procs. Judgement uses the active seal's judgement.
+if __CLASS == "PALADIN" then
+    local abv = A.ActionBarValues
+    local function avgOf(id)
+        local status, cs = checkSpell(id)
+        if status ~= "ok" then return nil, status .. ": " .. tostring(cs) end
+        return cs.effects[1].avg, cs
+    end
+    local function near(a, b) return type(a) == "number" and math.abs(a - b) < 1e-6 end
+    local function wield(itemId)
+        __INVENTORY[16] = itemId
+        __FireEvent("UNIT_INVENTORY_CHANGED", "player")
+        settle()
+    end
+    local function setLevel(level)
+        __PLAYER_LEVEL = level
+        __FireEvent("PLAYER_LEVEL_UP", level)
+        settle()
+    end
+    local function setSpellPower(sp)
+        __SPELL_POWER = sp
+        __FireEvent("SPELL_POWER_CHANGED")
+        settle()
+    end
+    local function data(id) return A.spellInfo[id] and A.spellInfo[id].effects[1] end
+    __WEAPONS[90001] = { subclass = Enum.ItemWeaponSubclass.Mace2H, low = 5, high = 9, speed = 2.9 }
+    __WEAPONS[90002] = { subclass = Enum.ItemWeaponSubclass.Mace1H, low = 3, high = 7, speed = 2.6 }
+
+    -- Level 1 without spell power, the case that showed 0
+    local spBefore = __SPELL_POWER
+    setLevel(1)
+    setSpellPower(0)
+    wield(90001)
+    local low2h, err1 = avgOf(21084)
+    __ACTION_SLOTS[31] = 21084
+    __FireEvent("ACTIONBAR_SLOT_CHANGED", 31)
+    __TickOnUpdate(10, 0.1)
+    local barText = abv:GetSlotText(31)
+    wield(90002)
+    local low1h, err2 = avgOf(21084)
+    emit(("seals: level 1, no spell power: Seal of Righteousness rank 1 %s with a 2.90 two-hander (bar %s), %s with a 2.60 one-hander")
+        :format(low2h and ("%.2f"):format(low2h) or tostring(err1), tostring(barText), low1h and ("%.2f"):format(low1h) or tostring(err2)))
+    if not near(low2h, 108 / 100 * 1.2 * 2.9) then emit("FAIL Seal of Righteousness rank 1 with a two-hander: " .. tostring(low2h or err1)) end
+    if not near(low1h, 108 / 100 * 0.85 * 2.6) then emit("FAIL Seal of Righteousness rank 1 with a one-hander: " .. tostring(low1h or err2)) end
+    if barText ~= "4" then emit("FAIL Seal of Righteousness bar value at level 1 is " .. tostring(barText) .. ", expected 4") end
+
+    -- Level 60 with 400 spell power: rank 8 has base points 1786 + 2 levels * 47
+    setLevel(60)
+    setSpellPower(400)
+    local sor1h = avgOf(20293)
+    local sof1h = avgOf(1311649)
+    wield(90001)
+    local sor2h = avgOf(20293)
+    local sof2h = avgOf(1311649)
+    local socStatus, soc = checkSpell(20375)
+    local sofData, socData = data(1311649), data(20375)
+    local sofExpected = sofData and sofData.valueBase + sofData.coef * 400 or -1
+    local socMin = socData and socData.weaponCoef * 100 + socData.coef * 400 or -1 -- UnitDamage gives 100-150
+    local socMax = socData and socData.weaponCoef * 150 + socData.coef * 400 or -1
+    emit(("seals: level 60, 400 spell power: Seal of Righteousness rank 8 %.2f (one-hander) / %.2f (two-hander), Seal of Fury rank 1 %.2f / %.2f, Seal of Command rank 1 %s")
+        :format(sor1h or -1, sor2h or -1, sof1h or -1, sof2h or -1,
+            socStatus == "ok" and ("%.1f-%.1f"):format(soc.effects[1].min, soc.effects[1].max) or socStatus))
+    if not near(sor1h, 18.8 * 0.85 * 2.6 + 0.0765 * 400) then emit("FAIL Seal of Righteousness rank 8 with a one-hander: " .. tostring(sor1h)) end
+    if not near(sor2h, 18.8 * 1.2 * 2.9 + 0.12 * 400) then emit("FAIL Seal of Righteousness rank 8 with a two-hander: " .. tostring(sor2h)) end
+    if sofExpected ~= 6 + 0.10000000149 * 400 or not near(sof1h, sofExpected) or not near(sof2h, sofExpected) then
+        emit(("FAIL Seal of Fury rank 1: %s / %s, expected %s"):format(tostring(sof1h), tostring(sof2h), tostring(sofExpected)))
+    end
+    if socStatus ~= "ok" or not near(soc.effects[1].min, socMin) or not near(soc.effects[1].max, socMax) then
+        emit("FAIL Seal of Command doesn't add its spell power bonus to 70% of a weapon hit")
+    end
+
+    -- Improved Seals (15% at 5/5) reaches the procs that deal the damage
+    __TALENT_TREE[1] = { spellId = 20224, maxRanks = 5 }
+    __TALENT_RANKS[20224] = 5
+    __FireEvent("TRAIT_CONFIG_UPDATED", 4001)
+    settle()
+    local sorTalent, sofTalent = avgOf(20293), avgOf(1311649)
+    __TALENT_TREE[1], __TALENT_RANKS[20224] = nil, nil
+    __FireEvent("TRAIT_CONFIG_UPDATED", 4001)
+    settle()
+    emit(("seals: Improved Seals 5/5: Seal of Righteousness x%.3f, Seal of Fury x%.3f"):format((sorTalent or 0) / (sor2h or 1), (sofTalent or 0) / (sof2h or 1)))
+    if not near(sorTalent, (sor2h or 0) * 1.15) or not near(sofTalent, (sof2h or 0) * 1.15) then
+        emit("FAIL Improved Seals doesn't apply to Seal of Righteousness and Seal of Fury")
+    end
+
+    -- Seal of Fury up: Judgement is Judgement of Fury
+    __AURAS.player = { { name = __SPELL_NAMES[1311649], spellId = 1311649, applications = 1, sourceUnit = "player",
+        auraInstanceID = 901, duration = 30, expirationTime = 0, isHelpful = true } }
+    __FireEvent("UNIT_AURA", "player", { isFullUpdate = true })
+    settle()
+    local judged = A.judgementSpell
+    local judgement = avgOf(A.CONST.JUDGEMENT_ID)
+    local jof = A.spellInfo[1311650]
+    local jofExpected = -1
+    if jof then
+        local e = jof.effects[1]
+        jofExpected = e.valueBase + e.valueRange / 2 + (math.min(60, jof.maxLevel) - jof.spellLevel) * e.valuePerLevel + e.coef * 400
+    end
+    __AURAS.player = {}
+    __FireEvent("UNIT_AURA", "player", { isFullUpdate = true })
+    settle()
+    emit(("seals: Judgement with Seal of Fury up is spell %s, %s on average"):format(tostring(judged), judgement and ("%.1f"):format(judgement) or "nothing"))
+    if judged ~= 1311650 or not near(judgement, jofExpected) then emit("FAIL Judgement with Seal of Fury up isn't Judgement of Fury rank 1") end
+
+    -- Back to unarmed at level 60 with the old spell power: the numbers from before
+    wield(nil)
+    setSpellPower(spBefore)
+    __ACTION_SLOTS[31] = nil
+    __FireEvent("ACTIONBAR_SLOT_CHANGED", 0)
+    local differ, examples = 0, {}
+    for id, v in pairs(runAll("seals checked")) do
+        if base[id] and math.abs(base[id] - v) > 1e-6 then
+            differ = differ + 1
+            if #examples < 4 then examples[#examples + 1] = ("%s %.2f -> %.2f"):format(name(id), base[id], v) end
+        end
+    end
+    if differ > 0 then emit(("FAIL %d spells differ after the seal checks: %s"):format(differ, table.concat(examples, ", "))) end
+end
+
 -- The options table must pass AceConfig validation (it is only validated when the panel opens in game)
 do
     local registry = LibStub("AceConfigRegistry-3.0")

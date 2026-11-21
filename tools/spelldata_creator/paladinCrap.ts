@@ -5,11 +5,14 @@ import { cfg } from "./config";
 export enum SealType {
     SOR = "SOR",
     SOC = "SOC",
+    SOF = "SOF",
 }
 
 interface SealInfo {
     judgeDummyIndex: number,
-    spells: number[]
+    spells: number[],
+    /** Seal spell ID -> the proc spell that deals its damage, where the seal's data doesn't link it. */
+    procs?: { [sealId: string]: number | string },
 }
 
 interface SealData {
@@ -32,6 +35,20 @@ export function isSeal(id: number, specific?: SealType) {
         if (SEALDATA.seals[sealType as SealType].spells.indexOf(id) != -1) return <SealType>sealType;
     }
     return false;
+}
+
+/**
+ * The proc spell listed for a seal in sealData.json, if any.
+ * @param id Seal spell ID
+ */
+export function getListedSealProc(id: number): number | undefined
+{
+    for (const sealType in SEALDATA.seals)
+    {
+        const proc = SEALDATA.seals[sealType as SealType].procs?.[id];
+        if (typeof proc === "number") return proc;
+    }
+    return undefined;
 }
 
 /**

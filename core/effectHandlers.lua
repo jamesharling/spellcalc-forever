@@ -6,6 +6,21 @@ local stats = _addon.stats;
 local EFFECT_TYPES = _addon.CONST.SPELL_EFFECT_TYPES;
 local AURA_TYPES = _addon.CONST.SPELL_AURA_TYPES;
 
+---The part of an effect's base value that comes from the player's level (up to the spell's max level).
+---@param spellInfo SpellInfo
+---@param effectData SpellEffectData
+---@return number
+local function LevelBonus(spellInfo, effectData)
+    if not effectData.valuePerLevel or effectData.valuePerLevel <= 0 then
+        return 0;
+    end
+    local refLevel = UnitLevel("player");
+    if spellInfo.maxLevel and spellInfo.maxLevel > 0 and spellInfo.maxLevel < refLevel then
+        refLevel = spellInfo.maxLevel;
+    end
+    return (refLevel - spellInfo.spellLevel) * effectData.valuePerLevel;
+end
+
 ---Fill effect base values.
 ---Fills min, max, avg and avgCombined.
 ---@param calcedSpell CalcedSpell
@@ -21,14 +36,7 @@ local function FillBaseValues(calcedSpell, calcedEffect, spellId, spellInfo, spe
     mod = mod or 1;
     add = add or 0;
 
-    local baseLow = effectData.valueBase + flat;
-    if effectData.valuePerLevel and effectData.valuePerLevel > 0 then
-        local refLevel = UnitLevel("player");
-        if spellInfo.maxLevel and spellInfo.maxLevel > 0 and spellInfo.maxLevel < refLevel then
-            refLevel = spellInfo.maxLevel;
-        end
-        baseLow = baseLow + (refLevel - spellInfo.spellLevel) * effectData.valuePerLevel;
-    end
+    local baseLow = effectData.valueBase + flat + LevelBonus(spellInfo, effectData);
 
     if spellInfo.useScalingFormula then
         local min, max = _addon.ApplyScalingFormula(spellInfo.useScalingFormula, baseLow, baseLow + effectData.valueRange);
@@ -172,25 +180,85 @@ end
 ---@type table<string, AuraEffectHandler>
 local dummyAuraHandlers = {};
 
+---Multipliers from spell modifiers on the proc spell that deals a seal's damage. Improved Seals, for one,
+---modifies the Seal of Righteousness and Seal of Fury procs, not the seal auras the addon calculates.
+---@param calcedSpell CalcedSpell
+---@param procId integer|nil
+---@return number baseMult For the base value only
+---@return number damageMult For the base value and the spell power bonus
+local function SealProcMods(calcedSpell, procId)
+    local baseMult, damageMult = 1, 1;
+    if procId then
+        local effectMod = stats.spellModPctEffect[procId];
+        if effectMod and effectMod.val ~= 0 then
+            baseMult = math.max(0, 1 + effectMod.val / 100);
+            calcedSpell:AddToBuffList(effectMod.buffs);
+        end
+        local damageMod = stats.spellModPctDamageHealing[procId];
+        if damageMod and damageMod.val ~= 0 then
+            damageMult = math.max(0, 1 + damageMod.val / 100);
+            calcedSpell:AddToBuffList(damageMod.buffs);
+        end
+    end
+    return baseMult, damageMult;
+end
+
+---A seal's damage per melee swing: one value, no range.
+---@param calcedEffect CalcedEffect
+---@param damage number
+local function SetPerSwingDamage(calcedEffect, damage)
+    calcedEffect.min = damage;
+    calcedEffect.max = damage;
+    calcedEffect.avg = damage;
+    calcedEffect.avgCombined = damage;
+end
+
+-- Seal of Righteousness per swing. Forever's tooltip gives "(s/87 + 0.0765 * SP) to (s/25 + 0.12 * SP)", times
+-- Improved Seals (SpellDescriptionVariables 1023: $1h = 0.0765 * holy SP, $2h = 0.12 * holy SP), where s is the
+-- rank's base points. The base part is the Classic Era formula (WoWSims): s / 100 * weapon speed * 0.85 with a
+-- one-hander, * 1.2 with a two-hander, using the weapon's own speed (haste doesn't change it); s/87 is a 1.35 speed
+-- one-hander, s/25 a 3.33 two-hander. The spell power part depends only on the weapon type.
+local SOR_ONE_HAND = { speedMult = 0.85, spCoef = 0.0765 };
+local SOR_TWO_HAND = { speedMult = 1.2, spCoef = 0.12 };
+
 ---@param calcedSpell CalcedSpell
 ---@param effNum integer
 ---@param spellInfo SpellInfo
 ---@param spellName string
 local function SealOfRighteousness(calcedSpell, effNum, spellInfo, spellName)
     local calcedEffect = calcedSpell.effects[effNum];
+    local effectData = spellInfo.effects[effNum];
+    local hand = _addon:IsTwoHandEquipped() and SOR_TWO_HAND or SOR_ONE_HAND;
+    local baseMult, damageMult = SealProcMods(calcedSpell, effectData.procSpell);
 
-    -- Formula is: Base_MH_Atk_Speed * (coef * SP + coefAP * AP)
+    local points = effectData.valueBase + LevelBonus(spellInfo, effectData);
+    local base = points / 100 * hand.speedMult * stats.baseAttackSpeed.mainhand;
 
-    local baseAtkSpeed = stats.baseAttackSpeed.mainhand;
+    calcedEffect.effectiveSpCoef = hand.spCoef * calcedEffect.modBonus * damageMult;
+    calcedEffect.effectiveApCoef = 0;
+    calcedEffect.effectivePower = calcedEffect.spellPower * calcedEffect.effectiveSpCoef;
 
-    calcedEffect.effectiveSpCoef = calcedEffect.effectiveSpCoef * baseAtkSpeed;
-    calcedEffect.effectiveApCoef = calcedEffect.effectiveApCoef * baseAtkSpeed;
-    local damageDone = calcedEffect.spellPower * calcedEffect.effectiveSpCoef + calcedEffect.attackPower * calcedEffect.effectiveApCoef;
-    calcedEffect.effectivePower = damageDone;
+    SetPerSwingDamage(calcedEffect,
+        (base + calcedEffect.flatMod) * calcedEffect.modBase * baseMult * damageMult + calcedEffect.effectivePower);
+end
 
-    calcedEffect.min = damageDone;
-    calcedEffect.avg = damageDone;
-    calcedEffect.avgCombined = damageDone;
+-- Seal of Fury per swing: the same Holy damage on every swing whatever the weapon, the proc spell's base value
+-- plus 10% of spell power (the generator puts the proc's values on the seal).
+---@param calcedSpell CalcedSpell
+---@param effNum integer
+---@param spellInfo SpellInfo
+---@param spellName string
+local function SealOfFury(calcedSpell, effNum, spellInfo, spellName)
+    local calcedEffect = calcedSpell.effects[effNum];
+    local effectData = spellInfo.effects[effNum];
+    local baseMult, damageMult = SealProcMods(calcedSpell, effectData.procSpell);
+
+    calcedEffect.effectiveSpCoef = calcedEffect.effectiveSpCoef * damageMult;
+    calcedEffect.effectivePower = calcedEffect.effectivePower * damageMult;
+
+    local base = effectData.valueBase + LevelBonus(spellInfo, effectData);
+    SetPerSwingDamage(calcedEffect,
+        (base + calcedEffect.flatMod) * calcedEffect.modBase * baseMult * damageMult + calcedEffect.effectivePower);
 end
 
 ---@param calcedSpell CalcedSpell
@@ -201,9 +269,10 @@ local function SealOfCommand(calcedSpell, effNum, spellInfo, spellName)
     local calcedEffect = calcedSpell.effects[effNum];
     local effectData = spellInfo.effects[effNum];
 
+    -- 70% of a normal weapon hit, plus the proc's spell power bonus (29%, in effectivePower)
     local weaponCoef = effectData.weaponCoef * calcedEffect.modBase;
-    calcedEffect.min = weaponCoef * stats.attackDmg.mainhand.min;
-    calcedEffect.max = weaponCoef * stats.attackDmg.mainhand.max;
+    calcedEffect.min = weaponCoef * stats.attackDmg.mainhand.min + calcedEffect.effectivePower;
+    calcedEffect.max = weaponCoef * stats.attackDmg.mainhand.max + calcedEffect.effectivePower;
     calcedEffect.avg = 0.5 * (calcedEffect.min + calcedEffect.max);
     calcedEffect.minCrit = calcedEffect.min * calcedSpell.critMult;
     calcedEffect.maxCrit = calcedEffect.max * calcedSpell.critMult;
@@ -239,6 +308,7 @@ end
 
 RegisterDummyAuraHandler(20154, SealOfRighteousness);
 RegisterDummyAuraHandler(20375, SealOfCommand);
+RegisterDummyAuraHandler(1311649, SealOfFury);
 RegisterDummyAuraHandler(401859, PrayerOfMending);
 -- Innervate and Evocation are mana regen percent auras on Forever (PowerRegenPercent below), Seal of
 -- Wisdom isn't calculated, and Earth Shield, Starfall, Thunderstorm, the Wrath Conflagrate and Seal of

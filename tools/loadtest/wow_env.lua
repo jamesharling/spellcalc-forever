@@ -516,14 +516,24 @@ C_SpellBook = namespace("C_SpellBook", {
 IsSpellKnown = function() return true end
 IsPlayerSpell = function() return true end
 
--- Any item ID is a cached cloth armor piece; the driver equips items through __INVENTORY (slot -> item ID).
+-- Any item ID is a cached cloth armor piece, except the weapons the driver puts in __WEAPONS (item ID ->
+-- { subclass = Enum.ItemWeaponSubclass value, low, high, speed }); it equips items through __INVENTORY
+-- (slot -> item ID).
 __INVENTORY = {}
+__WEAPONS = {}
+local TWO_HAND_SUBCLASSES = { [1] = true, [5] = true, [6] = true, [8] = true, [10] = true }
 C_Item = namespace("C_Item", {
     GetItemInfo = function(item)
         local id = tonumber(item) or tonumber(tostring(item):match("item:(%d+)"))
         if not id then return nil end
-        return "item " .. id, ("|cffa335ee|Hitem:%d::::::::60:::::|h[item %d]|h|r"):format(id, id), 4, 60, 60, "Armor", "Cloth",
-            1, "INVTYPE_CHEST", 0, 0, 4, 1
+        local link = ("|cffa335ee|Hitem:%d::::::::60:::::|h[item %d]|h|r"):format(id, id)
+        local weapon = __WEAPONS[id]
+        if weapon then
+            local twoHand = TWO_HAND_SUBCLASSES[weapon.subclass]
+            return "item " .. id, link, 4, 60, 60, "Weapon", twoHand and "Two-Handed Maces" or "One-Handed Maces",
+                1, twoHand and "INVTYPE_2HWEAPON" or "INVTYPE_WEAPON", 0, 0, 2, weapon.subclass
+        end
+        return "item " .. id, link, 4, 60, 60, "Armor", "Cloth", 1, "INVTYPE_CHEST", 0, 0, 4, 1
     end,
     GetItemInfoInstant = function() return nil end,
     GetItemSpell = function() return nil end, -- the addon has its own item -> use spell map
@@ -534,7 +544,14 @@ C_Item = namespace("C_Item", {
     IsItemDataCachedByID = function() return false end,
 })
 C_TooltipInfo = namespace("C_TooltipInfo", {
-    GetItemByID = function() return { lines = { { leftText = "Two-Hand", rightText = "Staff" }, { leftText = "100 - 150 Damage", rightText = "Speed 3.00" } } } end,
+    GetItemByID = function(id)
+        local weapon = __WEAPONS[id]
+        if weapon then
+            return { lines = { { leftText = TWO_HAND_SUBCLASSES[weapon.subclass] and "Two-Hand" or "One-Hand", rightText = "Mace" },
+                { leftText = ("%d - %d Damage"):format(weapon.low, weapon.high), rightText = ("Speed %.2f"):format(weapon.speed) } } }
+        end
+        return { lines = { { leftText = "Two-Hand", rightText = "Staff" }, { leftText = "100 - 150 Damage", rightText = "Speed 3.00" } } }
+    end,
     GetSpellByID = function() return { lines = {} } end,
 })
 LOCALIZED_CLASS_NAMES_MALE = { DRUID = "Druid", HUNTER = "Hunter", MAGE = "Mage", PALADIN = "Paladin", PRIEST = "Priest",
@@ -622,8 +639,9 @@ UnitCreatureType = function(unit)
     if not ct then return nil end
     return targetValues(unit, ct[1], ct[2])
 end
+__PLAYER_LEVEL = 60 -- the driver changes it to check level scaling
 UnitLevel = function(unit)
-    if unit == "player" then return 60 end
+    if unit == "player" then return __PLAYER_LEVEL end
     return targetValues(unit, __TARGET and __TARGET.level or -1)
 end
 UnitEffectiveLevel = UnitLevel

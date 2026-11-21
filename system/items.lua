@@ -71,6 +71,12 @@ local function SetWeaponBaseDmgAndSpeed(itemId, key)
     stats.weaponBaseDamage[key].max = dmgHigh;
 end
 
+-- Empty slots until items are read, the same values as after taking a weapon off (an empty main hand is unarmed,
+-- 2.0 speed; Seal of Righteousness scales with it).
+for _, key in ipairs({ "mainhand", "offhand", "ranged" }) do
+    SetWeaponBaseDmgAndSpeed(nil, key);
+end
+
 --- Update set item count and add/remove buffs as needed
 ---@param setId integer
 ---@param change integer

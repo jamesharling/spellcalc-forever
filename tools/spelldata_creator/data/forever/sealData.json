@@ -12,7 +12,19 @@
                 20291,
                 20292,
                 20293
-            ]
+            ],
+            "procs": {
+                "_comment": "The melee proc spell that deals each rank's damage. The server script picks it, the seal's data doesn't link it.",
+                "21084": 25742,
+                "20154": 25742,
+                "20287": 25740,
+                "20288": 25739,
+                "20289": 25738,
+                "20290": 25737,
+                "20291": 25736,
+                "20292": 25735,
+                "20293": 25713
+            }
         },
         "SOC": {
             "judgeDummyIndex": 2,
@@ -22,6 +34,18 @@
                 20918,
                 20919,
                 20920
+            ]
+        },
+        "SOF": {
+            "judgeDummyIndex": 2,
+            "spells": [
+                1311649,
+                1311656,
+                20163,
+                20419,
+                20421,
+                20422,
+                20423
             ]
         }
     }

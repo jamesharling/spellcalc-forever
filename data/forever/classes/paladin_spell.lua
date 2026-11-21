@@ -681,7 +681,46 @@ _addon.spellInfo = {
                 valueBase = 108,
                 valueRange = 0,
                 valuePerLevel = 18,
+                procSpell = 25742,
                 coef = 0.10000000149,
+                coefAP = 0,
+            },
+        }
+    },
+    [20163] = { -- Seal of Fury (Rank 3)
+        spellLevel = 26,
+        maxLevel = 32,
+        duration = 30,
+        baseCost = 90,
+        school = 2,
+        schoolMask = 2,
+        defType = 2,
+        effects = {
+            [1] = {
+                effectType = 6,
+                auraType = 4,
+                valueBase = 14,
+                valueRange = 0,
+                procSpell = 20231,
+                coef = 0.10000000149,
+                coefAP = 0,
+            },
+        }
+    },
+    [20183] = { -- Judgement of Fury (Rank 3)
+        spellLevel = 25,
+        maxLevel = 31,
+        school = 2,
+        schoolMask = 2,
+        defType = 3,
+        cantDogeParryBlock = true,
+        effects = {
+            [1] = {
+                effectType = 2,
+                valueBase = 51,
+                valueRange = 6,
+                valuePerLevel = 2.51999998093,
+                coef = 0.42899999022,
                 coefAP = 0,
             },
         }
@@ -845,6 +884,7 @@ _addon.spellInfo = {
                 valueBase = 216,
                 valueRange = 0,
                 valuePerLevel = 17,
+                procSpell = 25740,
                 coef = 0.10000000149,
                 coefAP = 0,
             },
@@ -865,6 +905,7 @@ _addon.spellInfo = {
                 valueBase = 352,
                 valueRange = 0,
                 valuePerLevel = 23,
+                procSpell = 25739,
                 coef = 0.10000000149,
                 coefAP = 0,
             },
@@ -885,6 +926,7 @@ _addon.spellInfo = {
                 valueBase = 541,
                 valueRange = 0,
                 valuePerLevel = 31,
+                procSpell = 25738,
                 coef = 0.10000000149,
                 coefAP = 0,
             },
@@ -905,6 +947,7 @@ _addon.spellInfo = {
                 valueBase = 785,
                 valueRange = 0,
                 valuePerLevel = 37,
+                procSpell = 25737,
                 coef = 0.10000000149,
                 coefAP = 0,
             },
@@ -925,6 +968,7 @@ _addon.spellInfo = {
                 valueBase = 1082,
                 valueRange = 0,
                 valuePerLevel = 41,
+                procSpell = 25736,
                 coef = 0.10000000149,
                 coefAP = 0,
             },
@@ -945,6 +989,7 @@ _addon.spellInfo = {
                 valueBase = 1407,
                 valueRange = 0,
                 valuePerLevel = 47,
+                procSpell = 25735,
                 coef = 0.10000000149,
                 coefAP = 0,
             },
@@ -965,6 +1010,7 @@ _addon.spellInfo = {
                 valueBase = 1786,
                 valueRange = 0,
                 valuePerLevel = 47,
+                procSpell = 25713,
                 coef = 0,
                 coefAP = 0,
             },
@@ -986,6 +1032,158 @@ _addon.spellInfo = {
                 valueBase = 0,
                 valueRange = 0,
                 coef = 0.28999999166,
+                coefAP = 0,
+            },
+        }
+    },
+    [20411] = { -- Judgement of Fury (Rank 4)
+        spellLevel = 34,
+        maxLevel = 40,
+        school = 2,
+        schoolMask = 2,
+        defType = 3,
+        cantDogeParryBlock = true,
+        effects = {
+            [1] = {
+                effectType = 2,
+                valueBase = 70,
+                valueRange = 8,
+                valuePerLevel = 2.78999996185,
+                coef = 0.42899999022,
+                coefAP = 0,
+            },
+        }
+    },
+    [20412] = { -- Judgement of Fury (Rank 5)
+        spellLevel = 42,
+        maxLevel = 48,
+        school = 2,
+        schoolMask = 2,
+        defType = 3,
+        cantDogeParryBlock = true,
+        effects = {
+            [1] = {
+                effectType = 2,
+                valueBase = 91,
+                valueRange = 10,
+                valuePerLevel = 3.42000007629,
+                coef = 0.42899999022,
+                coefAP = 0,
+            },
+        }
+    },
+    [20413] = { -- Judgement of Fury (Rank 6)
+        spellLevel = 50,
+        maxLevel = 56,
+        school = 2,
+        schoolMask = 2,
+        defType = 3,
+        cantDogeParryBlock = true,
+        effects = {
+            [1] = {
+                effectType = 2,
+                valueBase = 118,
+                valueRange = 10,
+                valuePerLevel = 3.69000005722,
+                coef = 0.42899999022,
+                coefAP = 0,
+            },
+        }
+    },
+    [20414] = { -- Judgement of Fury (Rank 7)
+        spellLevel = 58,
+        maxLevel = 64,
+        school = 2,
+        schoolMask = 2,
+        defType = 3,
+        cantDogeParryBlock = true,
+        effects = {
+            [1] = {
+                effectType = 2,
+                valueBase = 146,
+                valueRange = 14,
+                valuePerLevel = 3.69000005722,
+                coef = 0.42899999022,
+                coefAP = 0,
+            },
+        }
+    },
+    [20419] = { -- Seal of Fury (Rank 4)
+        spellLevel = 34,
+        maxLevel = 40,
+        duration = 30,
+        baseCost = 120,
+        school = 2,
+        schoolMask = 2,
+        defType = 2,
+        effects = {
+            [1] = {
+                effectType = 6,
+                auraType = 4,
+                valueBase = 19,
+                valueRange = 0,
+                procSpell = 20415,
+                coef = 0.10000000149,
+                coefAP = 0,
+            },
+        }
+    },
+    [20421] = { -- Seal of Fury (Rank 5)
+        spellLevel = 42,
+        maxLevel = 48,
+        duration = 30,
+        baseCost = 140,
+        school = 2,
+        schoolMask = 2,
+        defType = 2,
+        effects = {
+            [1] = {
+                effectType = 6,
+                auraType = 4,
+                valueBase = 25,
+                valueRange = 0,
+                procSpell = 20416,
+                coef = 0.10000000149,
+                coefAP = 0,
+            },
+        }
+    },
+    [20422] = { -- Seal of Fury (Rank 6)
+        spellLevel = 50,
+        maxLevel = 56,
+        duration = 30,
+        baseCost = 170,
+        school = 2,
+        schoolMask = 2,
+        defType = 2,
+        effects = {
+            [1] = {
+                effectType = 6,
+                auraType = 4,
+                valueBase = 32,
+                valueRange = 0,
+                procSpell = 20417,
+                coef = 0.10000000149,
+                coefAP = 0,
+            },
+        }
+    },
+    [20423] = { -- Seal of Fury (Rank 7)
+        spellLevel = 58,
+        maxLevel = 64,
+        duration = 30,
+        baseCost = 200,
+        school = 2,
+        schoolMask = 2,
+        defType = 2,
+        effects = {
+            [1] = {
+                effectType = 6,
+                auraType = 4,
+                valueBase = 35,
+                valueRange = 0,
+                procSpell = 20418,
+                coef = 0.10000000149,
                 coefAP = 0,
             },
         }
@@ -1313,6 +1511,7 @@ _addon.spellInfo = {
                 valueBase = 108,
                 valueRange = 0,
                 valuePerLevel = 18,
+                procSpell = 25742,
                 coef = 0.10000000149,
                 coefAP = 0,
             },
@@ -1621,6 +1820,82 @@ _addon.spellInfo = {
             },
         }
     },
+    [1311649] = { -- Seal of Fury (Rank 1)
+        spellLevel = 10,
+        maxLevel = 16,
+        duration = 30,
+        baseCost = 40,
+        school = 2,
+        schoolMask = 2,
+        defType = 2,
+        effects = {
+            [1] = {
+                effectType = 6,
+                auraType = 4,
+                valueBase = 6,
+                valueRange = 0,
+                procSpell = 1311647,
+                coef = 0.10000000149,
+                coefAP = 0,
+            },
+        }
+    },
+    [1311650] = { -- Judgement of Fury (Rank 1)
+        spellLevel = 10,
+        maxLevel = 16,
+        school = 2,
+        schoolMask = 2,
+        defType = 3,
+        cantDogeParryBlock = true,
+        effects = {
+            [1] = {
+                effectType = 2,
+                valueBase = 22,
+                valueRange = 2,
+                valuePerLevel = 1.71000003815,
+                coef = 0.42899999022,
+                coefAP = 0,
+            },
+        }
+    },
+    [1311655] = { -- Judgement of Fury (Rank 2)
+        spellLevel = 18,
+        maxLevel = 24,
+        school = 2,
+        schoolMask = 2,
+        defType = 3,
+        cantDogeParryBlock = true,
+        effects = {
+            [1] = {
+                effectType = 2,
+                valueBase = 35,
+                valueRange = 4,
+                valuePerLevel = 2.16000008583,
+                coef = 0.42899999022,
+                coefAP = 0,
+            },
+        }
+    },
+    [1311656] = { -- Seal of Fury (Rank 2)
+        spellLevel = 18,
+        maxLevel = 24,
+        duration = 30,
+        baseCost = 60,
+        school = 2,
+        schoolMask = 2,
+        defType = 2,
+        effects = {
+            [1] = {
+                effectType = 6,
+                auraType = 4,
+                valueBase = 9,
+                valueRange = 0,
+                procSpell = 1311654,
+                coef = 0.10000000149,
+                coefAP = 0,
+            },
+        }
+    },
 };
 
 _addon.aurasPlayer[20287] = { -- Seal of Righteousness (Rank 2)
@@ -1711,6 +1986,55 @@ _addon.aurasPlayer[21084] = { -- Seal of Righteousness (Rank 1)
     {
         type = _addon.CONST.EFFECT_TYPE.JUDGEMENT_SPELL,
         value = 20187
+    }
+};
+
+_addon.aurasPlayer[20163] = { -- Seal of Fury (Rank 3)
+    {
+        type = _addon.CONST.EFFECT_TYPE.JUDGEMENT_SPELL,
+        value = 20183
+    }
+};
+
+_addon.aurasPlayer[20419] = { -- Seal of Fury (Rank 4)
+    {
+        type = _addon.CONST.EFFECT_TYPE.JUDGEMENT_SPELL,
+        value = 20411
+    }
+};
+
+_addon.aurasPlayer[20421] = { -- Seal of Fury (Rank 5)
+    {
+        type = _addon.CONST.EFFECT_TYPE.JUDGEMENT_SPELL,
+        value = 20412
+    }
+};
+
+_addon.aurasPlayer[20422] = { -- Seal of Fury (Rank 6)
+    {
+        type = _addon.CONST.EFFECT_TYPE.JUDGEMENT_SPELL,
+        value = 20413
+    }
+};
+
+_addon.aurasPlayer[20423] = { -- Seal of Fury (Rank 7)
+    {
+        type = _addon.CONST.EFFECT_TYPE.JUDGEMENT_SPELL,
+        value = 20414
+    }
+};
+
+_addon.aurasPlayer[1311656] = { -- Seal of Fury (Rank 2)
+    {
+        type = _addon.CONST.EFFECT_TYPE.JUDGEMENT_SPELL,
+        value = 1311655
+    }
+};
+
+_addon.aurasPlayer[1311649] = { -- Seal of Fury (Rank 1)
+    {
+        type = _addon.CONST.EFFECT_TYPE.JUDGEMENT_SPELL,
+        value = 1311650
     }
 };
 

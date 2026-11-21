@@ -13,6 +13,7 @@ local _addon = select(2, ...);
 ---@field coef number
 ---@field coefAP number
 ---@field weaponCoef number|nil
+---@field procSpell integer|nil Paladin seals: the proc spell that deals the damage (its spell modifiers apply)
 ---@field tickPeriod integer|nil In seconds
 ---@field chains integer|nil
 ---@field chainMult number|nil

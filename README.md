@@ -79,6 +79,13 @@ from upstream SpellCalc in more than the TOC:
   actions on the bars resolve to that spell, and Item tooltips show the same lines as a spell tooltip. One effect
   per use spell is calculated (a heal before a mana restore before damage); per-second values of off-GCD items
   are per 1.5 s. Drinks are shown per 2-second regen tick.
+- **Paladin seals** follow Forever's tooltips, per swing and without crits. Seal of Righteousness deals the
+  rank's base points / 100 × the weapon's own speed × 0.85 with a one-hander (× 1.2 with a two-hander), plus
+  7.65% (12%) of spell power. Upstream used Wrath's formula, which has no base damage and showed 0 without spell
+  power. Seal of Fury, Forever's tanking seal, deals its proc's base damage plus 10% of spell power on every
+  swing, whatever the weapon, and Judgement with it up is Judgement of Fury. Seal of Command adds its proc's
+  29% spell power bonus to 70% of a weapon hit. Improved Seals applies to the Seal of Righteousness and Seal of
+  Fury procs, which deal the damage.
 - Settings open through the Settings API (`Settings.OpenToCategory`); Ace3 updated to r1386.
 
 ## Needs verification at launch
@@ -113,6 +120,9 @@ Nothing here has run on a live Forever client (the beta closed before this port 
 10. Hotfixed items: launch-day hotfixes can add items and sets. After logging in on launch day, run
     `npm run update-hotfixes-forever` and regenerate (see *Regenerating data*). Check a tier 0 set's bonus
     shows up (`/sc debug` prints "Add set bonus" when the pieces go on).
+11. Seal of Righteousness: the per-swing formula combines Forever's tooltip (its range runs from a fast one-hander
+    to a slow two-hander) with Classic Era's weapon speed formula. Compare a few hits in the combat log with the
+    action bar value, with a one-hander and a two-hander, and with spell power on gear.
 
 ## Regenerating data
 
@@ -205,7 +215,9 @@ npm test
   hunter and rogue are loaded too, to check the tooltip hook copes with a class that has no data. It puts
   spells on the stock action bars (6–8 included) and checks their values show, sit above the cooldown frame,
   and follow every anchor, outline and shadow setting. It checks macro slots and Macro tooltips show the
-  macro's current spell, including after the spell switches. It validates the settings table with AceConfig,
+  macro's current spell, including after the spell switches. For a paladin it checks the seals: Seal of
+  Righteousness at level 1 and 60 with a one-handed and a two-handed weapon (bar value included), Seal of Fury,
+  Seal of Command, Improved Seals, and Judgement with Seal of Fury up. It validates the settings table with AceConfig,
   and checks old saved
   settings migrate. Finally it equips the class's tier 0 set (hotfix-only items) and checks its set bonus
   applies, equips every item that has effects in the data, then unequips everything and checks the numbers

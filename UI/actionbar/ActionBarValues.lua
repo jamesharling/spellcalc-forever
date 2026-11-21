@@ -6,6 +6,7 @@ local GetSpellInfo = _addon.api.GetSpellInfo;
 local IsSecret = _addon.api.IsSecret;
 local SEAL_OF_RIGHTEOUSNESS = GetSpellInfo(20154);
 local SEAL_OF_COMMAND = GetSpellInfo(20375);
+local SEAL_OF_FURY = GetSpellInfo(1311649);
 local PRAYER_OF_MENDING = GetSpellInfo(401859);
 
 local ActionBarValues = {};
@@ -38,7 +39,7 @@ end
 ---@param calcedEffect CalcedEffect
 ---@param spellName string
 local function GetDummyValue(calcedEffect, spellName)
-    if spellName == SEAL_OF_RIGHTEOUSNESS or spellName == SEAL_OF_COMMAND then
+    if spellName == SEAL_OF_RIGHTEOUSNESS or spellName == SEAL_OF_COMMAND or spellName == SEAL_OF_FURY then
         local k = "avg" -- SpellCalc_settings.abSealValue;
         if calcedEffect[k] then
             return calcedEffect[k];

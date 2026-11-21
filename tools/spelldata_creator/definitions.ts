@@ -231,6 +231,8 @@ interface EffectInfo {
     },
     auraStacks?: number,
     mechanic: number,
+    /** Paladin seals: the proc spell that deals the damage (spell modifiers on it apply). */
+    procSpell?: number,
 }
 
 const enum PowerType {
