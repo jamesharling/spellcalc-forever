@@ -352,6 +352,53 @@ do
     end
 end
 
+-- Items that restore mana: a potion (direct) and a drink or periodic one
+do
+    local abv = A.ActionBarValues
+    local function effectOf(itemId)
+        local sp = A.itemUseSpells and A.itemUseSpells[itemId]
+        local info = sp and A.spellInfo[sp]
+        return info and info.effects[1], sp
+    end
+    local function findItem(match)
+        if match(13444) then return 13444 end -- Major Mana Potion
+        local best
+        for itemId in pairs(A.itemUseSpells or {}) do
+            if match(itemId) and (not best or itemId < best) then best = itemId end
+        end
+        return best
+    end
+    local SET, SAT = A.CONST.SPELL_EFFECT_TYPES, A.CONST.SPELL_AURA_TYPES
+    local potion = findItem(function(id) local e = effectOf(id); return e ~= nil and e.effectType == SET.SPELL_EFFECT_ENERGIZE end)
+    local periodic = findItem(function(id) local e = effectOf(id); return e ~= nil and e.effectType == SET.SPELL_EFFECT_APPLY_AURA
+        and (e.auraType == SAT.SPELL_AURA_PERIODIC_ENERGIZE or e.auraType == SAT.SPELL_AURA_MOD_POWER_REGEN) end)
+    if not potion or not periodic then
+        emit(("FAIL mana items missing from the data (potion %s, periodic %s)"):format(tostring(potion), tostring(periodic)))
+    else
+        __ACTION_SLOTS[29] = { "item", potion }
+        __ACTION_SLOTS[30] = { "item", periodic }
+        __FireEvent("ACTIONBAR_SLOT_CHANGED", 29)
+        __FireEvent("ACTIONBAR_SLOT_CHANGED", 30)
+        __TickOnUpdate(10, 0.1)
+        local _, potionSpell = effectOf(potion)
+        local _, periodicSpell = effectOf(periodic)
+        local ps, pcs = checkSpell(potionSpell)
+        local ds, dcs = checkSpell(periodicSpell)
+        local pe = ps == "ok" and pcs.effects[1] or nil
+        local de = ds == "ok" and dcs.effects[1] or nil
+        local potionText, periodicText = abv:GetSlotText(29), abv:GetSlotText(30)
+        emit(("mana items: %s [%d] %s, mana %s (bar %s); %s [%d] %s, mana %s per tick x %s (bar %s)"):format(
+            name(potionSpell), potionSpell, ps, pe and ("%.0f-%.0f"):format(pe.min, pe.max) or "?", tostring(potionText),
+            name(periodicSpell), periodicSpell, ds, de and ("%.1f"):format(de.avgCombined) or "?", de and tostring(de.ticks) or "?", tostring(periodicText)))
+        if not pe or pe.avgCombined <= 0 or bit.band(pe.effectFlags, A.CONST.ADDON_EFFECT_FLAGS.MANA_RESTORE) == 0 then emit("FAIL mana potion has no mana value") end
+        if not potionText or potionText == "" then emit("FAIL mana potion shows no bar value") end
+        if not de or not de.ticks or de.ticks < 2 or math.abs(de.avgAfterMitigation - de.avgCombined * de.ticks) > 1e-6 then emit("FAIL periodic mana item total is not ticks x per tick") end
+        if not periodicText or periodicText == "" then emit("FAIL periodic mana item shows no bar value") end
+        __ACTION_SLOTS[29], __ACTION_SLOTS[30] = nil, nil
+        __FireEvent("ACTIONBAR_SLOT_CHANGED", 0)
+    end
+end
+
 -- Action bars 6-8 (slots 145-180): first and last slot of each
 do
     local abv = A.ActionBarValues

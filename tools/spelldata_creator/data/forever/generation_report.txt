@@ -1,6 +1,6 @@
 SpellCalc Forever data generation report
 Client build: wowf 1.60.1.71037
-Generated: 2026-11-21T11:56:48.339Z
+Generated: 2026-11-21T12:27:41.247Z
 
 Everything listed here was skipped or guessed by the generator and should be reviewed.
 
@@ -932,7 +932,7 @@ The act of shapeshifting frees the caster of Polymorph and Movement Impairing ef
   WARRIOR: Mortal Strike (Rank 4) [27580]
   WARRIOR: Spell Vulnerability [23605]
 
-== Item use spells (72)
+== Item use spells (86)
   102 use items skipped by name (test, deprecated or placeholder items)
   Heal Self [9163]: no SpellLevels entry, using level 0 (no per-level scaling)
   Flee [5024]: no SpellCategories entry, defense type set to none
@@ -944,8 +944,10 @@ The act of shapeshifting frees the caster of Polymorph and Movement Impairing ef
   CHUG! CHUG! CHUG! CHUG! [363881]: no SpellLevels entry, using level 0 (no per-level scaling)
   Linken's Boomerang [15712]: no SpellLevels entry, using level 0 (no per-level scaling)
   Linken's Boomerang [15712]: no SpellCategories entry, defense type set to none
+  Restore Mana [17531]: no SpellLevels entry, using level 0 (no per-level scaling)
   High-Yield Radiation Bomb [435963]: no SpellLevels entry, using level 0 (no per-level scaling)
   Ez-Thro Radiation Bomb [435968]: no SpellLevels entry, using level 0 (no per-level scaling)
+  Minor Evocation [434851]: no SpellLevels entry, using level 0 (no per-level scaling)
   Green Tea [833]: no SpellCategories entry, defense type set to none
   Blazing Emblem [13744]: no SpellCategories entry, defense type set to none
   Iron Grenade [4068]: no SpellLevels entry, using level 0 (no per-level scaling)
@@ -972,12 +974,23 @@ The act of shapeshifting frees the caster of Polymorph and Movement Impairing ef
   Dark Iron Bomb [19784]: no SpellLevels entry, using level 0 (no per-level scaling)
   Thorium Grenade [19769]: no SpellLevels entry, using level 0 (no per-level scaling)
   Razorlash Root [21955]: no SpellCategories entry, defense type set to none
+  Restore Mana [17530]: no SpellLevels entry, using level 0 (no per-level scaling)
   Dense Dynamite [23063]: no SpellLevels entry, using level 0 (no per-level scaling)
   Recombobulate [23064]: no SpellCategories entry, defense type set to none
   Ez-Thro Dynamite [23000]: no SpellLevels entry, using level 0 (no per-level scaling)
+  Food [24707]: no SpellCategories entry, defense type set to none
   Prayer Beads Blessing [24354]: no SpellCategories entry, defense type set to none
+  Earthen Sigil [24884]: no SpellLevels entry, using level 0 (no per-level scaling)
+  Sanctified Orb [24865]: no SpellLevels entry, using level 0 (no per-level scaling)
+  Dim Sum [26263]: no SpellCategories entry, defense type set to none
   Shard of the Fallen Star [26789]: no SpellLevels entry, using level 0 (no per-level scaling)
   Shard of the Fallen Star [26789]: no SpellCategories entry, defense type set to none
+  Graccu's Mince Meat Fruitcake [25990]: no SpellCategories entry, defense type set to none
+  Refreshing Red Apple [29055]: no SpellCategories entry, defense type set to none
+  Elixir of Wicked Regeneration [1250932]: no SpellCategories entry, defense type set to none
+  Minor Mageblood Elixir [1250942]: no SpellCategories entry, defense type set to none
+  Lesser Mageblood Elixir [1250944]: no SpellCategories entry, defense type set to none
+  Greater Mageblood Elixir [1250948]: no SpellCategories entry, defense type set to none
   Dragonfire Potion [1252554]: no SpellLevels entry, using level 0 (no per-level scaling)
   SAF-T Dynamite [1269155]: no SpellLevels entry, using level 0 (no per-level scaling)
   SAF-T Copper Bomb [1269161]: no SpellLevels entry, using level 0 (no per-level scaling)
@@ -1000,6 +1013,7 @@ The act of shapeshifting frees the caster of Polymorph and Movement Impairing ef
   Mysticbloom Seed [1302874]: no SpellCategories entry, defense type set to none
   Satchel of Potions [1309685]: no SpellLevels entry, using level 0 (no per-level scaling)
   Satchel of Potions [1309685]: no SpellCategories entry, defense type set to none
+  Restorative Bread [1312719]: no SpellCategories entry, defense type set to none
   Renewing Flame [1314412]: no SpellLevels entry, using level 0 (no per-level scaling)
   Renewing Flame [1314412]: no SpellCategories entry, defense type set to none
   Behemoth Bone [1315849]: no SpellLevels entry, using level 0 (no per-level scaling)

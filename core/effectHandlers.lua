@@ -460,6 +460,55 @@ local function PowerRegenPercent(calcedSpell, effNum, spellInfo)
     calcedEffect.avgAfterMitigation = perTickRegenExtra * ticks;
 end
 
+--- Fill a mana restore effect: base values without spell power, damage modifiers or crit, and no per-second
+--- value (the mana restore tooltip would show it as a proc chance). Per tick for periodic auras; the total
+--- over the duration is avgAfterMitigation.
+---@param calcedSpell CalcedSpell
+---@param effNum integer
+---@param spellInfo SpellInfo
+---@param spellName string
+---@param spellId integer
+---@param pctOfMaxMana boolean The base value is a percentage of maximum mana.
+local function FillManaValues(calcedSpell, effNum, spellInfo, spellName, spellId, pctOfMaxMana)
+    local calcedEffect = calcedSpell.effects[effNum];
+    local effectData = spellInfo.effects[effNum];
+    FillBaseValues(calcedSpell, calcedEffect, spellId, spellInfo, spellName, effectData, 0, 1, 0);
+    if pctOfMaxMana then
+        local pct = stats.manaMax / 100;
+        calcedEffect.min = calcedEffect.min * pct;
+        calcedEffect.max = calcedEffect.max * pct;
+        calcedEffect.avg = calcedEffect.avg * pct;
+        calcedEffect.avgCombined = calcedEffect.avg;
+    end
+    calcedEffect.minCrit = 0;
+    calcedEffect.maxCrit = 0;
+    calcedEffect.avgCrit = 0;
+    calcedEffect.avgAfterMitigation = calcedEffect.avgCombined * (calcedEffect.ticks or 1);
+    calcedEffect.perSec = 0;
+    calcedEffect.doneToOom = 0;
+    calcedEffect.perResource = 0;
+end
+
+--- Mana per tick over the duration: periodic energize auras, and drinks (mana regen auras, per 2 s tick).
+---@param calcedSpell CalcedSpell
+---@param effNum integer
+---@param spellInfo SpellInfo
+---@param spellName string
+---@param spellId integer
+local function PeriodicEnergize(calcedSpell, effNum, spellInfo, spellName, spellId)
+    FillManaValues(calcedSpell, effNum, spellInfo, spellName, spellId, false);
+end
+
+--- A percentage of maximum mana per tick.
+---@param calcedSpell CalcedSpell
+---@param effNum integer
+---@param spellInfo SpellInfo
+---@param spellName string
+---@param spellId integer
+local function ObsModMana(calcedSpell, effNum, spellInfo, spellName, spellId)
+    FillManaValues(calcedSpell, effNum, spellInfo, spellName, spellId, true);
+end
+
 --- Handler for dummy auras
 ---@param calcedSpell CalcedSpell
 ---@param effNum integer
@@ -483,8 +532,9 @@ auraHandler[AURA_TYPES.SPELL_AURA_PERIODIC_TRIGGER_SPELL] = PeriodicTriggerSpell
 auraHandler[AURA_TYPES.SPELL_AURA_PERIODIC_TRIGGER_SPELL_WITH_VALUE] = PeriodicTriggerSpell;
 auraHandler[AURA_TYPES.SPELL_AURA_MOD_POWER_REGEN_PERCENT] = PowerRegenPercent;
 auraHandler[AURA_TYPES.SPELL_AURA_DUMMY] = DummyAura;
-auraHandler[AURA_TYPES.SPELL_AURA_PERIODIC_ENERGIZE] = DummyAura;
-auraHandler[AURA_TYPES.SPELL_AURA_OBS_MOD_MANA] = DummyAura;
+auraHandler[AURA_TYPES.SPELL_AURA_PERIODIC_ENERGIZE] = PeriodicEnergize;
+auraHandler[AURA_TYPES.SPELL_AURA_OBS_MOD_MANA] = ObsModMana;
+auraHandler[AURA_TYPES.SPELL_AURA_MOD_POWER_REGEN] = PeriodicEnergize;
 
 ----------------------------------------------------------------------------------------------------------------------------------------
 -- Effect Hanlder
@@ -643,14 +693,24 @@ local function AutoAttack(_, calcedSpell, effNum, spellInfo, spellName)
     ohd.perSec = ohd.avgAfterMitigation / stats.attackSpeed.offhand;
 end
 
---- Handle SPELL_EFFECT_ENERGIZE_PCT
+--- Handle SPELL_EFFECT_ENERGIZE: mana potions, runes and mana gems.
+---@param calcedSpell CalcedSpell
+---@param effNum integer
+---@param spellInfo SpellInfo
+---@param spellName string
+---@param spellId integer
+local function Energize(_, calcedSpell, effNum, spellInfo, spellName, spellId)
+    FillManaValues(calcedSpell, effNum, spellInfo, spellName, spellId, false);
+end
+
+--- Handle SPELL_EFFECT_ENERGIZE_PCT: a percentage of maximum mana.
 ---@param calcedSpell CalcedSpell
 ---@param effNum integer
 ---@param spellInfo SpellInfo
 ---@param spellName string
 ---@param spellId integer
 local function EnergizePct(_, calcedSpell, effNum, spellInfo, spellName, spellId)
-    auraHandler[AURA_TYPES.SPELL_AURA_DUMMY](calcedSpell, effNum, spellInfo, spellName, spellId);
+    FillManaValues(calcedSpell, effNum, spellInfo, spellName, spellId, true);
 end
 
 ---Handles SPELL_EFFECT_WEAPON_DAMAGE
@@ -710,6 +770,7 @@ effHandler[EFFECT_TYPES.SPELL_EFFECT_HEALTH_FUNNEL] = AuraOrAreaAura;
 effHandler[EFFECT_TYPES.SPELL_EFFECT_PERSISTENT_AREA_AURA] = AuraOrAreaAura;
 effHandler[EFFECT_TYPES.SPELL_EFFECT_APPLY_AREA_AURA_PARTY] = AuraOrAreaAura;
 effHandler[EFFECT_TYPES.SPELL_EFFECT_ATTACK] = AutoAttack;
+effHandler[EFFECT_TYPES.SPELL_EFFECT_ENERGIZE] = Energize;
 effHandler[EFFECT_TYPES.SPELL_EFFECT_ENERGIZE_PCT] = EnergizePct;
 effHandler[EFFECT_TYPES.SPELL_EFFECT_WEAPON_DAMAGE] = WeaponDamage;
 effHandler[EFFECT_TYPES.SPELL_EFFECT_NORMALIZED_WEAPON_DMG] = WeaponDamage;

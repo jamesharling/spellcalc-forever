@@ -290,9 +290,11 @@ local function CalcSpell(spellId, calcedSpell, parentSpellData, parentValue)
                 end
 
                 if red.effectType == SPELL_EFFECT_TYPES.SPELL_EFFECT_ENERGIZE_PCT
+                or red.effectType == SPELL_EFFECT_TYPES.SPELL_EFFECT_ENERGIZE
                 or red.auraType and (
                     red.auraType == AURA_TYPES.SPELL_AURA_OBS_MOD_MANA
                     or red.auraType == AURA_TYPES.SPELL_AURA_PERIODIC_ENERGIZE
+                    or red.auraType == AURA_TYPES.SPELL_AURA_MOD_POWER_REGEN
                     or red.auraType == AURA_TYPES.SPELL_AURA_MOD_POWER_REGEN_PERCENT
                 ) then
                     effectFlags[i] = effectFlags[i] + ADDON_EFFECT_FLAGS.MANA_RESTORE;

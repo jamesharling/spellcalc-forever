@@ -171,9 +171,20 @@ function applyAuraAreaAura(rankInfo: RankInfo, effect: SpellEffect, effectNum: n
             handleDummyAura(effect, rankInfo.effects[effectNum], rankInfo);
             break;
         case AURA_TYPE.SPELL_AURA_PROC_TRIGGER_DAMAGE:
-        case AURA_TYPE.SPELL_AURA_PERIODIC_ENERGIZE:
         case AURA_TYPE.MOD_POWER_REGEN_PERCENT:
+            break;
+        case AURA_TYPE.SPELL_AURA_PERIODIC_ENERGIZE:
+            rankInfo.effects[effectNum].period = effect.EffectAuraPeriod / 1000;
+            break;
         case AURA_TYPE.SPELL_AURA_OBS_MOD_MANA:
+            // A percentage of maximum mana per tick; a period of 0 means the default 5 seconds.
+            rankInfo.effects[effectNum].period = effect.EffectAuraPeriod ? effect.EffectAuraPeriod / 1000 : 5;
+            break;
+        case AURA_TYPE.SPELL_AURA_MOD_POWER_REGEN:
+            // Mana per 5 seconds for the duration (drinks); stored per 2-second regen tick.
+            rankInfo.effects[effectNum].valueBase = rankInfo.effects[effectNum].valueBase * 0.4;
+            rankInfo.effects[effectNum].valueRange = rankInfo.effects[effectNum].valueRange * 0.4;
+            rankInfo.effects[effectNum].period = 2;
             break;
         default:
             if (effect.EffectMechanic != 0) {
@@ -390,6 +401,24 @@ const effectInfoHandler: {[index: number]: (rankInfo: RankInfo, effect: SpellEff
     },
 
     [EFFECT_TYPE.SPELL_EFFECT_DUMMY]: handleDummyEffect,
+
+    [EFFECT_TYPE.SPELL_EFFECT_ENERGIZE]: (rankInfo, effect, effectNum, _spellName) => {
+        rankInfo.effects[effectNum] = {
+            effectType: effect.Effect,
+            coefAP: effect.BonusCoefficientFromAP,
+            coef: effect.EffectBonusCoefficient,
+            valueBase: 0,
+            valueRange: 0,
+            valuePerLevel: effect.EffectRealPointsPerLevel,
+            forceScaleWithHeal: false,
+            period: 0,
+            weaponCoef: 0,
+            mechanic: effect.EffectMechanic,
+            perResource: effect.EffectPointsPerResource,
+            triggeredSpell: 0,
+        };
+        fillBaseAndRange(rankInfo.effects[effectNum], effect);
+    },
 
     [EFFECT_TYPE.SPELL_EFFECT_ENERGIZE_PCT]: (rankInfo, effect, effectNum, _spellName) => {
         rankInfo.effects[effectNum] = {

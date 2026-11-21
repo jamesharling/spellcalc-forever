@@ -72,10 +72,12 @@ from upstream SpellCalc in more than the TOC:
   Target identity that comes back secret (inside instances, and in combat) is treated as unknown: no class or
   creature type, and the default level difference instead of the target's level.
 - **No downranking penalty** on coefficients: Forever's spell data carries the full coefficient on every rank.
-- **Items that heal or deal damage** (potions, healthstones, bandages, explosives, trinkets such as Blessed Prayer
-  Beads) get values too: `data/forever/itemSpells.lua` holds their use spells and an item -> spell map, item
-  actions on the bars resolve to that spell, and Item tooltips show the same lines as a spell tooltip. Only the
-  first heal or damage effect of a use spell is calculated; per-second values of off-GCD items are per 1.5 s.
+- **Items that heal, restore mana or deal damage** (potions, healthstones, bandages, drinks, explosives,
+  trinkets such as Blessed Prayer Beads) get values too: `data/forever/itemSpells.lua` holds their use spells
+  and an item -> spell map, item
+  actions on the bars resolve to that spell, and Item tooltips show the same lines as a spell tooltip. One effect
+  per use spell is calculated (a heal before a mana restore before damage); per-second values of off-GCD items
+  are per 1.5 s. Drinks are shown per 2-second regen tick.
 - Settings open through the Settings API (`Settings.OpenToCategory`); Ace3 updated to r1386.
 
 ## Needs verification at launch

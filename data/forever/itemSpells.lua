@@ -3,9 +3,10 @@
 ---@class AddonEnv
 local _addon = select(2, ...);
 
--- Use effects of items that heal or deal damage: potions, healthstones, bandages, explosives and trinkets
--- such as Blessed Prayer Beads. Only the first heal or damage effect of each use spell is kept. Loaded after the
--- class spell data; classes the addon does not support get none (see events.lua).
+-- Use effects of items that heal, restore mana or deal damage: potions, healthstones, bandages, drinks,
+-- explosives and trinkets such as Blessed Prayer Beads. One effect per use spell: a heal before a mana
+-- restore before damage. Loaded after the class spell data; classes the addon does not support get none
+-- (see events.lua).
 local _, playerClass = UnitClass("player");
 if _addon.CONST.UNSUPPORTED_CLASSES[playerClass] then
     return;
@@ -47,6 +48,100 @@ local itemSpells = {
                 valueRange = 12,
                 valuePerLevel = 0.30000001192,
                 coef = 0.57099997997,
+                coefAP = 0,
+            },
+        }
+    },
+    [430] = { -- Drink (Refreshing Spring Water, Conjured Water, Crisp Spring Water)
+        spellLevel = 5,
+        maxLevel = 0,
+        duration = 18,
+        school = 1,
+        schoolMask = 1,
+        GCD = 0,
+        defType = 1,
+        effects = {
+            [1] = {
+                effectType = 6,
+                auraType = 85,
+                tickPeriod = 2,
+                valueBase = 16.8,
+                valueRange = 0,
+                coef = 0,
+                coefAP = 0,
+            },
+        }
+    },
+    [431] = { -- Drink (Ice Cold Milk, Conjured Fresh Water, Blended Bean Brew, Gustberry Juice)
+        spellLevel = 15,
+        maxLevel = 0,
+        duration = 21,
+        school = 1,
+        schoolMask = 1,
+        GCD = 0,
+        defType = 1,
+        effects = {
+            [1] = {
+                effectType = 6,
+                auraType = 85,
+                tickPeriod = 2,
+                valueBase = 41.6,
+                valueRange = 0,
+                coef = 0,
+                coefAP = 0,
+            },
+        }
+    },
+    [432] = { -- Drink (Melon Juice, Conjured Purified Water, Bubbling Water, Fizzy Faire Drink)
+        spellLevel = 25,
+        maxLevel = 0,
+        duration = 24,
+        school = 1,
+        schoolMask = 1,
+        GCD = 0,
+        defType = 1,
+        effects = {
+            [1] = {
+                effectType = 6,
+                auraType = 85,
+                tickPeriod = 2,
+                valueBase = 69.60000000000001,
+                valueRange = 0,
+                coef = 0,
+                coefAP = 0,
+            },
+        }
+    },
+    [437] = { -- Restore Mana (Minor Mana Potion, Minor Mana Potion)
+        spellLevel = 0,
+        maxLevel = 0,
+        school = 1,
+        schoolMask = 1,
+        GCD = 0,
+        defType = 1,
+        effects = {
+            [1] = {
+                effectType = 30,
+                valueBase = 140,
+                valueRange = 40,
+                coef = 0,
+                coefAP = 0,
+            },
+        }
+    },
+    [438] = { -- Restore Mana (Full Moonshine, Lesser Mana Potion, Lesser Mana Potion)
+        spellLevel = 0,
+        maxLevel = 0,
+        school = 1,
+        schoolMask = 1,
+        GCD = 0,
+        defType = 1,
+        effects = {
+            [1] = {
+                effectType = 30,
+                valueBase = 280,
+                valueRange = 80,
+                coef = 0,
                 coefAP = 0,
             },
         }
@@ -158,6 +253,66 @@ local itemSpells = {
             },
         }
     },
+    [1133] = { -- Drink (Sweet Nectar, Conjured Spring Water, Enchanted Water, Green Garden Tea, ...)
+        spellLevel = 35,
+        maxLevel = 0,
+        duration = 27,
+        school = 1,
+        schoolMask = 1,
+        GCD = 0,
+        defType = 1,
+        effects = {
+            [1] = {
+                effectType = 6,
+                auraType = 85,
+                tickPeriod = 2,
+                valueBase = 99.60000000000001,
+                valueRange = 0,
+                coef = 0,
+                coefAP = 0,
+            },
+        }
+    },
+    [1135] = { -- Drink (Lapidis Tankard of Tidesippe, Moonberry Juice, Conjured Mineral Water, Bottled Winterspring Water)
+        spellLevel = 45,
+        maxLevel = 0,
+        duration = 30,
+        school = 1,
+        schoolMask = 1,
+        GCD = 0,
+        defType = 1,
+        effects = {
+            [1] = {
+                effectType = 6,
+                auraType = 85,
+                tickPeriod = 2,
+                valueBase = 132.8,
+                valueRange = 0,
+                coef = 0,
+                coefAP = 0,
+            },
+        }
+    },
+    [1137] = { -- Drink (Morning Glory Dew, Conjured Sparkling Water, Warm Apple Juice)
+        spellLevel = 55,
+        maxLevel = 0,
+        duration = 30,
+        school = 1,
+        schoolMask = 1,
+        GCD = 0,
+        defType = 1,
+        effects = {
+            [1] = {
+                effectType = 6,
+                auraType = 85,
+                tickPeriod = 2,
+                valueBase = 195.60000000000002,
+                valueRange = 0,
+                coef = 0,
+                coefAP = 0,
+            },
+        }
+    },
     [1159] = { -- First Aid (Rank 2) (Heavy Linen Bandage)
         spellLevel = 0,
         maxLevel = 23,
@@ -189,6 +344,23 @@ local itemSpells = {
                 effectType = 2,
                 valueBase = 28,
                 valueRange = 4,
+                coef = 0,
+                coefAP = 0,
+            },
+        }
+    },
+    [2023] = { -- Restore Mana (Mana Potion)
+        spellLevel = 0,
+        maxLevel = 0,
+        school = 1,
+        schoolMask = 1,
+        GCD = 0,
+        defType = 1,
+        effects = {
+            [1] = {
+                effectType = 30,
+                valueBase = 455,
+                valueRange = 130,
                 coef = 0,
                 coefAP = 0,
             },
@@ -241,6 +413,26 @@ local itemSpells = {
                 effectType = 10,
                 valueBase = 90,
                 valueRange = 60,
+                coef = 0,
+                coefAP = 0,
+            },
+        }
+    },
+    [2639] = { -- Food (Senggin Root)
+        spellLevel = 15,
+        maxLevel = 0,
+        duration = 21,
+        school = 1,
+        schoolMask = 1,
+        GCD = 0,
+        defType = 1,
+        effects = {
+            [1] = {
+                effectType = 6,
+                auraType = 85,
+                tickPeriod = 2,
+                valueBase = 28,
+                valueRange = 0,
                 coef = 0,
                 coefAP = 0,
             },
@@ -530,6 +722,23 @@ local itemSpells = {
             },
         }
     },
+    [5405] = { -- Replenish Mana (Rank 1) (Mana Agate)
+        spellLevel = 28,
+        maxLevel = 0,
+        school = 1,
+        schoolMask = 1,
+        GCD = 0,
+        defType = 1,
+        effects = {
+            [1] = {
+                effectType = 30,
+                valueBase = 375,
+                valueRange = 50,
+                coef = 0,
+                coefAP = 0,
+            },
+        }
+    },
     [5720] = { -- Healthstone (Healthstone)
         spellLevel = 34,
         maxLevel = 0,
@@ -780,6 +989,91 @@ local itemSpells = {
             },
         }
     },
+    [9252] = { -- Replenish Mana I (Arcane Orb, Ley Orb)
+        spellLevel = 10,
+        maxLevel = 0,
+        school = 1,
+        schoolMask = 1,
+        GCD = 0,
+        defType = 1,
+        effects = {
+            [1] = {
+                effectType = 30,
+                valueBase = 80,
+                valueRange = 160,
+                coef = 0,
+                coefAP = 0,
+            },
+        }
+    },
+    [9253] = { -- Replenish Mana II (Celestial Orb)
+        spellLevel = 40,
+        maxLevel = 0,
+        school = 1,
+        schoolMask = 1,
+        GCD = 0,
+        defType = 1,
+        effects = {
+            [1] = {
+                effectType = 30,
+                valueBase = 400,
+                valueRange = 800,
+                coef = 0,
+                coefAP = 0,
+            },
+        }
+    },
+    [10052] = { -- Replenish Mana (Rank 2) (Mana Jade)
+        spellLevel = 38,
+        maxLevel = 0,
+        school = 1,
+        schoolMask = 1,
+        GCD = 0,
+        defType = 1,
+        effects = {
+            [1] = {
+                effectType = 30,
+                valueBase = 550,
+                valueRange = 100,
+                coef = 0,
+                coefAP = 0,
+            },
+        }
+    },
+    [10057] = { -- Replenish Mana (Rank 3) (Mana Citrine)
+        spellLevel = 48,
+        maxLevel = 0,
+        school = 1,
+        schoolMask = 1,
+        GCD = 0,
+        defType = 1,
+        effects = {
+            [1] = {
+                effectType = 30,
+                valueBase = 775,
+                valueRange = 150,
+                coef = 0,
+                coefAP = 0,
+            },
+        }
+    },
+    [10058] = { -- Replenish Mana (Rank 4) (Mana Ruby)
+        spellLevel = 58,
+        maxLevel = 0,
+        school = 1,
+        schoolMask = 1,
+        GCD = 0,
+        defType = 1,
+        effects = {
+            [1] = {
+                effectType = 30,
+                valueBase = 1000,
+                valueRange = 200,
+                coef = 0,
+                coefAP = 0,
+            },
+        }
+    },
     [10577] = { -- Heal (Gauntlets of the Sea)
         spellLevel = 0,
         maxLevel = 0,
@@ -900,6 +1194,23 @@ local itemSpells = {
                 effectType = 10,
                 valueBase = 1440,
                 valueRange = 0,
+                coef = 0,
+                coefAP = 0,
+            },
+        }
+    },
+    [11903] = { -- Restore Mana (Greater Mana Potion)
+        spellLevel = 0,
+        maxLevel = 0,
+        school = 1,
+        schoolMask = 1,
+        GCD = 0,
+        defType = 1,
+        effects = {
+            [1] = {
+                effectType = 30,
+                valueBase = 700,
+                valueRange = 200,
                 coef = 0,
                 coefAP = 0,
             },
@@ -1098,6 +1409,25 @@ local itemSpells = {
             },
         }
     },
+    [15604] = { -- Second Wind (Second Wind)
+        spellLevel = 60,
+        maxLevel = 0,
+        duration = 10,
+        school = 7,
+        schoolMask = 64,
+        defType = 1,
+        effects = {
+            [1] = {
+                effectType = 6,
+                auraType = 24,
+                tickPeriod = 1,
+                valueBase = 63,
+                valueRange = 0,
+                coef = 0,
+                coefAP = 0,
+            },
+        }
+    },
     [15700] = { -- Whipper Root Tuber (Whipper Root Tuber)
         spellLevel = 45,
         maxLevel = 0,
@@ -1209,9 +1539,9 @@ local itemSpells = {
         defType = 1,
         effects = {
             [1] = {
-                effectType = 2,
-                valueBase = 600,
-                valueRange = 400,
+                effectType = 30,
+                valueBase = 900,
+                valueRange = 600,
                 coef = 0,
                 coefAP = 0,
             },
@@ -1263,7 +1593,7 @@ local itemSpells = {
         effects = {
             [1] = {
                 effectType = 6,
-                auraType = 3,
+                auraType = 24,
                 tickPeriod = 1,
                 valueBase = 59,
                 valueRange = 40,
@@ -1283,6 +1613,40 @@ local itemSpells = {
                 effectType = 10,
                 valueBase = 554,
                 valueRange = 124,
+                coef = 0,
+                coefAP = 0,
+            },
+        }
+    },
+    [17530] = { -- Restore Mana (Combat Mana Potion, Superior Mana Potion, Superior Mana Potion)
+        spellLevel = 0,
+        maxLevel = 0,
+        school = 1,
+        schoolMask = 1,
+        GCD = 0,
+        defType = 1,
+        effects = {
+            [1] = {
+                effectType = 30,
+                valueBase = 900,
+                valueRange = 600,
+                coef = 0,
+                coefAP = 0,
+            },
+        }
+    },
+    [17531] = { -- Restore Mana (Major Mana Potion, Diet McWeaksauce)
+        spellLevel = 0,
+        maxLevel = 0,
+        school = 1,
+        schoolMask = 1,
+        GCD = 0,
+        defType = 1,
+        effects = {
+            [1] = {
+                effectType = 30,
+                valueBase = 1350,
+                valueRange = 900,
                 coef = 0,
                 coefAP = 0,
             },
@@ -1436,6 +1800,43 @@ local itemSpells = {
             },
         }
     },
+    [18140] = { -- Blessed Sunfruit Juice (Blessed Sunfruit Juice)
+        spellLevel = 65,
+        maxLevel = 0,
+        duration = 30,
+        school = 1,
+        schoolMask = 1,
+        GCD = 0,
+        defType = 1,
+        effects = {
+            [1] = {
+                effectType = 6,
+                auraType = 85,
+                tickPeriod = 2,
+                valueBase = 294,
+                valueRange = 0,
+                coef = 0,
+                coefAP = 0,
+            },
+        }
+    },
+    [18385] = { -- Replenish Mana (Robe of the Archmage)
+        spellLevel = 28,
+        maxLevel = 0,
+        school = 1,
+        schoolMask = 1,
+        GCD = 0,
+        defType = 1,
+        effects = {
+            [1] = {
+                effectType = 30,
+                valueBase = 375,
+                valueRange = 250,
+                coef = 0,
+                coefAP = 0,
+            },
+        }
+    },
     [18386] = { -- Heal Pet (Robe of the Void)
         spellLevel = 0,
         maxLevel = 0,
@@ -1582,6 +1983,25 @@ local itemSpells = {
             },
         }
     },
+    [19634] = { -- Mana Rejuvenation (Veildust Medicine Bag)
+        spellLevel = 15,
+        maxLevel = 0,
+        duration = 15,
+        school = 4,
+        schoolMask = 8,
+        defType = 1,
+        effects = {
+            [1] = {
+                effectType = 6,
+                auraType = 24,
+                tickPeriod = 3,
+                valueBase = 50,
+                valueRange = 0,
+                coef = 0,
+                coefAP = 0,
+            },
+        }
+    },
     [19769] = { -- Thorium Grenade (Thorium Grenade)
         spellLevel = 0,
         maxLevel = 0,
@@ -1671,6 +2091,40 @@ local itemSpells = {
             },
         }
     },
+    [21395] = { -- Restore Mana (Major Mana Draught)
+        spellLevel = 0,
+        maxLevel = 0,
+        school = 1,
+        schoolMask = 1,
+        GCD = 0,
+        defType = 1,
+        effects = {
+            [1] = {
+                effectType = 30,
+                valueBase = 980,
+                valueRange = 280,
+                coef = 0,
+                coefAP = 0,
+            },
+        }
+    },
+    [21396] = { -- Restore Mana (Superior Mana Draught)
+        spellLevel = 0,
+        maxLevel = 0,
+        school = 1,
+        schoolMask = 1,
+        GCD = 0,
+        defType = 1,
+        effects = {
+            [1] = {
+                effectType = 30,
+                valueBase = 560,
+                valueRange = 160,
+                coef = 0,
+                coefAP = 0,
+            },
+        }
+    },
     [21955] = { -- Razorlash Root (Razorlash Root)
         spellLevel = 0,
         maxLevel = 0,
@@ -1720,6 +2174,26 @@ local itemSpells = {
                 effectType = 10,
                 valueBase = 1440,
                 valueRange = 320,
+                coef = 0,
+                coefAP = 0,
+            },
+        }
+    },
+    [22734] = { -- Drink (Conjured Crystal Water, Hyjal Nectar)
+        spellLevel = 65,
+        maxLevel = 0,
+        duration = 30,
+        school = 1,
+        schoolMask = 1,
+        GCD = 0,
+        defType = 1,
+        effects = {
+            [1] = {
+                effectType = 6,
+                auraType = 85,
+                tickPeriod = 2,
+                valueBase = 280,
+                valueRange = 0,
                 coef = 0,
                 coefAP = 0,
             },
@@ -2032,6 +2506,26 @@ local itemSpells = {
             },
         }
     },
+    [23698] = { -- Alterac Spring Water (Bottled Alterac Spring Water)
+        spellLevel = 65,
+        maxLevel = 0,
+        duration = 30,
+        school = 1,
+        schoolMask = 1,
+        GCD = 0,
+        defType = 1,
+        effects = {
+            [1] = {
+                effectType = 6,
+                auraType = 85,
+                tickPeriod = 2,
+                valueBase = 294,
+                valueRange = 0,
+                coef = 0,
+                coefAP = 0,
+            },
+        }
+    },
     [23991] = { -- Damage Absorb (Talisman of Arathor, Defiler's Talisman)
         spellLevel = 0,
         maxLevel = 0,
@@ -2067,6 +2561,26 @@ local itemSpells = {
             },
         }
     },
+    [24355] = { -- Drink (Harvest Nectar, Winter Veil Eggnog)
+        spellLevel = 0,
+        maxLevel = 0,
+        duration = 30,
+        school = 1,
+        schoolMask = 1,
+        GCD = 0,
+        defType = 1,
+        effects = {
+            [1] = {
+                effectType = 6,
+                auraType = 21,
+                tickPeriod = 1,
+                valueBase = 2,
+                valueRange = 0,
+                coef = 0,
+                coefAP = 0,
+            },
+        }
+    },
     [24360] = { -- Greater Dreamless Sleep (Greater Dreamless Sleep Potion)
         spellLevel = 0,
         maxLevel = 0,
@@ -2080,6 +2594,25 @@ local itemSpells = {
                 auraType = 8,
                 tickPeriod = 3,
                 valueBase = 525,
+                valueRange = 0,
+                coef = 0,
+                coefAP = 0,
+            },
+        }
+    },
+    [24363] = { -- Mana Regeneration (Mageblood Elixir)
+        spellLevel = 0,
+        maxLevel = 0,
+        duration = 3600,
+        school = 1,
+        schoolMask = 1,
+        defType = 1,
+        effects = {
+            [1] = {
+                effectType = 6,
+                auraType = 85,
+                tickPeriod = 2,
+                valueBase = 4.800000000000001,
                 valueRange = 0,
                 coef = 0,
                 coefAP = 0,
@@ -2146,6 +2679,61 @@ local itemSpells = {
             },
         }
     },
+    [24707] = { -- Food (Lollipop, Candy Corn, Candy Bar)
+        spellLevel = 0,
+        maxLevel = 0,
+        duration = 25,
+        school = 1,
+        schoolMask = 1,
+        defType = 1,
+        effects = {
+            [1] = {
+                effectType = 6,
+                auraType = 21,
+                tickPeriod = 5,
+                valueBase = 3,
+                valueRange = 0,
+                coef = 0,
+                coefAP = 0,
+            },
+        }
+    },
+    [24865] = { -- Sanctified Orb (Sanctified Orb)
+        spellLevel = 0,
+        maxLevel = 0,
+        school = 2,
+        schoolMask = 2,
+        GCD = 0,
+        defType = 1,
+        effects = {
+            [1] = {
+                effectType = 30,
+                valueBase = 319,
+                valueRange = 42,
+                coef = 0,
+                coefAP = 0,
+            },
+        }
+    },
+    [24884] = { -- Earthen Sigil (Earthen Sigil)
+        spellLevel = 0,
+        maxLevel = 0,
+        duration = 10,
+        school = 4,
+        schoolMask = 8,
+        defType = 1,
+        effects = {
+            [1] = {
+                effectType = 6,
+                auraType = 24,
+                tickPeriod = 1,
+                valueBase = 40,
+                valueRange = 0,
+                coef = 0,
+                coefAP = 0,
+            },
+        }
+    },
     [25746] = { -- Damage Absorb (Defiler's Talisman, Talisman of Arathor)
         spellLevel = 0,
         maxLevel = 0,
@@ -2203,6 +2791,44 @@ local itemSpells = {
             },
         }
     },
+    [25990] = { -- Graccu's Mince Meat Fruitcake (Graccu's Mince Meat Fruitcake)
+        spellLevel = 0,
+        maxLevel = 0,
+        duration = 20,
+        school = 1,
+        schoolMask = 1,
+        defType = 1,
+        effects = {
+            [1] = {
+                effectType = 6,
+                auraType = 21,
+                tickPeriod = 5,
+                valueBase = 5,
+                valueRange = 0,
+                coef = 0,
+                coefAP = 0,
+            },
+        }
+    },
+    [26263] = { -- Dim Sum (Festival Dumplings)
+        spellLevel = 0,
+        maxLevel = 0,
+        duration = 25,
+        school = 1,
+        schoolMask = 1,
+        defType = 1,
+        effects = {
+            [1] = {
+                effectType = 6,
+                auraType = 21,
+                tickPeriod = 5,
+                valueBase = 3,
+                valueRange = 0,
+                coef = 0,
+                coefAP = 0,
+            },
+        }
+    },
     [26789] = { -- Shard of the Fallen Star (Shard of the Fallen Star)
         spellLevel = 0,
         maxLevel = 0,
@@ -2228,9 +2854,82 @@ local itemSpells = {
         defType = 1,
         effects = {
             [1] = {
-                effectType = 2,
-                valueBase = 600,
-                valueRange = 400,
+                effectType = 30,
+                valueBase = 900,
+                valueRange = 600,
+                coef = 0,
+                coefAP = 0,
+            },
+        }
+    },
+    [28760] = { -- Mana Infusion (Warmth of Forgiveness)
+        spellLevel = 35,
+        maxLevel = 0,
+        school = 1,
+        schoolMask = 1,
+        GCD = 0,
+        defType = 1,
+        effects = {
+            [1] = {
+                effectType = 30,
+                valueBase = 500,
+                valueRange = 0,
+                coef = 0,
+                coefAP = 0,
+            },
+        }
+    },
+    [29007] = { -- Drink (Freshly-Squeezed Lemonade)
+        spellLevel = 55,
+        maxLevel = 0,
+        duration = 30,
+        school = 1,
+        schoolMask = 1,
+        GCD = 0,
+        defType = 1,
+        effects = {
+            [1] = {
+                effectType = 6,
+                auraType = 85,
+                tickPeriod = 2,
+                valueBase = 195.60000000000002,
+                valueRange = 0,
+                coef = 0,
+                coefAP = 0,
+            },
+        }
+    },
+    [29055] = { -- Refreshing Red Apple (Refreshing Red Apple)
+        spellLevel = 0,
+        maxLevel = 0,
+        duration = 25,
+        school = 1,
+        schoolMask = 1,
+        defType = 1,
+        effects = {
+            [1] = {
+                effectType = 6,
+                auraType = 21,
+                tickPeriod = 5,
+                valueBase = 3,
+                valueRange = 0,
+                coef = 0,
+                coefAP = 0,
+            },
+        }
+    },
+    [29236] = { -- Shimmer Stout (Mug of Shimmer Stout)
+        spellLevel = 15,
+        maxLevel = 0,
+        school = 1,
+        schoolMask = 1,
+        GCD = 0,
+        defType = 1,
+        effects = {
+            [1] = {
+                effectType = 30,
+                valueBase = 140,
+                valueRange = 40,
                 coef = 0,
                 coefAP = 0,
             },
@@ -2325,6 +3024,45 @@ local itemSpells = {
             [1] = {
                 effectType = 2,
                 valueBase = 300,
+                valueRange = 0,
+                coef = 0,
+                coefAP = 0,
+            },
+        }
+    },
+    [430948] = { -- Arcane Recovery (Scroll of Arcane Recovery I)
+        spellLevel = 1,
+        maxLevel = 0,
+        duration = 1800,
+        school = 7,
+        schoolMask = 64,
+        defType = 1,
+        effects = {
+            [1] = {
+                effectType = 6,
+                auraType = 85,
+                tickPeriod = 2,
+                valueBase = 3.2,
+                valueRange = 0,
+                coef = 0,
+                coefAP = 0,
+            },
+        }
+    },
+    [434851] = { -- Minor Evocation (Scroll of Minor Evocation)
+        spellLevel = 0,
+        maxLevel = 0,
+        duration = 4,
+        school = 1,
+        schoolMask = 1,
+        isChannel = true,
+        defType = 1,
+        effects = {
+            [1] = {
+                effectType = 6,
+                auraType = 24,
+                tickPeriod = 1,
+                valueBase = 75,
                 valueRange = 0,
                 coef = 0,
                 coefAP = 0,
@@ -2453,6 +3191,46 @@ local itemSpells = {
             },
         }
     },
+    [461632] = { -- Stratholme Holy Water (Drinkable Stratholme Holy Water)
+        spellLevel = 55,
+        maxLevel = 0,
+        duration = 30,
+        school = 1,
+        schoolMask = 1,
+        GCD = 0,
+        defType = 1,
+        effects = {
+            [1] = {
+                effectType = 6,
+                auraType = 85,
+                tickPeriod = 2,
+                valueBase = 441.20000000000005,
+                valueRange = 0,
+                coef = 0,
+                coefAP = 0,
+            },
+        }
+    },
+    [468767] = { -- Drink (Mountain Spring Water)
+        spellLevel = 65,
+        maxLevel = 0,
+        duration = 30,
+        school = 1,
+        schoolMask = 1,
+        GCD = 0,
+        defType = 1,
+        effects = {
+            [1] = {
+                effectType = 6,
+                auraType = 85,
+                tickPeriod = 2,
+                valueBase = 340,
+                valueRange = 0,
+                coef = 0,
+                coefAP = 0,
+            },
+        }
+    },
     [470345] = { -- First Aid (Rank 11) (Dense Runecloth Bandage)
         spellLevel = 0,
         maxLevel = 50,
@@ -2570,6 +3348,82 @@ local itemSpells = {
                 effectType = 10,
                 valueBase = 1500,
                 valueRange = 200,
+                coef = 0,
+                coefAP = 0,
+            },
+        }
+    },
+    [1250932] = { -- Elixir of Wicked Regeneration (Elixir of Wicked Regeneration)
+        spellLevel = 0,
+        maxLevel = 0,
+        duration = 1800,
+        school = 1,
+        schoolMask = 1,
+        defType = 1,
+        effects = {
+            [1] = {
+                effectType = 6,
+                auraType = 85,
+                tickPeriod = 2,
+                valueBase = 4,
+                valueRange = 0,
+                coef = 0,
+                coefAP = 0,
+            },
+        }
+    },
+    [1250942] = { -- Minor Mageblood Elixir (Minor Mageblood Elixir)
+        spellLevel = 0,
+        maxLevel = 0,
+        duration = 1800,
+        school = 1,
+        schoolMask = 1,
+        defType = 1,
+        effects = {
+            [1] = {
+                effectType = 6,
+                auraType = 85,
+                tickPeriod = 2,
+                valueBase = 1.2000000000000002,
+                valueRange = 0,
+                coef = 0,
+                coefAP = 0,
+            },
+        }
+    },
+    [1250944] = { -- Lesser Mageblood Elixir (Lesser Mageblood Elixir)
+        spellLevel = 0,
+        maxLevel = 0,
+        duration = 1800,
+        school = 1,
+        schoolMask = 1,
+        defType = 1,
+        effects = {
+            [1] = {
+                effectType = 6,
+                auraType = 85,
+                tickPeriod = 2,
+                valueBase = 2.4000000000000004,
+                valueRange = 0,
+                coef = 0,
+                coefAP = 0,
+            },
+        }
+    },
+    [1250948] = { -- Greater Mageblood Elixir (Greater Mageblood Elixir)
+        spellLevel = 0,
+        maxLevel = 0,
+        duration = 1800,
+        school = 1,
+        schoolMask = 1,
+        defType = 1,
+        effects = {
+            [1] = {
+                effectType = 6,
+                auraType = 85,
+                tickPeriod = 2,
+                valueBase = 8,
+                valueRange = 0,
                 coef = 0,
                 coefAP = 0,
             },
@@ -2820,6 +3674,26 @@ local itemSpells = {
             },
         }
     },
+    [1269354] = { -- Ketharas' Hyjal Stew (Ketharas' Hyjal Stew)
+        spellLevel = 0,
+        maxLevel = 0,
+        duration = 30,
+        school = 1,
+        schoolMask = 1,
+        GCD = 0,
+        defType = 1,
+        effects = {
+            [1] = {
+                effectType = 6,
+                auraType = 85,
+                tickPeriod = 2,
+                valueBase = 294,
+                valueRange = 0,
+                coef = 0,
+                coefAP = 0,
+            },
+        }
+    },
     [1290863] = { -- First Aid (Rank 8) (Darkspear Islands Mageweave Bandage)
         spellLevel = 0,
         maxLevel = 43,
@@ -2894,6 +3768,43 @@ local itemSpells = {
                 auraType = 69,
                 valueBase = 450,
                 valueRange = 0,
+                coef = 0,
+                coefAP = 0,
+            },
+        }
+    },
+    [1291782] = { -- Skum's Bucket (Skum's Bucket)
+        spellLevel = 25,
+        maxLevel = 0,
+        duration = 24,
+        school = 1,
+        schoolMask = 1,
+        GCD = 0,
+        defType = 1,
+        effects = {
+            [1] = {
+                effectType = 6,
+                auraType = 85,
+                tickPeriod = 2,
+                valueBase = 69.60000000000001,
+                valueRange = 0,
+                coef = 0,
+                coefAP = 0,
+            },
+        }
+    },
+    [1294025] = { -- Energize (Energy Cloak)
+        spellLevel = 28,
+        maxLevel = 0,
+        school = 1,
+        schoolMask = 1,
+        GCD = 0,
+        defType = 1,
+        effects = {
+            [1] = {
+                effectType = 30,
+                valueBase = 300,
+                valueRange = 40,
                 coef = 0,
                 coefAP = 0,
             },
@@ -2977,6 +3888,25 @@ local itemSpells = {
                 effectType = 6,
                 auraType = 69,
                 valueBase = 0,
+                valueRange = 0,
+                coef = 0,
+                coefAP = 0,
+            },
+        }
+    },
+    [1302205] = { -- Mindtap (Mindtap Talisman)
+        spellLevel = 0,
+        maxLevel = 0,
+        duration = 10,
+        school = 7,
+        schoolMask = 64,
+        defType = 1,
+        effects = {
+            [1] = {
+                effectType = 6,
+                auraType = 24,
+                tickPeriod = 1,
+                valueBase = 125,
                 valueRange = 0,
                 coef = 0,
                 coefAP = 0,
@@ -3071,6 +4001,43 @@ local itemSpells = {
             },
         }
     },
+    [1312702] = { -- Restored Mana Potion (Restored Mana Potion)
+        spellLevel = 0,
+        maxLevel = 0,
+        school = 1,
+        schoolMask = 1,
+        GCD = 0,
+        defType = 1,
+        effects = {
+            [1] = {
+                effectType = 137,
+                valueBase = 20,
+                valueRange = 0,
+                coef = 0,
+                coefAP = 0,
+            },
+        }
+    },
+    [1312719] = { -- Restorative Bread (Restorative Bread)
+        spellLevel = 1,
+        maxLevel = 0,
+        duration = 20,
+        school = 1,
+        schoolMask = 1,
+        defType = 1,
+        noCrit = true,
+        effects = {
+            [1] = {
+                effectType = 6,
+                auraType = 21,
+                tickPeriod = 1,
+                valueBase = 5,
+                valueRange = 0,
+                coef = 0,
+                coefAP = 0,
+            },
+        }
+    },
     [1314412] = { -- Renewing Flame (Mark of the Red Flight)
         spellLevel = 0,
         maxLevel = 0,
@@ -3154,6 +4121,26 @@ local itemSpells = {
             },
         }
     },
+    [1330734] = { -- Drink (Morning Glory Dew)
+        spellLevel = 0,
+        maxLevel = 0,
+        duration = 30,
+        school = 1,
+        schoolMask = 1,
+        GCD = 0,
+        defType = 1,
+        effects = {
+            [1] = {
+                effectType = 6,
+                auraType = 85,
+                tickPeriod = 2,
+                valueBase = 195.60000000000002,
+                valueRange = 0,
+                coef = 0,
+                coefAP = 0,
+            },
+        }
+    },
 };
 for spellId, info in pairs(itemSpells) do
     if not _addon.spellInfo[spellId] then
@@ -3165,24 +4152,38 @@ end
 ---@type table<integer, integer>
 _addon.itemUseSpells = {
     [118] = 439, -- Minor Healing Potion
+    [159] = 430, -- Refreshing Spring Water
     [833] = 17712, -- Lifestone
     [858] = 440, -- Lesser Healing Potion
     [929] = 441, -- Healing Potion
+    [1072] = 438, -- Full Moonshine
     [1127] = 1326475, -- Flash Bundle
     [1178] = 1940, -- Explosive Rocket
+    [1179] = 431, -- Ice Cold Milk
+    [1205] = 432, -- Melon Juice
     [1251] = 746, -- Linen Bandage
     [1399] = 133, -- Magic Candle
     [1401] = 833, -- Green Tea Leaf
     [1402] = 143, -- Brimstone
     [1450] = 806, -- Potion of Fervor
+    [1645] = 1135, -- Moonberry Juice
+    [1708] = 1133, -- Sweet Nectar
     [1710] = 2024, -- Greater Healing Potion
     [1713] = 1317424, -- Ankh of Life
     [1970] = 8070, -- Restoring Balm
+    [2136] = 432, -- Conjured Purified Water
+    [2288] = 431, -- Conjured Fresh Water
+    [2455] = 437, -- Minor Mana Potion
     [2456] = 2370, -- Minor Rejuvenation Potion
     [2581] = 1159, -- Heavy Linen Bandage
     [2802] = 13744, -- Blazing Emblem
+    [3087] = 29236, -- Mug of Shimmer Stout
+    [3385] = 438, -- Lesser Mana Potion
+    [3448] = 2639, -- Senggin Root
     [3530] = 3267, -- Wool Bandage
     [3531] = 3268, -- Heavy Wool Bandage
+    [3772] = 1133, -- Conjured Spring Water
+    [3827] = 2023, -- Mana Potion
     [3928] = 4042, -- Superior Healing Potion
     [4262] = 9163, -- Gem-studded Leather Belt
     [4358] = 4054, -- Rough Dynamite
@@ -3200,31 +4201,48 @@ _addon.itemUseSpells = {
     [4403] = 4067, -- Portable Bronze Mortar
     [4596] = 1244863, -- Minor Discolored Healing Potion
     [4598] = 4062, -- Goblin Fishing Pole
+    [4696] = 1135, -- Lapidis Tankard of Tidesippe
+    [4791] = 1133, -- Enchanted Water
     [4945] = 16375, -- Faintly Glowing Skull
     [4984] = 5024, -- Skull of Impending Doom
     [5013] = 5100, -- Fertile Bulb
     [5205] = 2052, -- Sprouted Frond
     [5323] = 14053, -- Everglow Lantern
+    [5350] = 430, -- Conjured Water
     [5509] = 5720, -- Healthstone
     [5510] = 5723, -- Greater Healthstone
     [5511] = 6263, -- Lesser Healthstone
     [5512] = 6262, -- Minor Healthstone
+    [5513] = 10052, -- Mana Jade
+    [5514] = 5405, -- Mana Agate
     [6048] = 7242, -- Shadow Protection Potion
     [6049] = 7233, -- Fire Protection Potion
     [6050] = 7239, -- Frost Protection Potion
     [6051] = 7245, -- Holy Protection Potion
     [6052] = 7254, -- Nature Protection Potion
+    [6149] = 11903, -- Greater Mana Potion
     [6450] = 7926, -- Silk Bandage
     [6451] = 7927, -- Heavy Silk Bandage
     [6714] = 8331, -- Ez-Thro Dynamite
     [6898] = 18956, -- Orb of Soran'ruk
+    [7507] = 9252, -- Arcane Orb
+    [7508] = 9252, -- Ley Orb
+    [7515] = 9253, -- Celestial Orb
+    [8007] = 10057, -- Mana Citrine
+    [8008] = 10058, -- Mana Ruby
+    [8077] = 1135, -- Conjured Mineral Water
+    [8078] = 1137, -- Conjured Sparkling Water
+    [8079] = 22734, -- Conjured Crystal Water
     [8346] = 10577, -- Gauntlets of the Sea
     [8348] = 10578, -- Helm of Fire
     [8367] = 10618, -- Dragonscale Breastplate
     [8544] = 10838, -- Mageweave Bandage
     [8545] = 10839, -- Heavy Mageweave Bandage
+    [8766] = 1137, -- Morning Glory Dew
     [9144] = 11387, -- Wildvine Potion
+    [9397] = 1294025, -- Energy Cloak
     [9421] = 11732, -- Major Healthstone
+    [9451] = 432, -- Bubbling Water
     [10507] = 12419, -- Solid Dynamite
     [10514] = 12421, -- Mithril Frag Bomb
     [10543] = 12561, -- Goblin Construction Helmet
@@ -3235,6 +4253,7 @@ _addon.itemUseSpells = {
     [10721] = 13234, -- Gnomish Harm Prevention Belt
     [10830] = 13808, -- M73 Frag Grenade
     [11808] = 17447, -- Circle of Flame
+    [11819] = 15604, -- Second Wind
     [11905] = 15712, -- Linken's Boomerang
     [11951] = 15700, -- Whipper Root Tuber
     [11952] = 15701, -- Night Dragon's Breath
@@ -3244,6 +4263,8 @@ _addon.itemUseSpells = {
     [13143] = 17252, -- Mark of the Dragon Lord
     [13171] = 17283, -- Smokey's Lighter
     [13315] = 17448, -- Testament of Hope
+    [13443] = 17530, -- Superior Mana Potion
+    [13444] = 17531, -- Major Mana Potion
     [13446] = 17534, -- Major Healing Potion
     [13456] = 17544, -- Greater Frost Protection Potion
     [13457] = 17543, -- Greater Fire Protection Potion
@@ -3251,6 +4272,8 @@ _addon.itemUseSpells = {
     [13459] = 17548, -- Greater Shadow Protection Potion
     [13460] = 17545, -- Greater Holy Protection Potion
     [13461] = 17549, -- Greater Arcane Protection Potion
+    [13813] = 18140, -- Blessed Sunfruit Juice
+    [14152] = 18385, -- Robe of the Archmage
     [14153] = 18386, -- Robe of the Void
     [14529] = 18608, -- Runecloth Bandage
     [14530] = 18610, -- Heavy Runecloth Bandage
@@ -3258,20 +4281,28 @@ _addon.itemUseSpells = {
     [15107] = 18957, -- Orb of Noh'Orahil
     [15108] = 18957, -- Orb of Dar'Orahil
     [15723] = 19199, -- Tea with Sugar
+    [15866] = 19634, -- Veildust Medicine Bag
     [15993] = 19769, -- Thorium Grenade
     [16005] = 19784, -- Dark Iron Bomb
     [16768] = 20631, -- Furbolg Medicine Pouch
     [17348] = 21393, -- Major Healing Draught
     [17349] = 21394, -- Superior Healing Draught
+    [17351] = 21395, -- Major Mana Draught
+    [17352] = 21396, -- Superior Mana Draught
+    [17404] = 431, -- Blended Bean Brew
+    [17405] = 1133, -- Green Garden Tea
     [17747] = 21955, -- Razorlash Root
     [17759] = 21956, -- Mark of Resolution
     [18047] = 1301625, -- Flame Walkers
     [18253] = 22729, -- Major Rejuvenation Potion
+    [18300] = 22734, -- Hyjal Nectar
     [18340] = 1302362, -- Eidolon Talisman
+    [18371] = 1302205, -- Mindtap Talisman
     [18588] = 23000, -- Ez-Thro Dynamite II
     [18637] = 23064, -- Major Recombobulator
     [18641] = 23063, -- Dense Dynamite
     [18839] = 4042, -- Combat Healing Potion
+    [18841] = 17530, -- Combat Mana Potion
     [19004] = 23468, -- Minor Healthstone
     [19005] = 23469, -- Minor Healthstone
     [19006] = 23470, -- Lesser Healthstone
@@ -3286,9 +4317,14 @@ _addon.itemUseSpells = {
     [19066] = 23567, -- Warsong Gulch Runecloth Bandage
     [19067] = 23568, -- Warsong Gulch Mageweave Bandage
     [19068] = 23569, -- Warsong Gulch Silk Bandage
+    [19299] = 432, -- Fizzy Faire Drink
+    [19300] = 1135, -- Bottled Winterspring Water
     [19307] = 23696, -- Alterac Heavy Runecloth Bandage
+    [19318] = 23698, -- Bottled Alterac Spring Water
     [19990] = 24354, -- Blessed Prayer Beads
+    [19997] = 24355, -- Harvest Nectar
     [20002] = 24360, -- Greater Dreamless Sleep Potion
+    [20007] = 24363, -- Mageblood Elixir
     [20065] = 24413, -- Arathi Basin Mageweave Bandage
     [20066] = 24414, -- Arathi Basin Runecloth Bandage
     [20067] = 24412, -- Arathi Basin Silk Bandage
@@ -3301,19 +4337,33 @@ _addon.itemUseSpells = {
     [20237] = 24413, -- Highlander's Mageweave Bandage
     [20243] = 24414, -- Highlander's Runecloth Bandage
     [20244] = 24412, -- Highlander's Silk Bandage
+    [20388] = 24707, -- Lollipop
+    [20389] = 24707, -- Candy Corn
+    [20390] = 24707, -- Candy Bar
+    [20512] = 24865, -- Sanctified Orb
     [20520] = 27869, -- Dark Rune
+    [20525] = 24884, -- Earthen Sigil
     [21115] = 25746, -- Defiler's Talisman
     [21116] = 25747, -- Defiler's Talisman
     [21117] = 25746, -- Talisman of Arathor
     [21118] = 25747, -- Talisman of Arathor
     [21119] = 25750, -- Talisman of Arathor
     [21120] = 25750, -- Defiler's Talisman
+    [21215] = 25990, -- Graccu's Mince Meat Fruitcake
+    [21241] = 24355, -- Winter Veil Eggnog
+    [21537] = 26263, -- Festival Dumplings
     [21891] = 26789, -- Shard of the Fallen Star
     [22682] = 29432, -- Frozen Rune
+    [23027] = 28760, -- Warmth of Forgiveness
+    [23161] = 29007, -- Freshly-Squeezed Lemonade
+    [23172] = 29055, -- Refreshing Red Apple
     [23558] = 29506, -- The Burrower's Shell
+    [23578] = 17531, -- Diet McWeaksauce
     [23579] = 17534, -- The McWeaksauce Classic
     [23684] = 30020, -- Crystal Infused Bandage
     [191292] = 370347, -- Ritual Dagger
+    [211953] = 430948, -- Scroll of Arcane Recovery I
+    [213564] = 434851, -- Scroll of Minor Evocation
     [215127] = 435963, -- High-Yield Radiation Bomb
     [215168] = 435968, -- Ez-Thro Radiation Bomb
     [216619] = 436432, -- Student Fodder
@@ -3321,13 +4371,21 @@ _addon.itemUseSpells = {
     [219345] = 443265, -- Infernal Lasso
     [223913] = 450106, -- Major Healing Potion
     [223914] = 450107, -- Greater Healing Potion
+    [227813] = 461632, -- Drinkable Stratholme Holy Water
+    [231778] = 468767, -- Mountain Spring Water
     [232433] = 470345, -- Dense Runecloth Bandage
     [241650] = 1231578, -- Major Discolored Healing Potion
     [247239] = 1244864, -- Lesser Discolored Healing Potion
     [247240] = 1244865, -- Discolored Healing Potion
     [247241] = 1244866, -- Greater Discolored Healing Potion
     [247242] = 1244867, -- Superior Discolored Healing Potion
+    [250336] = 1250932, -- Elixir of Wicked Regeneration
+    [250339] = 1250942, -- Minor Mageblood Elixir
+    [250340] = 1250944, -- Lesser Mageblood Elixir
+    [250341] = 1250948, -- Greater Mageblood Elixir
     [250953] = 1252554, -- Dragonfire Potion
+    [252027] = 431, -- Gustberry Juice
+    [252031] = 430, -- Crisp Spring Water
     [255663] = 1259231, -- Windstone
     [260792] = 1269155, -- SAF-T Dynamite
     [260793] = 1269161, -- SAF-T Copper Bomb
@@ -3341,6 +4399,7 @@ _addon.itemUseSpells = {
     [260814] = 1269282, -- SAF-T Clever Dynamite
     [260816] = 1269330, -- EZ-Thro Thorium Grenade
     [260817] = 1269334, -- EZ-Thro Dark Bomb
+    [262433] = 1269354, -- Ketharas' Hyjal Stew
     [268881] = 439, -- Perishable Minor Healing Potion
     [268882] = 440, -- Perishable Lesser Healing Potion
     [268883] = 441, -- Perishable Healing Potion
@@ -3348,6 +4407,7 @@ _addon.itemUseSpells = {
     [272057] = 1290863, -- Darkspear Islands Mageweave Bandage
     [272058] = 1290865, -- Darkspear Islands Runecloth Bandage
     [272437] = 1291097, -- Adaptive Combat Assistant
+    [273137] = 1291782, -- Skum's Bucket
     [274609] = 1295039, -- Serpentbane Crown
     [274759] = 1295270, -- Everlook Pathcarver
     [274935] = 1295688, -- Tessa's Tonic
@@ -3357,10 +4417,18 @@ _addon.itemUseSpells = {
     [277910] = 1302874, -- Mysticbloom Seed
     [280065] = 1315849, -- Behemoth Bones
     [280766] = 1309685, -- Satchel of Potions
+    [282013] = 1312702, -- Restored Mana Potion
+    [282018] = 1312719, -- Restorative Bread
     [282778] = 1314412, -- Mark of the Red Flight
     [284868] = 1317268, -- Holy Hand Grenade of Alterac
+    [285359] = 1137, -- Warm Apple Juice
+    [286541] = 1133, -- Bael'dun Tankard
+    [287964] = 1330734, -- Morning Glory Dew
     [287966] = 439, -- Minor Healing Potion
     [287967] = 440, -- Lesser Healing Potion
+    [287968] = 437, -- Minor Mana Potion
+    [287969] = 438, -- Lesser Mana Potion
     [287977] = 2024, -- Greater Healing Potion
     [288896] = 4042, -- Superior Healing Potion
+    [288897] = 17530, -- Superior Mana Potion
 };

@@ -5,12 +5,13 @@ import { report } from "../report";
 import { SpellData, SpellEffect } from "../SpellData";
 
 /**
- * Use effects of items that heal or deal damage: potions, healthstones, bandages, explosives and trinkets
- * such as Blessed Prayer Beads. Their spells get the same rank info as class spells, so tooltips and action bar
- * values work for the item, and an item -> use spell map tells the addon which spell an item action casts.
+ * Use effects of items that heal, restore mana or deal damage: potions, healthstones, bandages, drinks,
+ * explosives and trinkets such as Blessed Prayer Beads. Their spells get the same rank info as class spells,
+ * so tooltips and action bar values work for the item, and an item -> use spell map tells the addon which
+ * spell an item action casts.
  *
- * Only the first heal or damage effect of a use spell is kept (a sapper charge also hurts its user, a
- * potion may also restore mana); anything the spell does besides that is left out.
+ * Only one effect of a use spell is kept: a heal before a mana restore before damage (a rune hurts its user
+ * and restores mana, a rejuvenation potion heals and restores mana, a sapper charge also hurts its user).
  */
 
 interface ItemEffectRow
@@ -37,18 +38,8 @@ interface ItemXItemEffectRow
 /** ItemEffect.TriggerType of a "Use:" effect. */
 const TRIGGER_ON_USE = 0;
 
-/** Effects worth showing a value for. */
-const VALUE_EFFECTS = new Set<number>([
-    EFFECT_TYPE.SPELL_EFFECT_HEAL,
-    EFFECT_TYPE.SPELL_EFFECT_SCHOOL_DAMAGE,
-    EFFECT_TYPE.SPELL_EFFECT_HEALTH_LEECH,
-]);
-const VALUE_AURAS = new Set<number>([
-    AURA_TYPE.SPELL_AURA_PERIODIC_HEAL,
-    AURA_TYPE.SPELL_AURA_PERIODIC_DAMAGE,
-    AURA_TYPE.SPELL_AURA_PERIODIC_LEECH,
-    AURA_TYPE.SPELL_AURA_SCHOOL_ABSORB,
-]);
+/** EffectMiscValue_0 of energize effects and power regen auras: the power type. */
+const POWER_MANA = 0;
 
 /** Item classes whose use effects are not for the calculator. */
 const SKIP_ITEM_CLASSES = new Set<number>([ItemClass.ITEM_CLASS_QUEST, ItemClass.ITEM_CLASS_KEY]);
@@ -56,10 +47,31 @@ const SKIP_ITEM_CLASSES = new Set<number>([ItemClass.ITEM_CLASS_QUEST, ItemClass
 /** Items that exist in the tables but not in the game: test, deprecated and placeholder entries. */
 const NOT_IN_GAME = /\b(test|deprecated|dnt|debug|placeholder|unused|do not use)\b|\(test\)|\[ph\]|^monster\b/i;
 
-function isValueEffect(effect: SpellEffect)
+/**
+ * Rank of an effect for the value shown: heals first, then mana restores, then damage.
+ * Undefined for effects the calculator does not show.
+ */
+function effectRank(effect: SpellEffect): number | undefined
 {
-    if (VALUE_EFFECTS.has(effect.Effect)) return true;
-    return effect.Effect === EFFECT_TYPE.SPELL_EFFECT_APPLY_AURA && VALUE_AURAS.has(effect.EffectAura);
+    const aura = effect.Effect === EFFECT_TYPE.SPELL_EFFECT_APPLY_AURA ? effect.EffectAura : -1;
+
+    if (effect.Effect === EFFECT_TYPE.SPELL_EFFECT_HEAL
+        || aura === AURA_TYPE.SPELL_AURA_PERIODIC_HEAL
+        || aura === AURA_TYPE.SPELL_AURA_SCHOOL_ABSORB) return 0;
+
+    if (effect.EffectMiscValue_0 === POWER_MANA
+        && (effect.Effect === EFFECT_TYPE.SPELL_EFFECT_ENERGIZE
+            || effect.Effect === EFFECT_TYPE.SPELL_EFFECT_ENERGIZE_PCT
+            || aura === AURA_TYPE.SPELL_AURA_PERIODIC_ENERGIZE
+            || aura === AURA_TYPE.SPELL_AURA_OBS_MOD_MANA
+            || aura === AURA_TYPE.SPELL_AURA_MOD_POWER_REGEN)) return 1;
+
+    if (effect.Effect === EFFECT_TYPE.SPELL_EFFECT_SCHOOL_DAMAGE
+        || effect.Effect === EFFECT_TYPE.SPELL_EFFECT_HEALTH_LEECH
+        || aura === AURA_TYPE.SPELL_AURA_PERIODIC_DAMAGE
+        || aura === AURA_TYPE.SPELL_AURA_PERIODIC_LEECH) return 2;
+
+    return undefined;
 }
 
 export class ItemSpells
@@ -111,8 +123,17 @@ export class ItemSpells
     /** Rank info for a use spell, or undefined if it has nothing to show or is not handled. */
     private buildItemSpell(spellId: number, itemNames: string[]): RankInfo | undefined
     {
-        const effects = this.spellData.getSpellEffects(spellId, true);
-        const valueEffect = effects?.find(isValueEffect);
+        let valueEffect: SpellEffect | undefined;
+        let bestRank = Infinity;
+        for (const effect of this.spellData.getSpellEffects(spellId, true) ?? [])
+        {
+            const rank = effectRank(effect);
+            if (rank !== undefined && rank < bestRank)
+            {
+                bestRank = rank;
+                valueEffect = effect;
+            }
+        }
         if (!valueEffect) return undefined;
 
         try
@@ -159,9 +180,10 @@ export class ItemSpells
         const clean = (s: string) => String(s).replace(/[\r\n]+/g, " ");
 
         let str = createFileHead();
-        str += "-- Use effects of items that heal or deal damage: potions, healthstones, bandages, explosives and trinkets\n";
-        str += "-- such as Blessed Prayer Beads. Only the first heal or damage effect of each use spell is kept. Loaded after the\n";
-        str += "-- class spell data; classes the addon does not support get none (see events.lua).\n";
+        str += "-- Use effects of items that heal, restore mana or deal damage: potions, healthstones, bandages, drinks,\n";
+        str += "-- explosives and trinkets such as Blessed Prayer Beads. One effect per use spell: a heal before a mana\n";
+        str += "-- restore before damage. Loaded after the class spell data; classes the addon does not support get none\n";
+        str += "-- (see events.lua).\n";
         str += "local _, playerClass = UnitClass(\"player\");\n";
         str += "if _addon.CONST.UNSUPPORTED_CLASSES[playerClass] then\n";
         str += "    return;\n";
