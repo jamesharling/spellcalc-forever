@@ -218,9 +218,17 @@ local function SlotUpdate(slot)
         _addon.util.PrintDebug("Slot is mapped to " .. mappedSlot);
         if aType == "spell" then
             SetSlotSpell(mappedSlot, aId);
+        elseif aType == "item" then
+            SetSlotSpell(mappedSlot, _addon:GetItemUseSpellID(aId));
         elseif aType == "macro" then
-            -- Mainline reports a macro's current spell itself (subType "spell"), not the macro index.
-            SetSlotSpell(mappedSlot, aSubType == "spell" and aId or nil);
+            -- Mainline reports a macro's current spell or item itself (subType "spell"/"item"), not the macro index.
+            if aSubType == "spell" then
+                SetSlotSpell(mappedSlot, aId);
+            elseif aSubType == "item" then
+                SetSlotSpell(mappedSlot, _addon:GetItemUseSpellID(aId));
+            else
+                SetSlotSpell(mappedSlot, nil);
+            end
         else
             SetSlotSpell(mappedSlot, nil);
         end

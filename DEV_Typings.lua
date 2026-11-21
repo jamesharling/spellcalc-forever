@@ -86,6 +86,8 @@ _addon.ClassSettings = function() end
 ---@alias ItemEffects table<integer, UnitAuraEffect[]>
 ---@alias SetItemDataTable table<integer, integer>
 
+---@alias ItemUseSpells table<integer, integer>
+
 ---@class EnchantData : UnitAuraEffect
 ---@field name string
 ---@field requireSlot string|nil MH or OH

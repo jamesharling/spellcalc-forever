@@ -389,6 +389,9 @@ local function MacroTooltipSpell(tooltip, data)
         if actionType == "macro" and subType == "spell" and type(id) == "number" and not IsSecret(id) then
             return id;
         end
+        if actionType == "macro" and subType == "item" then
+            return _addon:GetItemUseSpellID(id);
+        end
     end
     -- Anywhere else (macro frame, action bar addons without an action field): the macro's current spell.
     local macroId = data and data.id;
@@ -398,6 +401,17 @@ local function MacroTooltipSpell(tooltip, data)
             return spellID;
         end
     end
+end
+
+--- Item tooltips (bags, bars, vendors, links): the item's use effect, if it heals or deals damage.
+---@param tooltip GameTooltip
+---@param data table TooltipData
+local function OnItemTooltip(tooltip, data)
+    if not tooltip or (tooltip.IsForbidden and tooltip:IsForbidden()) then return end
+    if not tooltip.AddLine or not tooltip.AddDoubleLine then return end
+
+    local spellID = _addon:GetItemUseSpellID(data and data.id);
+    if spellID then TooltipHandler(tooltip, spellID) end
 end
 
 ---@param tooltip GameTooltip
@@ -412,6 +426,9 @@ end
 
 if TooltipDataProcessor and Enum.TooltipDataType then
     TooltipDataProcessor.AddTooltipPostCall(Enum.TooltipDataType.Spell, OnSpellTooltip);
+    if Enum.TooltipDataType.Item then
+        TooltipDataProcessor.AddTooltipPostCall(Enum.TooltipDataType.Item, OnItemTooltip);
+    end
     if Enum.TooltipDataType.Macro then
         TooltipDataProcessor.AddTooltipPostCall(Enum.TooltipDataType.Macro, OnMacroTooltip);
     end

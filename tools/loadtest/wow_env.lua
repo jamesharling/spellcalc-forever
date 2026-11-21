@@ -526,6 +526,7 @@ C_Item = namespace("C_Item", {
             1, "INVTYPE_CHEST", 0, 0, 4, 1
     end,
     GetItemInfoInstant = function() return nil end,
+    GetItemSpell = function() return nil end, -- the addon has its own item -> use spell map
     GetItemStats = function() return {} end,
     GetItemSetInfo = function() return nil end,
     GetItemNameByID = function() return nil end,

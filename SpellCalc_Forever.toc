@@ -67,6 +67,7 @@ data/forever/classes/shaman.lua
 data/forever/classes/warlock.lua
 
 data/forever/racials.lua
+data/forever/itemSpells.lua
 
 slashcmd.lua
 settings.lua

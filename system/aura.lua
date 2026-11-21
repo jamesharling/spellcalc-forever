@@ -45,7 +45,7 @@ local function ApplyOrRemoveMult(apply, value, dest, name)
     end
     local m = 1;
     for _, v in pairs(dest.vals) do
-        m = m * (1 + v/100);
+        m = m * math.max(0, 1 + v / 100); -- an entry of -100% or less means nothing is done, not a negative value
     end
     dest.currentMult = m;
 end

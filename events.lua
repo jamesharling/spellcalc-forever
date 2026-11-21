@@ -28,10 +28,9 @@ end);
 ---@param event string
 ---@param callback fun(...:any):boolean|nil
 local function Register(event, callback)
-    -- dirty fix to "disable" the addon preventing errors on unsupported classes
-    -- TODO: Remove when classes are supported
+    -- "Disable" the addon on classes without data by registering nothing for them.
     local _, class = UnitClass("player");
-    if class == "WARRIOR" or class == "ROGUE" or class == "HUNTER" or class == "DEATHKNIGHT" then
+    if _A.CONST.UNSUPPORTED_CLASSES[class] then
         return;
     end
 

@@ -96,40 +96,48 @@ end
 ---@param calcedEffect CalcedEffect
 ---@param effectData SpellEffectData
 ---@param spellName string
+---Multiplier for an additive percentage modifier (-30 => 0.7). Floored at 0: modifiers that sum below
+----100% mean nothing is done, not negative damage or healing.
+---@param pct number
+---@return number
+local function PctMult(pct)
+    return math.max(0, (100 + pct) / 100);
+end
+
 local function SetBaseModifiers(isDmg, isHeal, spellId, calcedSpell, isDuration, si, calcedEffect, effectData, spellName)
     local bonusMod = 1;
     local baseMod = 1;
 
     if isDmg then
         if stats.spellModPctEffect[spellId] ~= nil then
-            baseMod = baseMod * (100 + stats.spellModPctEffect[spellId].val) / 100;
+            baseMod = baseMod * PctMult(stats.spellModPctEffect[spellId].val);
             calcedSpell:AddToBuffList(stats.spellModPctEffect[spellId].buffs);
         end
 
         if not isDuration then
             if stats.spellModPctDamageHealing[spellId] ~= nil then
-                bonusMod = bonusMod * (100 + stats.spellModPctDamageHealing[spellId].val) / 100;
+                bonusMod = bonusMod * PctMult(stats.spellModPctDamageHealing[spellId].val);
                 calcedSpell:AddToBuffList(stats.spellModPctDamageHealing[spellId].buffs);
             end
         else
             if stats.spellModPctDoTHoT[spellId] ~= nil then
-                bonusMod = bonusMod * (100 + stats.spellModPctDoTHoT[spellId].val) / 100;
+                bonusMod = bonusMod * PctMult(stats.spellModPctDoTHoT[spellId].val);
                 calcedSpell:AddToBuffList(stats.spellModPctDoTHoT[spellId].buffs);
             end
         end
 
-        --bonusMod = bonusMod * (100 + stats.schoolModPctDamage[school].val) / 100;
+        --bonusMod = bonusMod * PctMult(stats.schoolModPctDamage[school].val);
         --calcedSpell:AddToBuffList(stats.schoolModPctDamage[school].buffs);
         bonusMod = bonusMod * stats.schoolModPctDamageMult[si.school].currentMult;
         calcedSpell:AddToBuffList(stats.schoolModPctDamageMult[si.school].buffs);
 
         if stats.versusModPctDamage[_addon.Target.creatureType] then
-            bonusMod = bonusMod * (100 + stats.versusModPctDamage[_addon.Target.creatureType].val) / 100;
+            bonusMod = bonusMod * PctMult(stats.versusModPctDamage[_addon.Target.creatureType].val);
             calcedSpell:AddToBuffList(stats.versusModPctDamage[_addon.Target.creatureType].buffs);
         end
 
         if stats.targetSchoolModDamageTaken[si.school].val ~= 0 then
-            bonusMod = bonusMod * (100 + stats.targetSchoolModDamageTaken[si.school].val) / 100;
+            bonusMod = bonusMod * PctMult(stats.targetSchoolModDamageTaken[si.school].val);
             calcedSpell:AddToBuffList(stats.targetSchoolModDamageTaken[si.school].buffs);
         end
 
@@ -141,33 +149,33 @@ local function SetBaseModifiers(isDmg, isHeal, spellId, calcedSpell, isDuration,
         local mechanic = effectData.mechanic;
         if mechanic and stats.targetMechanicModDmgTakenPct[mechanic].val ~= 0 then
             local t = stats.targetMechanicModDmgTakenPct[mechanic];
-            bonusMod = bonusMod * (1 + t.val / 100);
+            bonusMod = bonusMod * PctMult(t.val);
             calcedSpell:AddToBuffList(t.buffs);
         end
     else
         if stats.spellModPctEffect[spellId] ~= nil then
-            baseMod = baseMod * (100 + stats.spellModPctEffect[spellId].val) / 100;
+            baseMod = baseMod * PctMult(stats.spellModPctEffect[spellId].val);
             calcedSpell:AddToBuffList(stats.spellModPctEffect[spellId].buffs);
         end
 
-        bonusMod = bonusMod * (100 + stats.modhealingDone.val) / 100;
+        bonusMod = bonusMod * PctMult(stats.modhealingDone.val);
         calcedSpell:AddToBuffList(stats.modhealingDone.buffs);
 
         if isHeal then
             if not isDuration then
                 if stats.spellModPctDamageHealing[spellId] ~= nil then
-                    bonusMod = bonusMod * (100 + stats.spellModPctDamageHealing[spellId].val) / 100;
+                    bonusMod = bonusMod * PctMult(stats.spellModPctDamageHealing[spellId].val);
                     calcedSpell:AddToBuffList(stats.spellModPctDamageHealing[spellId].buffs);
                 end
             else
                 if stats.spellModPctDoTHoT[spellId] ~= nil then
-                    bonusMod = bonusMod * (100 + stats.spellModPctDoTHoT[spellId].val) / 100;
+                    bonusMod = bonusMod * PctMult(stats.spellModPctDoTHoT[spellId].val);
                     calcedSpell:AddToBuffList(stats.spellModPctDoTHoT[spellId].buffs);
                 end
             end
 
             if stats.targetHealingRecieved.val ~= 0 then
-                bonusMod = bonusMod * (1 + stats.targetHealingRecieved.val / 100);
+                bonusMod = bonusMod * PctMult(stats.targetHealingRecieved.val);
                 calcedSpell:AddToBuffList(stats.targetHealingRecieved.buffs);
             end
         end
@@ -369,6 +377,10 @@ local function CalcSpell(spellId, calcedSpell, parentSpellData, parentValue)
                 castTime = castTime / 1000;
             end
             effCastTime = math.max(GCD, castTime);
+            -- Instant off-GCD casts (item uses): per-second values are per standard GCD, not per 0 seconds.
+            if effCastTime <= 0 then
+                effCastTime = 1.5;
+            end
         end
 
         calcedSpell.gcd = GCD;
@@ -932,6 +944,21 @@ do
         self.util.PrintDebug("Update triggered!");
         updateStaggerFrame:SetScript("OnUpdate", UpdateUpdate);
     end
+end
+
+--- Handled spell ID of an item's use effect, or nil (not a use item, or its spell isn't handled).
+-- The generated map first; an item the data doesn't know (a hotfix) may still use a known spell.
+---@param itemID integer
+---@return integer|nil
+function _addon:GetItemUseSpellID(itemID)
+    if type(itemID) ~= "number" or self.api.IsSecret(itemID) then return end
+    local spellID = self.itemUseSpells[itemID];
+    if not spellID and C_Item and C_Item.GetItemSpell then
+        local _, id = C_Item.GetItemSpell(itemID);
+        spellID = Unsecret(id);
+    end
+    if not spellID then return end
+    return self:GetHandledSpellID(spellID);
 end
 
 --- Return the handled spell ID (if different) or nil if spell is not handled by the addon

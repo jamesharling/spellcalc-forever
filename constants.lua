@@ -159,6 +159,15 @@ CONST.HEALING_CLASSES = {
     PALADIN = true
 }
 
+-- Classes without generated data; the addon registers no events for them (events.lua) and
+-- loads no item use spells.
+CONST.UNSUPPORTED_CLASSES = {
+    WARRIOR = true,
+    ROGUE = true,
+    HUNTER = true,
+    DEATHKNIGHT = true,
+}
+
 CONST.MELEE_CLASSES = {
     WARRIOR = true,
     ROGUE = true,
@@ -360,3 +369,6 @@ _A.spellInfo = {};
 _A.spellClassSet = { {}, {}, {}, {} };
 ---@type TalentDataRawEntry[]
 _A.talentDataRaw = {};
+---Item ID -> spell ID of its use effect (data/forever/itemSpells.lua).
+---@type table<integer, integer>
+_A.itemUseSpells = {};

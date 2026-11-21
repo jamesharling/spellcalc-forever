@@ -13,6 +13,7 @@ import { SpellLevelScaling } from "./modules/SpellLevelScaling/SpellLevelScaling
 import { applyHotfixes } from "./modules/hotFix";
 import { PlayerAuras } from "./modules/PlayerAuras";
 import { TargetAuras } from "./modules/TargetAuras";
+import { ItemSpells } from "./modules/ItemSpells";
 import { SkillData } from "./modules/SkillData";
 import { TraitData } from "./modules/TraitData";
 import { fillBaseAndRange, getEffectBase } from "./effectValues";
@@ -542,6 +543,66 @@ function buildSpellInfo(pclass: string) {
 }
 
 /**
+ * Lua for one spell's rank info: a `[id] = { ... },` block, tab indented one level.
+ */
+function rankInfoToLua(sid: string | number, ri: RankInfo): string {
+    let str = "";
+    str += `\t[${sid}] = { -- ${ri.spellnamecomment}\n`;
+    str += `\t\tspellLevel = ${ri.spellLevel},\n`;
+    str += `\t\tmaxLevel = ${ri.maxLevel},\n`;
+    if (ri.duration) str += `\t\tduration = ${ri.duration},\n`;
+    if (ri.baseCost > 0) str += `\t\tbaseCost = ${ri.baseCost},\n`;
+    if (ri.baseCostPct > 0) str += `\t\tbaseCostPct = ${ri.baseCostPct},\n`;
+    str += `\t\tschool = ${ri.school},\n`;
+    str += `\t\tschoolMask = ${ri.schoolMask},\n`;
+    if (ri.isChannel) str += `\t\tisChannel = true,\n`;
+    if (ri.isBinary) str += `\t\tisBinary = true,\n`;
+    if (ri.gcd != 1.5) str += `\t\tGCD = ${ri.gcd},\n`;
+    str += `\t\tdefType = ${ri.defenseType},\n`;
+    if (ri.cantDogeParryBlock) str += `\t\tcantDogeParryBlock = true,\n`;
+    if (ri.equippedWeaponMask != 0) str += `\t\tequippedWeaponMask = ${ri.equippedWeaponMask},\n`;
+    if (ri.noCrit) str += `\t\tnoCrit = ${ri.noCrit},\n`;
+    if (ri.forceHeal) str += `\t\tforceHeal = ${ri.forceHeal},\n`;
+    if (ri.charges != 0) str += `\t\tcharges = ${ri.charges},\n`;
+    if (ri.usePeriodicHaste) str += `\t\tusePeriodicHaste = true,\n`;
+    if (ri.extraTickAtApplication) str += `\t\textraTickAtApplication = true,\n`;
+    if (ri.onNextAttack) str += `\t\tonNextSwing = true,\n`;
+    if (ri.isOffhandAttack) str += `\t\tisOffhandAttack = true,\n`;
+    if (ri.useScalingFormula) str += `\t\tuseScalingFormula = { id = ${ri.useScalingFormula.id}, label = "${ri.useScalingFormula.label}" },\n`;
+
+    str += `\t\teffects = {\n`;
+
+    for (let i = 0; i < ri.effects.length; i++) {
+        let eff = ri.effects[i];
+        str += `\t\t\t[${i + 1}] = {\n`;
+        str += `\t\t\t\teffectType = ${eff.effectType},\n`;
+        if (eff.auraType) str += `\t\t\t\tauraType = ${eff.auraType},\n`;
+        if (eff.forceScaleWithHeal) str += `\t\t\t\tforceScaleWithHeal = true,\n`;
+        if (eff.period > 0) str += `\t\t\t\ttickPeriod = ${eff.period},\n`;
+        if (eff.weaponCoef) str += `\t\t\t\tweaponCoef = ${eff.weaponCoef},\n`;
+        str += `\t\t\t\tvalueBase = ${eff.valueBase},\n`;
+        str += `\t\t\t\tvalueRange = ${eff.valueRange},\n`;
+        if (eff.valuePerLevel) str += `\t\t\t\tvaluePerLevel = ${eff.valuePerLevel},\n`;
+        if (eff.perResource) str += `\t\t\t\tperResouce = ${eff.perResource},\n`;
+        if (eff.triggeredSpell) str += `\t\t\t\ttriggeredSpell = ${eff.triggeredSpell},\n`;
+        str += `\t\t\t\tcoef = ${eff.coef},\n`;
+        str += `\t\t\t\tcoefAP = ${eff.coefAP},\n`;
+        if (eff.chainInfo)
+        {
+            str += `\t\t\t\tchains = ${eff.chainInfo.chains},\n`;
+            str += `\t\t\t\tchainMult = ${eff.chainInfo.mult},\n`;
+        }
+        if (eff.auraStacks) str += `\t\t\t\tauraStacks = ${eff.auraStacks},\n`;
+        if (USEFUL_SPELL_MECHANICS[eff.mechanic]) str += `\t\t\t\tmechanic = ${eff.mechanic},\n`;
+        str += `\t\t\t},\n`;
+    }
+
+    str += `\t\t}\n`;
+    str += `\t},\n`;
+    return str;
+}
+
+/**
  * Create lua file with data for class
  * @param pclass
  */
@@ -552,59 +613,7 @@ function createLua(pclass: string) {
 
     str += "---@type SpellInfoTable\n_addon.spellInfo = {\n";
     for (let sid in classInfo.rankInfo) {
-        let ri = classInfo.rankInfo[sid];
-        str += `\t[${sid}] = { -- ${ri.spellnamecomment}\n`;
-        str += `\t\tspellLevel = ${ri.spellLevel},\n`;
-        str += `\t\tmaxLevel = ${ri.maxLevel},\n`;
-        if (ri.duration) str += `\t\tduration = ${ri.duration},\n`;
-        if (ri.baseCost > 0) str += `\t\tbaseCost = ${ri.baseCost},\n`;
-        if (ri.baseCostPct > 0) str += `\t\tbaseCostPct = ${ri.baseCostPct},\n`;
-        str += `\t\tschool = ${ri.school},\n`;
-        str += `\t\tschoolMask = ${ri.schoolMask},\n`;
-        if (ri.isChannel) str += `\t\tisChannel = true,\n`;
-        if (ri.isBinary) str += `\t\tisBinary = true,\n`;
-        if (ri.gcd != 1.5) str += `\t\tGCD = ${ri.gcd},\n`;
-        str += `\t\tdefType = ${ri.defenseType},\n`;
-        if (ri.cantDogeParryBlock) str += `\t\tcantDogeParryBlock = true,\n`;
-        if (ri.equippedWeaponMask != 0) str += `\t\tequippedWeaponMask = ${ri.equippedWeaponMask},\n`;
-        if (ri.noCrit) str += `\t\tnoCrit = ${ri.noCrit},\n`;
-        if (ri.forceHeal) str += `\t\tforceHeal = ${ri.forceHeal},\n`;
-        if (ri.charges != 0) str += `\t\tcharges = ${ri.charges},\n`;
-        if (ri.usePeriodicHaste) str += `\t\tusePeriodicHaste = true,\n`;
-        if (ri.extraTickAtApplication) str += `\t\textraTickAtApplication = true,\n`;
-        if (ri.onNextAttack) str += `\t\tonNextSwing = true,\n`;
-        if (ri.isOffhandAttack) str += `\t\tisOffhandAttack = true,\n`;
-        if (ri.useScalingFormula) str += `\t\tuseScalingFormula = { id = ${ri.useScalingFormula.id}, label = "${ri.useScalingFormula.label}" },\n`;
-
-        str += `\t\teffects = {\n`;
-
-        for (let i = 0; i < ri.effects.length; i++) {
-            let eff = ri.effects[i];
-            str += `\t\t\t[${i + 1}] = {\n`;
-            str += `\t\t\t\teffectType = ${eff.effectType},\n`;
-            if (eff.auraType) str += `\t\t\t\tauraType = ${eff.auraType},\n`;
-            if (eff.forceScaleWithHeal) str += `\t\t\t\tforceScaleWithHeal = true,\n`;
-            if (eff.period > 0) str += `\t\t\t\ttickPeriod = ${eff.period},\n`;
-            if (eff.weaponCoef) str += `\t\t\t\tweaponCoef = ${eff.weaponCoef},\n`;
-            str += `\t\t\t\tvalueBase = ${eff.valueBase},\n`;
-            str += `\t\t\t\tvalueRange = ${eff.valueRange},\n`;
-            if (eff.valuePerLevel) str += `\t\t\t\tvaluePerLevel = ${eff.valuePerLevel},\n`;
-            if (eff.perResource) str += `\t\t\t\tperResouce = ${eff.perResource},\n`;
-            if (eff.triggeredSpell) str += `\t\t\t\ttriggeredSpell = ${eff.triggeredSpell},\n`;
-            str += `\t\t\t\tcoef = ${eff.coef},\n`;
-            str += `\t\t\t\tcoefAP = ${eff.coefAP},\n`;
-            if (eff.chainInfo)
-            {
-                str += `\t\t\t\tchains = ${eff.chainInfo.chains},\n`;
-                str += `\t\t\t\tchainMult = ${eff.chainInfo.mult},\n`;
-            }
-            if (eff.auraStacks) str += `\t\t\t\tauraStacks = ${eff.auraStacks},\n`;
-            if (USEFUL_SPELL_MECHANICS[eff.mechanic]) str += `\t\t\t\tmechanic = ${eff.mechanic},\n`;
-            str += `\t\t\t},\n`;
-        }
-
-        str += `\t\t}\n`;
-        str += `\t},\n`;
+        str += rankInfoToLua(sid, classInfo.rankInfo[sid]);
     }
     str += "};\n\n";
 
@@ -703,6 +712,9 @@ async function main()
     fs.writeFileSync(cfg.outputDir + "auras.lua", playerAuras.getAuraLua());
     reportSection("Target auras");
     fs.writeFileSync(cfg.outputDir + "aurasTarget.lua", targetAuras.getAuraLua());
+    reportSection("Item use spells");
+    const itemSpells = new ItemSpells(spellData, buildRankInfo, rankInfoToLua);
+    fs.writeFileSync(cfg.outputDir + "itemSpells.lua", itemSpells.getLua());
 
     writeReport();
     console.log("Done.");

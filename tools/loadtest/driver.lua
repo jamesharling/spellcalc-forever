@@ -59,6 +59,9 @@ if __UNSUPPORTED then
             end
         end
     end
+    local itemSpells = 0
+    for _ in pairs(A.itemUseSpells or {}) do itemSpells = itemSpells + 1 end
+    if itemSpells > 0 then emit("FAIL item use spells loaded for an unsupported class") end
     emit(("unsupported class: %d spells in data, %d tooltip hooks ran without adding lines"):format(next(A.spellInfo) and 1 or 0, hooks))
     return table.concat(out, "\n")
 end
@@ -301,6 +304,52 @@ do
     if onButton ~= linesB or elsewhere ~= linesA or linesA == 0 then emit("FAIL macro tooltips don't show the macro's spell") end
     __ACTION_SLOTS[25], __ACTION_SLOTS[26], __MACROS[3] = nil, nil, nil
     __FireEvent("ACTIONBAR_SLOT_CHANGED", 0)
+end
+
+-- Items that heal or deal damage: an item action shows its use spell's value, and the Item tooltip shows
+-- the spell's lines
+do
+    local abv = A.ActionBarValues
+    local itemPostCalls = {}
+    for _, pc in ipairs(__TOOLTIP_POSTCALLS) do
+        if pc.kind == Enum.TooltipDataType.Item then itemPostCalls[#itemPostCalls + 1] = pc.fn end
+    end
+    -- Prefer Blessed Prayer Beads (19990); any mapped item otherwise
+    local itemId, spellId = 19990, A.itemUseSpells and A.itemUseSpells[19990]
+    if not spellId then
+        for id, sp in pairs(A.itemUseSpells or {}) do itemId, spellId = id, sp; break end
+    end
+    local mapped = 0
+    for _ in pairs(A.itemUseSpells or {}) do mapped = mapped + 1 end
+    if not spellId then
+        emit("FAIL no item use spells in the data")
+    else
+        __ACTION_SLOTS[27] = { "item", itemId }
+        __ACTION_SLOTS[28] = spellId
+        __FireEvent("ACTIONBAR_SLOT_CHANGED", 27)
+        __FireEvent("ACTIONBAR_SLOT_CHANGED", 28)
+        __TickOnUpdate(10, 0.1)
+        local itemText, spellText = abv:GetSlotText(27), abv:GetSlotText(28)
+        GameTooltip:ClearLines()
+        local terr
+        for _, fn in ipairs(itemPostCalls) do
+            local ok, err = xpcall(fn, debug.traceback, GameTooltip, { id = itemId, type = Enum.TooltipDataType.Item })
+            if not ok then terr = err end
+        end
+        local itemLines = GameTooltip:NumLines()
+        local spellLines = tooltipFor(spellId)
+        local status, cs = checkSpell(spellId)
+        local e = status == "ok" and cs.effects[1] or nil
+        emit(("item use spells: %d items mapped; item %d -> spell %d %s: bar value %s (spell %s), tooltip %d lines (spell %d), %s"):format(
+            mapped, itemId, spellId, name(spellId), tostring(itemText), tostring(spellText), itemLines, spellLines,
+            e and ("%.0f-%.0f avg %.0f"):format(e.min or 0, e.max or 0, e.avgCombined or 0) or status))
+        if terr then emit("FAIL item tooltip error: " .. (tostring(terr):gsub("\n.*", ""))) end
+        if not itemText or itemText == "" or itemText ~= spellText then emit("FAIL item action does not show its spell's value") end
+        if itemLines == 0 or itemLines ~= spellLines then emit("FAIL item tooltip does not show the spell's lines") end
+        if status ~= "ok" then emit("FAIL item use spell does not calculate: " .. tostring(cs)) end
+        __ACTION_SLOTS[27], __ACTION_SLOTS[28] = nil, nil
+        __FireEvent("ACTIONBAR_SLOT_CHANGED", 0)
+    end
 end
 
 -- Action bars 6-8 (slots 145-180): first and last slot of each

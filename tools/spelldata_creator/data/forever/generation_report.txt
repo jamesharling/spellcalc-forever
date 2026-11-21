@@ -1,6 +1,6 @@
 SpellCalc Forever data generation report
-Client build: wowf 1.60.1.70532
-Generated: 2026-10-22T21:11:44.712Z
+Client build: wowf 1.60.1.71037
+Generated: 2026-11-21T11:56:48.339Z
 
 Everything listed here was skipped or guessed by the generator and should be reviewed.
 
@@ -8,13 +8,13 @@ Everything listed here was skipped or guessed by the generator and should be rev
 
 == Spell list: druid (4)
   druid: skill lines 134 (Feral Combat), 573 (Restoration), 574 (Balance)
-  druid: 207 skill line spells, 62 passives ignored, 105 skill line entries point to removed spells
-  druid: 2 additional spells from trait tree 1089
+  druid: 209 skill line spells, 63 passives ignored, 105 skill line entries point to removed spells
+  druid: 1 additional spells from trait tree 1089
   Feral Charge [1238122, Feral Combat] skipped: Triggered spell has no valid effects!
 
 == Spell list: priest (3)
   priest: skill lines 56 (Holy), 78 (Shadow Magic), 613 (Discipline), 2885 (Meditation)
-  priest: 265 skill line spells, 48 passives ignored, 93 skill line entries point to removed spells
+  priest: 259 skill line spells, 48 passives ignored, 93 skill line entries point to removed spells
   priest: 0 additional spells from trait tree 1114
 
 == Spell list: warlock (3)
@@ -24,18 +24,18 @@ Everything listed here was skipped or guessed by the generator and should be rev
 
 == Spell list: mage (4)
   mage: skill lines 237 (Arcane), 6 (Frost), 8 (Fire)
-  mage: 208 skill line spells, 43 passives ignored, 97 skill line entries point to removed spells
+  mage: 205 skill line spells, 43 passives ignored, 97 skill line entries point to removed spells
   mage: 0 additional spells from trait tree 1112
   Combustion [11129, Fire] skipped: Triggered spell has no valid effects!
 
 == Spell list: paladin (3)
   paladin: skill lines 267 (Protection), 184 (Retribution), 594 (Holy)
-  paladin: 170 skill line spells, 53 passives ignored, 102 skill line entries point to removed spells
+  paladin: 165 skill line spells, 53 passives ignored, 108 skill line entries point to removed spells
   paladin: 0 additional spells from trait tree 1100
 
 == Spell list: shaman (4)
   shaman: skill lines 373 (Enhancement), 375 (Elemental Combat), 374 (Restoration)
-  shaman: 193 skill line spells, 60 passives ignored, 92 skill line entries point to removed spells
+  shaman: 189 skill line spells, 60 passives ignored, 92 skill line entries point to removed spells
   shaman: 1 additional spells from trait tree 1082
   Water Shield [408510, trait tree 1082] skipped: Triggered spell has no valid effects!
 
@@ -45,7 +45,9 @@ Everything listed here was skipped or guessed by the generator and should be rev
   Frenzied Regeneration [22845]: no SpellLevels entry, using level 0 (no per-level scaling)
   Frenzied Regeneration [22845]: no SpellCategories entry, defense type set to none
 
-== Talents: druid (27)
+== Talents: druid (29)
+  Bloom (1328621) effect 0 skipped: SPELL_AURA_DUMMY spell not handled! 1328621
+  Bloom (1328621) effect 1 skipped: SPELL_AURA_DUMMY spell not handled! 1328621
   Nature's Swiftness (17116) is an active ability, not applied as a permanent talent effect
   Nature's Majesty (1223082) effect 0: aura type 290 is not handled, effect skipped
   Improved Starfire (16850) effect 1 skipped: Triggered spell needs some love: 16922
@@ -54,8 +56,8 @@ Everything listed here was skipped or guessed by the generator and should be rev
   Eclipse (408248) effect 1 skipped: SPELL_AURA_DUMMY spell not handled! 408248
   Eclipse (408248) effect 2 skipped: SPELL_AURA_DUMMY spell not handled! 408248
   Eclipse (408248) effect 3 skipped: SPELL_AURA_DUMMY spell not handled! 408248
-  Heart of the Wild (17003) effect 1 skipped: SPELL_AURA_DUMMY spell not handled! 17003
-  Heart of the Wild (17003) effect 2 skipped: SPELL_AURA_DUMMY spell not handled! 17003
+  Furor (17056) effect 0 skipped: SPELL_AURA_DUMMY spell not handled! 17056
+  Furor (17056) effect 1 skipped: SPELL_AURA_DUMMY spell not handled! 17056
   Feral Instinct (16947) effect 0 skipped: Error: Unhandled SPELLMOD_EFFECT1: 16947: // Increases damage done by your Swipe ability by $s2% and reduces the chance enemies have to detect you while Prowling as if you were ${$m1/5} $llevel:levels; higher.
   Thick Hide (16929) effect 0 skipped: SPELL_AURA_DUMMY spell not handled! 16929
   Thick Hide (16929) effect 1 skipped: SPELL_AURA_DUMMY spell not handled! 16929
@@ -63,20 +65,20 @@ Everything listed here was skipped or guessed by the generator and should be rev
   Sharpened Claws (16942) effect 0: aura type 290 is not handled, effect skipped
   Blood Frenzy (16958) effect 0 skipped: SPELL_AURA_DUMMY spell not handled! 16958
   Blood Frenzy (16958) effect 1 skipped: SPELL_AURA_DUMMY spell not handled! 16958
+  Predatory Discipline (1328613) effect 0 skipped: SPELL_AURA_DUMMY spell not handled! 1328613
   Predatory Strikes (16972) effect 0 skipped: SPELL_AURA_DUMMY spell not handled! 16972
   Rend and Tear (1223246) effect 0 skipped: SPELL_AURA_DUMMY spell not handled! 1223246
   Natural Reaction (417051) effect 1 skipped: SPELL_AURA_DUMMY spell not handled! 417051
   Natural Reaction (417051) effect 2 skipped: SPELL_AURA_DUMMY spell not handled! 417051
   Natural Reaction (417051) effect 3 skipped: SPELL_AURA_DUMMY spell not handled! 417051
   Leader of the Pack (17007) effect 0 skipped: SPELL_AURA_DUMMY spell not handled! 17007
-  Berserk (417141) is an active ability, not applied as a permanent talent effect
-  Furor (17056) effect 0 skipped: SPELL_AURA_DUMMY spell not handled! 17056
-  Furor (17056) effect 1 skipped: SPELL_AURA_DUMMY spell not handled! 17056
+  Heart of the Wild (17003) effect 1 skipped: SPELL_AURA_DUMMY spell not handled! 17003
+  Heart of the Wild (17003) effect 2 skipped: SPELL_AURA_DUMMY spell not handled! 17003
   Overgrowth (17245) effect 0 skipped: SPELL_AURA_DUMMY spell not handled! 17245
 
 == Spell data: priest (0)
 
-== Talents: priest (27)
+== Talents: priest (28)
   Devouring Contagion (1309950) effect 1 skipped: SPELL_AURA_DUMMY spell not handled! 1309950
   Devouring Contagion (1309950) effect 2 skipped: SPELL_AURA_DUMMY spell not handled! 1309950
   Shadow Weaving (15257) effect 0 skipped: Triggered spell needs some love: 15258
@@ -96,6 +98,7 @@ Everything listed here was skipped or guessed by the generator and should be rev
   Wand Specialization (14524) requires weapon subclass mask 524288; its SCHOOLMOD_PCT_DAMAGE effect only applies to that weapon's damage and is dropped
   Spirit of Redemption (20711) effect 0 skipped: SPELL_AURA_DUMMY spell not handled! 20711
   Litany of Light (1317006) effect 0 skipped: Triggered spell needs some love
+  Holy Binding (1328569) effect 0 skipped: SPELL_AURA_DUMMY spell not handled! 1328569
   Searing Light (14909) effect 1 skipped: Triggered spell needs some love: 1284536
   Inspiration (14892) effect 0 skipped: SPELL_AURA_DUMMY spell not handled! 14892
   Blessed Recovery (27811) effect 0 skipped: SPELL_AURA_DUMMY spell not handled! 27811
@@ -107,7 +110,7 @@ Everything listed here was skipped or guessed by the generator and should be rev
 
 == Spell data: warlock (0)
 
-== Talents: warlock (29)
+== Talents: warlock (30)
   Shadow and Flame (426316) effect 0 skipped: SPELL_AURA_DUMMY spell not handled! 426316
   Shadow and Flame (426316) effect 1 skipped: SPELL_AURA_DUMMY spell not handled! 426316
   Shadow and Flame (426316) effect 2 skipped: SPELL_AURA_DUMMY spell not handled! 426316
@@ -134,6 +137,7 @@ Everything listed here was skipped or guessed by the generator and should be rev
   Soul Siphon (17804) effect 0 skipped: SPELL_AURA_DUMMY spell not handled! 17804
   Nightfall (18094) effect 0 skipped: SPELL_AURA_DUMMY spell not handled! 18094
   Amplify Curse (18288) is an active ability, not applied as a permanent talent effect
+  Improved Drains (403511) effect 1 skipped: Error: Unhandled SPELLMOD_EFFECT1: 403511: // Increases Health drained, damage done, or Mana drained by your Drain Life, Drain Soul, and Drain Mana spells by $m1%.
   Improved Life Tap (18182) effect 0 skipped: SPELL_AURA_DUMMY spell not handled! 18182
   Soul Harvest (437032) effect 0 skipped: SPELL_AURA_DUMMY spell not handled! 437032
   Soul Harvest (437032) effect 1 skipped: SPELL_AURA_DUMMY spell not handled! 437032
@@ -143,12 +147,12 @@ Everything listed here was skipped or guessed by the generator and should be rev
 == Talents: mage (27)
   Winter's Chill (11180) effect 0 skipped: Triggered spell needs some love: 12579
   Winter's Chill (11180) effect 1 skipped: SPELL_AURA_DUMMY spell not handled! 11180
+  Winter's Chill (11180) effect 2 skipped: SPELL_AURA_DUMMY spell not handled! 11180
   Fingers of Frost (400647) effect 0 skipped: SPELL_AURA_DUMMY spell not handled! 400647
   Fingers of Frost (400647) effect 1 skipped: SPELL_AURA_DUMMY spell not handled! 400647
   Cold Snap (12472) is an active ability, not applied as a permanent talent effect
   Shatter (11170) effect 0 skipped: SPELL_AURA_DUMMY spell not handled! 11170
   Improved Blizzard (11185) effect 0 skipped: SPELL_AURA_DUMMY spell not handled! 11185
-  Piercing Ice (11151) effect 1: no rank curve, value 2 is used for all 3 ranks (check the tooltip)
   Frostbite (11071) effect 0 skipped: Triggered spell needs some love: 12494
   Combustion (11129) is an active ability, not applied as a permanent talent effect
   Fire Power (11124) effect 0 skipped: SPELL_AURA_DUMMY spell not handled! 11124
@@ -161,44 +165,50 @@ Everything listed here was skipped or guessed by the generator and should be rev
   Arcane Power (12042) is an active ability, not applied as a permanent talent effect
   Arcane Instability (15058) effect 2: aura type 290 is not handled, effect skipped
   Presence of Mind (12043) is an active ability, not applied as a permanent talent effect
+  Arcane Resilience (28574) effect 0: aura type 268 is not handled, effect skipped
+  Improved Counterspell (11255) effect 0 skipped: SPELL_AURA_DUMMY spell not handled! 11255
   Missile Barrage (400588) effect 0 skipped: Triggered spell needs some love: 400589
   Missile Barrage (400588) effect 1 skipped: SPELL_AURA_DUMMY spell not handled! 400588
-  Improved Counterspell (11255) effect 0 skipped: SPELL_AURA_DUMMY spell not handled! 11255
-  Arcane Resilience (28574) effect 0: aura type 268 is not handled, effect skipped
   Arcane Concentration (11213) uses a hand-written definition: CLEARCAST_CHANCE_DMG=2/pt
   Magic Absorption (29441) effect 0 skipped: SPELL_AURA_DUMMY spell not handled! 29441
   Wand Specialization (6057) requires weapon subclass mask 524288; its SCHOOLMOD_PCT_DAMAGE effect only applies to that weapon's damage and is dropped
 
 == Spell data: paladin (0)
 
-== Talents: paladin (23)
+== Talents: paladin (29)
+  Holy Power (5923) effect 0: aura type 50 is not handled, effect skipped
+  Divine Precision (1310904) effect 1: aura type 232 is not handled, effect skipped
   Illumination (20210) uses a hand-written definition: ILLUMINATION=10/pt
-  Voice of Truth (1310897) is an active ability, not applied as a permanent talent effect
   Unyielding Faith (9453) effect 0: aura type 232 is not handled, effect skipped
   Unyielding Faith (9453) effect 1: aura type 232 is not handled, effect skipped
   Redoubt (20127) effect 0 skipped: SPELL_AURA_DUMMY spell not handled! 20127
   Reckoning (20177) effect 0 skipped: SPELL_AURA_DUMMY spell not handled! 20177
   Toughness (20143) effect 0: aura type 142 is not handled, effect skipped
   Toughness (20143) effect 1: aura type 466 is not handled, effect skipped
+  Stoicism (1328546) effect 0: aura type 232 is not handled, effect skipped
+  Stoicism (1328546) effect 1: aura type 232 is not handled, effect skipped
   Vengeance (20049) effect 0: aura type 231 is not handled, effect skipped
+  Two-Handed Weapon Specialization (20111) requires weapon subclass mask 136546; its SCHOOLMOD_PCT_DAMAGE effect only applies to that weapon's damage and is dropped
   Eye for an Eye (9799) effect 0 skipped: SPELL_AURA_DUMMY spell not handled! 9799
   Sanctified Judgement (1311074) effect 0 skipped: SPELL_AURA_DUMMY spell not handled! 1311074
   Sanctified Judgement (1311074) effect 1 skipped: SPELL_AURA_DUMMY spell not handled! 1311074
   Vindication (9452) effect 0 skipped: SPELL_AURA_DUMMY spell not handled! 9452
   Vindication (9452) effect 1 skipped: SPELL_AURA_DUMMY spell not handled! 9452
+  Conviction (20117) effect 0: aura type 290 is not handled, effect skipped
   Consecrated Ground (1310905) effect 0 skipped: SPELL_AURA_DUMMY spell not handled! 1310905
   Infusion of Light (426065) effect 0 skipped: SPELL_AURA_DUMMY spell not handled! 426065
   Shield Specialization (20150) effect 0: aura type 272 is not handled, effect skipped
   Shield Specialization (20150) effect 1 skipped: Triggered spell needs some love: 1310925
-  Improved Seal of Fury (1314103) effect 0 skipped: SPELL_AURA_DUMMY spell not handled! 1314103
-  Improved Seal of Fury (1314103) effect 1 skipped: SPELL_AURA_DUMMY spell not handled! 1314103
-  Improved Seal of Fury (1314103) effect 2 skipped: SPELL_AURA_DUMMY spell not handled! 1314103
   Swift Judgement (1310994) is an active ability, not applied as a permanent talent effect
   Iron Creed (1311034) effect 1: aura type 231 is not handled, effect skipped
+  Turn Evil (1328370) effect 2: aura type 332 is not handled, effect skipped
+  Turn Evil (1328370) effect 3: aura type 332 is not handled, effect skipped
+  Turn Evil (1328370) effect 4: aura type 332 is not handled, effect skipped
+  Boundless Light (1328550) effect 0 skipped: SPELL_AURA_DUMMY spell not handled! 1328550
 
 == Spell data: shaman (0)
 
-== Talents: shaman (26)
+== Talents: shaman (27)
   Nature's Swiftness (16188) is an active ability, not applied as a permanent talent effect
   Ancestral Healing (16176) effect 0 skipped: SPELL_AURA_DUMMY spell not handled! 16176
   Water Shield (408510) is an active ability, not applied as a permanent talent effect
@@ -219,14 +229,15 @@ Everything listed here was skipped or guessed by the generator and should be rev
   Thundering Strikes (16255) effect 0: aura type 290 is not handled, effect skipped
   Mental Dexterity (415140) effect 0: aura type 598 is not handled, effect skipped
   Mental Dexterity (415140) effect 1 skipped: SPELL_AURA_DUMMY spell not handled! 415140
-  Elemental Mastery (16166) is an active ability, not applied as a permanent talent effect
+  Lightning Mastery (16166) is an active ability, not applied as a permanent talent effect
   Lightning Overload (408438) effect 0 skipped: SPELL_AURA_DUMMY spell not handled! 408438
   Elemental Reach (28999) effect 1 skipped: SPELL_AURA_DUMMY spell not handled! 28999
+  Elemental Reach (28999) effect 2 skipped: SPELL_AURA_DUMMY spell not handled! 28999
   Earthbound (1222988) effect 0 skipped: SPELL_AURA_DUMMY spell not handled! 1222988
-  Elemental Focus (16164) uses a hand-written definition: CLEARCAST_CHANCE_DMG=10/pt
+  Elemental Focus (16164) uses a hand-written definition: CLEARCAST_CHANCE_DMG=100/pt
   Elemental Devastation (30160) effect 0 skipped: SPELL_AURA_DUMMY spell not handled! 30160
 
-== Item sets (538)
+== Item sets (535)
   Item set bonus spell 1301123 effect 0: Triggered spell needs some love: 1301124
   Item set bonus spell 1301123 effect 1: SPELL_AURA_DUMMY spell not handled! 1301123
   Item set bonus spell 1301123 effect 2: SPELL_AURA_DUMMY spell not handled! 1301123
@@ -650,21 +661,21 @@ Everything listed here was skipped or guessed by the generator and should be rev
   Item set bonus spell 1300934 effect 0: aura type 342 is not handled, skipped
   Item set bonus spell 1300934 effect 1: aura type 65 is not handled, skipped
   Item set bonus spell 1300999 effect 2: aura type 275 is not handled, skipped
-  Item set bonus spell 1315077 effect 0 doesn't apply an aura (effect 2), skipped
+  Item set bonus spell 1330858 effect 0: Triggered spell needs some love: 1315077
   Item set bonus spell 1317039 effect 0: Triggered spell needs some love: 1317040
   Item set bonus spell 1321560 effect 0: Triggered spell needs some love: 1321558
   Item set bonus spell 1321587 effect 0: Triggered spell needs some love: 1321586
   Item set bonus spell 1324318 effect 0: Triggered spell needs some love: 1324315
-  Item set bonus spell 1324323 effect 0: Triggered spell needs some love: 1326099
+  Item set bonus spell 1324323 effect 0: Triggered spell needs some love: 1324322
   Item set bonus spell 1324287 effect 0: aura type 674 is not handled, skipped
   Item set bonus spell 1324298 effect 0: Triggered spell needs some love: 1324296
   Item set bonus spell 1324298 effect 1 doesn't apply an aura (effect 3), skipped
   Item set bonus spell 1324309 effect 0: Triggered spell needs some love: 1324308
   Item set bonus spell 1324684 effect 0: Triggered spell needs some love: 1324683
-  Item set 81 (The Postmaster): none of its items exist in Forever (no exported or hotfix detail row), skipped
-  Item set 121 (Cadaverous Garb): none of its items exist in Forever (no exported or hotfix detail row), skipped
-  Item set 161 (Defias Leather): none of its items exist in Forever (no exported or hotfix detail row), skipped
-  Item set 163 (Chain of the Scarlet Crusade): none of its items exist in Forever (no exported or hotfix detail row), skipped
+  Item set 81 (The Postmaster): no item has a detail row (hotfix-only items), placed in the class-neutral file
+  Item set 121 (Cadaverous Garb): no item has a detail row (hotfix-only items), placed in the class-neutral file
+  Item set 161 (Defias Leather): no item has a detail row (hotfix-only items), placed in the class-neutral file
+  Item set 163 (Chain of the Scarlet Crusade): no item has a detail row (hotfix-only items), placed in the class-neutral file
   Item set 181 (Magister's Regalia): no item has a detail row (hotfix-only items), placed in the class-neutral file
   Item set 182 (Vestments of the Devout): no item has a detail row (hotfix-only items), placed in the class-neutral file
   Item set 183 (Dreadmist Raiment): no item has a detail row (hotfix-only items), placed in the class-neutral file
@@ -684,7 +695,7 @@ Everything listed here was skipped or guessed by the generator and should be rev
   Item set 241 (Scale of the Gods): none of its items exist in Forever (no exported or hotfix detail row), skipped
   Item set 261 (Spirit of Eskhandar): none of its items exist in Forever (no exported or hotfix detail row), skipped
   Item set 462 (Zanzil's Concentration): none of its items exist in Forever (no exported or hotfix detail row), skipped
-  Item set 520 (Ironweave Battlesuit): none of its items exist in Forever (no exported or hotfix detail row), skipped
+  Item set 520 (Ironweave Battlesuit): no item has a detail row (hotfix-only items), placed in the class-neutral file
   Item set 1570 (Twilight Invoker's Vestments): none of its items exist in Forever (no exported or hotfix detail row), skipped
   Item set 1577 (Blackfathom Avenger's Mail): none of its items exist in Forever (no exported or hotfix detail row), skipped
   Item set 1578 (Blackfathom Slayer's Leather): none of its items exist in Forever (no exported or hotfix detail row), skipped
@@ -704,13 +715,6 @@ Everything listed here was skipped or guessed by the generator and should be rev
   Item set 1649 (Wailing Berserker's Plate Armor): none of its items exist in Forever (no exported or hotfix detail row), skipped
   Item set 1650 (Banished Martyr's Full Plate): none of its items exist in Forever (no exported or hotfix detail row), skipped
   Item set 1664 (Cenarion Eclipse): none of its items exist in Forever (no exported or hotfix detail row), skipped
-  Item set 1667 (Feralheart Raiment): none of its items exist in Forever (no exported or hotfix detail row), skipped
-  Item set 1669 (Beastmaster Armor): none of its items exist in Forever (no exported or hotfix detail row), skipped
-  Item set 1671 (Sorcerer's Regalia): none of its items exist in Forever (no exported or hotfix detail row), skipped
-  Item set 1673 (Soulforge Armor): none of its items exist in Forever (no exported or hotfix detail row), skipped
-  Item set 1675 (Vestments of the Virtuous): none of its items exist in Forever (no exported or hotfix detail row), skipped
-  Item set 1679 (The Five Thunders): none of its items exist in Forever (no exported or hotfix detail row), skipped
-  Item set 1681 (Deathmist Raiment): none of its items exist in Forever (no exported or hotfix detail row), skipped
   Item set 1698 (Cenarion Eclipse): none of its items exist in Forever (no exported or hotfix detail row), skipped
   Item set 1700 (Cenarion Bounty): none of its items exist in Forever (no exported or hotfix detail row), skipped
   Item set 1708 (Lawbringer Will): none of its items exist in Forever (no exported or hotfix detail row), skipped
@@ -765,56 +769,124 @@ Everything listed here was skipped or guessed by the generator and should be rev
   Item set 2111 (The Spiritcaller's Storm): none of its items exist in Forever (no exported or hotfix detail row), skipped
   Item set 2114 (Grovekeeper Eclipse): none of its items exist in Forever (no exported or hotfix detail row), skipped
   Item set 2115 (Grovekeeper Ferocity): none of its items exist in Forever (no exported or hotfix detail row), skipped
+  Item set 2138 (Arcanist Regalia): none of its items exist in Forever (no exported or hotfix detail row), skipped
+  Item set 2140 (Vestments of Prophecy): none of its items exist in Forever (no exported or hotfix detail row), skipped
+  Item set 2142 (Cenarion Raiment): none of its items exist in Forever (no exported or hotfix detail row), skipped
+  Item set 2143 (The Earthfury): none of its items exist in Forever (no exported or hotfix detail row), skipped
 
-== Item effects (41)
+== Item effects (105)
   Item effect spell 14825 effect 0: aura type 557 is not handled, skipped
   Item effect spell 29417 effect 0: aura type 557 is not handled, skipped
+  Item effect spell 29415 effect 0: aura type 557 is not handled, skipped
   Item effect spell 29418 effect 0: aura type 557 is not handled, skipped
   Item effect spell 14824 effect 0: aura type 557 is not handled, skipped
+  Item effect spell 14828 effect 0: aura type 557 is not handled, skipped
   Item effect spell 29413 effect 0: aura type 557 is not handled, skipped
   Item effect spell 14827 effect 0: aura type 557 is not handled, skipped
   Item effect spell 29416 effect 0: aura type 557 is not handled, skipped
   Item effect spell 14826 effect 0: aura type 557 is not handled, skipped
   Item effect spell 17768 effect 0: Error: Unhandled SPELLMOD_EFFECT2: 17768: // You gain an additional ${$m1/10} Rage from activating Enrage and an additional $m2 Energy from activating Shifting Power.
   Item effect spell 17768 effect 1: SPELL_AURA_DUMMY spell not handled! 17768
+  Item effect spell 11789 effect 0: aura type 155 is not handled, skipped
   Item effect spell 1320643 effect 0: aura type 155 is not handled, skipped
+  Item effect spell 1294477 effect 0: SPELL_AURA_DUMMY spell not handled! 1294477
+  Item effect spell 1301046 effect 1: SPELL_AURA_DUMMY spell not handled! 1301046
+  Item effect spell 15600 effect 1: SPELL_AURA_DUMMY spell not handled! 15600
+  Item effect spell 17350 effect 1 doesn't apply an aura (effect 3), skipped
+  Item effect spell 1294777 effect 0: aura type 245 is not handled, skipped
+  Item effect spell 1294794 effect 0: SPELL_AURA_DUMMY spell not handled! 1294794
+  Item effect spell 23686 effect 1: SPELL_AURA_DUMMY spell not handled! 23686
   Item effect spell 29414 effect 0: aura type 557 is not handled, skipped
   Item effect spell 14829 effect 0: aura type 557 is not handled, skipped
+  Item effect spell 27656 effect 1 doesn't apply an aura (effect 0), skipped
+  Item effect spell 27853 effect 0: SPELL_AURA_DUMMY spell not handled! 27853
   Item effect spell 418509 effect 0: SPELL_AURA_DUMMY spell not handled! 418509
+  Item effect spell 440841 effect 0: SPELL_AURA_DUMMY spell not handled! 440841
   Item effect spell 459217 effect 0: SPELL_AURA_DUMMY spell not handled! 459217
-  Item effect spell 1252323 effect 0 doesn't apply an aura (effect 24), skipped
+  Item effect spell 463001 effect 0: SPELL_AURA_DUMMY spell not handled! 463001
   Item effect spell 1270490 effect 0: aura type 142 is not handled, skipped
   Item effect spell 1270490 effect 1: aura type 466 is not handled, skipped
   Item effect spell 1291060 effect 0: Error: Unhandled SPELLMOD_EFFECT1: 1291060: // Your Enrage ability generates an additional $s1 Rage over its duration.
   Item effect spell 1291075 effect 0: SPELL_AURA_DUMMY spell not handled! 1291075
   Item effect spell 1291078 effect 0: SPELL_AURA_DUMMY spell not handled! 1291078
+  Item effect spell 1291698 effect 1: SPELL_AURA_DUMMY spell not handled! 1291698
+  Item effect spell 1291749 effect 0: SPELL_AURA_DUMMY spell not handled! 1291749
+  Item effect spell 1291915 effect 0: SPELL_AURA_DUMMY spell not handled! 1291915
+  Item effect spell 1291987 effect 0: Error: SPELL_AURA_ADD_PCT_MODIFIER misc value 16 not handled: 1291987 // Increases the chance your Pick Pocket and Distract abilities are successful by $s1%
+  Item effect spell 1292142 effect 0 doesn't apply an aura (effect 35), skipped
+  Item effect spell 1292546 effect 0: aura type 232 is not handled, skipped
+  Item effect spell 1292546 effect 1: aura type 232 is not handled, skipped
+  Item effect spell 1292706 effect 0: SPELL_AURA_DUMMY spell not handled! 1292706
+  Item effect spell 1293433 effect 0: SPELL_AURA_DUMMY spell not handled! 1293433
+  Item effect spell 1293501 effect 0: SPELL_AURA_DUMMY spell not handled! 1293501
+  Item effect spell 1293540 effect 0: SPELL_AURA_DUMMY spell not handled! 1293540
+  Item effect spell 1293819 effect 0: aura type 232 is not handled, skipped
+  Item effect spell 1293819 effect 1: aura type 232 is not handled, skipped
+  Item effect spell 1293881 effect 0: aura type 319 is not handled, skipped
   Item effect spell 1295267 effect 0: SPELL_AURA_DUMMY spell not handled! 1295267
+  Item effect spell 1298508 effect 0: SPELL_AURA_DUMMY spell not handled! 1298508
+  Item effect spell 1298517 effect 0: SPELL_AURA_DUMMY spell not handled! 1298517
+  Item effect spell 1300435 effect 0: SPELL_AURA_DUMMY spell not handled! 1300435
+  Item effect spell 1300667 effect 0: SPELL_AURA_DUMMY spell not handled! 1300667
+  Item effect spell 1300668 effect 0: SPELL_AURA_DUMMY spell not handled! 1300668
   Item effect spell 1300740 effect 0: SPELL_AURA_DUMMY spell not handled! 1300740
+  Item effect spell 1302345 effect 0: Error: SPELL_AURA_ADD_PCT_MODIFIER misc value 16 not handled: 1302345 // Increases the chance your Pick Pocket and Distract abilities are successful by $s1%.
   Item effect spell 1302968 effect 0: SPELL_AURA_DUMMY spell not handled! 1302968
   Item effect spell 1302968 effect 1: aura type 470 is not handled, skipped
   Item effect spell 1306433 effect 0: SPELL_AURA_DUMMY spell not handled! 1306433
   Item effect spell 1306483 effect 0: SPELL_AURA_DUMMY spell not handled! 1306483
+  Item effect spell 1309550 effect 0: SPELL_AURA_DUMMY spell not handled! 1309550
   Item effect spell 1299095 effect 0: SPELL_AURA_DUMMY spell not handled! 1299095
+  Item effect spell 1311505 effect 0: SPELL_AURA_DUMMY spell not handled! 1311505
+  Item effect spell 1311505 effect 1: SPELL_AURA_DUMMY spell not handled! 1311505
+  Item effect spell 1326019 effect 0 doesn't apply an aura (effect 3), skipped
+  Item effect spell 1315339 effect 0: SPELL_AURA_DUMMY spell not handled! 1315339
   Item effect spell 1316049 effect 0: SPELL_AURA_DUMMY spell not handled! 1316049
   Item effect spell 23076 effect 0: SPELL_AURA_DUMMY spell not handled! 23076
+  Item effect spell 1316928 effect 0: aura type 155 is not handled, skipped
   Item effect spell 1317283 effect 0: SPELL_AURA_DUMMY spell not handled! 1317283
   Item effect spell 1317286 effect 0: SPELL_AURA_DUMMY spell not handled! 1317286
+  Item effect spell 1317446 effect 0: SPELL_AURA_DUMMY spell not handled! 1317446
   Item effect spell 1317479 effect 0: SPELL_AURA_DUMMY spell not handled! 1317479
   Item effect spell 1317480 effect 0: SPELL_AURA_DUMMY spell not handled! 1317480
   Item effect spell 1317483 effect 0: SPELL_AURA_DUMMY spell not handled! 1317483
   Item effect spell 1317985 effect 0: SPELL_AURA_DUMMY spell not handled! 1317985
+  Item effect spell 1318073 effect 0: SPELL_AURA_DUMMY spell not handled! 1318073
+  Item effect spell 1318108 effect 0: SPELL_AURA_DUMMY spell not handled! 1318108
+  Item effect spell 1318104 effect 0: SPELL_AURA_DUMMY spell not handled! 1318104
   Item effect spell 1318317 effect 0: SPELL_AURA_DUMMY spell not handled! 1318317
   Item effect spell 1318325 effect 0: SPELL_AURA_DUMMY spell not handled! 1318325
+  Item effect spell 1301707 effect 0: aura type 120 is not handled, skipped
   Item effect spell 1318470 effect 0: SPELL_AURA_DUMMY spell not handled! 1318470
   Item effect spell 1318514 effect 0: SPELL_AURA_DUMMY spell not handled! 1318514
-  Item effect spell 11789 effect 0: aura type 155 is not handled, skipped
+  Item effect spell 1318945 effect 0: SPELL_AURA_DUMMY spell not handled! 1318945
+  Item effect spell 1318846 effect 0: SPELL_AURA_DUMMY spell not handled! 1318846
+  Item effect spell 1322312 effect 0: SPELL_AURA_DUMMY spell not handled! 1322312
+  Item effect spell 1324752 effect 0: aura type 155 is not handled, skipped
+  Item effect spell 1324981 effect 0: wtf?
+  Item 22401: no detail row (hotfix-only), class paladin inferred from its effect spells
+  Item 22395: no detail row (hotfix-only), class shaman inferred from its effect spells
+  Item 23200: no detail row (hotfix-only), class shaman inferred from its effect spells
+  Item 22207: no detail row (hotfix-only), placed in the class-neutral file
+  Item 13255: no detail row (hotfix-only), placed in the class-neutral file
+  Item 279892: no detail row (hotfix-only), placed in the class-neutral file
+  Item 18471: no detail row (hotfix-only), placed in the class-neutral file
+  Item 18472: no detail row (hotfix-only), placed in the class-neutral file
+  Item 18467: no detail row (hotfix-only), placed in the class-neutral file
+  Item 18537: no detail row (hotfix-only), placed in the class-neutral file
+  Item 273817: no detail row (hotfix-only), placed in the class-neutral file
+  Item 13209: no detail row (hotfix-only), placed in the class-neutral file
+  Item 19812: no detail row (hotfix-only), placed in the class-neutral file
+  Item 18388: no detail row (hotfix-only), placed in the class-neutral file
+  Item 18296: no detail row (hotfix-only), placed in the class-neutral file
+  Item 17754: no detail row (hotfix-only), placed in the class-neutral file
 
-== Player auras (24)
+== Player auras (25)
   Nature's Grace [16886] effect 1 skipped: Error: SPELL_AURA_ADD_PCT_MODIFIER misc value 21 not handled: 16886 // 
-  Moonkin Form (Shapeshift) [24858] effect 4 skipped: Error: SPELL_AURA_ADD_PCT_MODIFIER misc value 18 not handled: 24858 // Shapeshift into Moonkin Form, increasing Omen of Clarity's chance to trigger by $s5%, Armor contribution from items by $24905s1%, and all party or raid members within $24907a1 yards have their spell Critical Strike chance increased by $24907s1%.  Also protects the caster from Polymorph effects and prevents the use of healing spells.
+  Moonkin Form (Shapeshift) [24858] effect 4 skipped: Error: SPELL_AURA_ADD_PCT_MODIFIER misc value 18 not handled: 24858 // Shapeshift into Moonkin Form, increasing Omen of Clarity's chance to trigger by $s5%, Armor contribution from items by $24905s1%, and all party or raid members within $24907a1 yards have their Critical Strike chance increased by $24907s1%. Also protects the caster from Polymorph effects and prevents the use of healing spells.
 
 The act of shapeshifting frees the caster of Polymorph and Movement Impairing effects.
-  Moonkin Form (Shapeshift) [24858] effect 5 skipped: Error: SPELL_AURA_ADD_PCT_MODIFIER misc value 38 not handled: 24858 // Shapeshift into Moonkin Form, increasing Omen of Clarity's chance to trigger by $s5%, Armor contribution from items by $24905s1%, and all party or raid members within $24907a1 yards have their spell Critical Strike chance increased by $24907s1%.  Also protects the caster from Polymorph effects and prevents the use of healing spells.
+  Moonkin Form (Shapeshift) [24858] effect 5 skipped: Error: SPELL_AURA_ADD_PCT_MODIFIER misc value 38 not handled: 24858 // Shapeshift into Moonkin Form, increasing Omen of Clarity's chance to trigger by $s5%, Armor contribution from items by $24905s1%, and all party or raid members within $24907a1 yards have their Critical Strike chance increased by $24907s1%. Also protects the caster from Polymorph effects and prevents the use of healing spells.
 
 The act of shapeshifting frees the caster of Polymorph and Movement Impairing effects.
   S03 - Item - T1 - Mage - Damage 6P Bonus [456402] effect 0 skipped: Error: Unhandled SPELLMOD_EFFECT2: 456402: // Mage Armor increases your mana regeneration while casting by an additional $s1%. Molten Armor increases your spell damage and healing by $s2. Ice Armor grants $s3% increased chance to trigger Fingers of Frost.
@@ -838,6 +910,7 @@ The act of shapeshifting frees the caster of Polymorph and Movement Impairing ef
   S03 - Item - Scarlet Enclave - Shaman - Enhancement 4P Bonus [1226986] effect 1 skipped: Error: SPELL_AURA_ADD_PCT_MODIFIER misc value 19 not handled: 1226986 // Reduces the cooldown on your Fire Nova Totem by $s1%, increases its damage by $s4%, and reduces its mana cost by $s5%. Additionally, your Fire Nova Totem now activates instantly on cast.
   Eureka! (Racial) [1259817] effect 2 skipped: wtf?
   Cooldown Reduction [1325739] effect 0 skipped: wtf?
+  Composure [1329265] effect 0 skipped: Error: Unhandled SPELLMOD_EFFECT1: 1329265: // Increases the Energy cost reduction of your Poised ability by $s1.
 
 == Target auras (0)
 
@@ -858,4 +931,78 @@ The act of shapeshifting frees the caster of Polymorph and Movement Impairing ef
   WARRIOR: Sunder Armor (Rank 5) [11597], up to 5 stacks
   WARRIOR: Mortal Strike (Rank 4) [27580]
   WARRIOR: Spell Vulnerability [23605]
+
+== Item use spells (72)
+  102 use items skipped by name (test, deprecated or placeholder items)
+  Heal Self [9163]: no SpellLevels entry, using level 0 (no per-level scaling)
+  Flee [5024]: no SpellCategories entry, defense type set to none
+  Heal [10577]: no SpellLevels entry, using level 0 (no per-level scaling)
+  Harm Prevention Belt [13234]: no SpellLevels entry, using level 0 (no per-level scaling)
+  Harm Prevention Belt [13234]: no SpellCategories entry, defense type set to none
+  Circle of Flame [17447]: no SpellCategories entry, defense type set to none
+  Heal Pet [18386]: no SpellLevels entry, using level 0 (no per-level scaling)
+  CHUG! CHUG! CHUG! CHUG! [363881]: no SpellLevels entry, using level 0 (no per-level scaling)
+  Linken's Boomerang [15712]: no SpellLevels entry, using level 0 (no per-level scaling)
+  Linken's Boomerang [15712]: no SpellCategories entry, defense type set to none
+  High-Yield Radiation Bomb [435963]: no SpellLevels entry, using level 0 (no per-level scaling)
+  Ez-Thro Radiation Bomb [435968]: no SpellLevels entry, using level 0 (no per-level scaling)
+  Green Tea [833]: no SpellCategories entry, defense type set to none
+  Blazing Emblem [13744]: no SpellCategories entry, defense type set to none
+  Iron Grenade [4068]: no SpellLevels entry, using level 0 (no per-level scaling)
+  Heavy Dynamite [4062]: no SpellLevels entry, using level 0 (no per-level scaling)
+  Large Copper Bomb [4065]: no SpellLevels entry, using level 0 (no per-level scaling)
+  Recombobulate [18805]: no SpellCategories entry, defense type set to none
+  Rough Dynamite [4054]: no SpellLevels entry, using level 0 (no per-level scaling)
+  Small Bronze Bomb [4066]: no SpellLevels entry, using level 0 (no per-level scaling)
+  Big Iron Bomb [4069]: no SpellLevels entry, using level 0 (no per-level scaling)
+  Big Bronze Bomb [4067]: no SpellLevels entry, using level 0 (no per-level scaling)
+  Coarse Dynamite [4061]: no SpellLevels entry, using level 0 (no per-level scaling)
+  Rough Copper Bomb [4064]: no SpellLevels entry, using level 0 (no per-level scaling)
+  Spore Burst [5100]: no SpellCategories entry, defense type set to none
+  Ez-Thro Dynamite [8331]: no SpellLevels entry, using level 0 (no per-level scaling)
+  Mithril Frag Bomb [12421]: no SpellLevels entry, using level 0 (no per-level scaling)
+  Solid Dynamite [12419]: no SpellLevels entry, using level 0 (no per-level scaling)
+  M73 Frag Grenade [13808]: no SpellLevels entry, using level 0 (no per-level scaling)
+  Goblin Mortar [13237]: no SpellLevels entry, using level 0 (no per-level scaling)
+  Attuned Dampener [16629]: no SpellLevels entry, using level 0 (no per-level scaling)
+  Attuned Dampener [16629]: no SpellCategories entry, defense type set to none
+  Mark of the Dragon Lord [17252]: no SpellLevels entry, using level 0 (no per-level scaling)
+  Mark of the Dragon Lord [17252]: no SpellCategories entry, defense type set to none
+  Hi-Explosive Bomb [12543]: no SpellLevels entry, using level 0 (no per-level scaling)
+  Dark Iron Bomb [19784]: no SpellLevels entry, using level 0 (no per-level scaling)
+  Thorium Grenade [19769]: no SpellLevels entry, using level 0 (no per-level scaling)
+  Razorlash Root [21955]: no SpellCategories entry, defense type set to none
+  Dense Dynamite [23063]: no SpellLevels entry, using level 0 (no per-level scaling)
+  Recombobulate [23064]: no SpellCategories entry, defense type set to none
+  Ez-Thro Dynamite [23000]: no SpellLevels entry, using level 0 (no per-level scaling)
+  Prayer Beads Blessing [24354]: no SpellCategories entry, defense type set to none
+  Shard of the Fallen Star [26789]: no SpellLevels entry, using level 0 (no per-level scaling)
+  Shard of the Fallen Star [26789]: no SpellCategories entry, defense type set to none
+  Dragonfire Potion [1252554]: no SpellLevels entry, using level 0 (no per-level scaling)
+  SAF-T Dynamite [1269155]: no SpellLevels entry, using level 0 (no per-level scaling)
+  SAF-T Copper Bomb [1269161]: no SpellLevels entry, using level 0 (no per-level scaling)
+  EZ-Thro Copper Bomb XL [1269192]: no SpellLevels entry, using level 0 (no per-level scaling)
+  SAF-T Bronze Bomb [1269216]: no SpellLevels entry, using level 0 (no per-level scaling)
+  SAF-T Jumbo Dynamite [1269264]: no SpellLevels entry, using level 0 (no per-level scaling)
+  EZ-Thro Bronze Mortar [1269268]: no SpellLevels entry, using level 0 (no per-level scaling)
+  EZ-Thro Grenade [1269270]: no SpellLevels entry, using level 0 (no per-level scaling)
+  SAF-T Bomb [1269272]: no SpellLevels entry, using level 0 (no per-level scaling)
+  Tru-Trigger Frag Bomb [1269278]: no SpellLevels entry, using level 0 (no per-level scaling)
+  SAF-T Clever Dynamite [1269282]: no SpellLevels entry, using level 0 (no per-level scaling)
+  EZ-Thro Thorium Grenade [1269330]: no SpellLevels entry, using level 0 (no per-level scaling)
+  EZ-Thro Dark Bomb [1269334]: no SpellLevels entry, using level 0 (no per-level scaling)
+  Serpentbane [1295039]: no SpellLevels entry, using level 0 (no per-level scaling)
+  Prototype Pathcarver [1295270]: no SpellLevels entry, using level 0 (no per-level scaling)
+  Explosive Runeshard [1298707]: no SpellLevels entry, using level 0 (no per-level scaling)
+  Eat [1302229]: no SpellLevels entry, using level 0 (no per-level scaling)
+  Eat [1302229]: no SpellCategories entry, defense type set to none
+  Mysticbloom Seed [1302874]: no SpellLevels entry, using level 0 (no per-level scaling)
+  Mysticbloom Seed [1302874]: no SpellCategories entry, defense type set to none
+  Satchel of Potions [1309685]: no SpellLevels entry, using level 0 (no per-level scaling)
+  Satchel of Potions [1309685]: no SpellCategories entry, defense type set to none
+  Renewing Flame [1314412]: no SpellLevels entry, using level 0 (no per-level scaling)
+  Renewing Flame [1314412]: no SpellCategories entry, defense type set to none
+  Behemoth Bone [1315849]: no SpellLevels entry, using level 0 (no per-level scaling)
+  Behemoth Bone [1315849]: no SpellCategories entry, defense type set to none
+  Holy Hand Grenade [1317268]: no SpellLevels entry, using level 0 (no per-level scaling)
 
