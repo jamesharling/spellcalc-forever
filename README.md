@@ -121,8 +121,9 @@ Nothing here has run on a live Forever client (the beta closed before this port 
     `npm run update-hotfixes-forever` and regenerate (see *Regenerating data*). Check a tier 0 set's bonus
     shows up (`/sc debug` prints "Add set bonus" when the pieces go on).
 11. Seal of Righteousness: the per-swing formula combines Forever's tooltip (its range runs from a fast one-hander
-    to a slow two-hander) with Classic Era's weapon speed formula. Compare a few hits in the combat log with the
-    action bar value, with a one-hander and a two-hander, and with spell power on gear.
+    to a slow two-hander) with Classic Era's weapon speed formula. The bar value matched combat log hits at low
+    level without spell power. Still to check: the spell power part (7.65% with a one-hander, 12% with a
+    two-hander) once gear has spell power, with both weapon types.
 
 ## Regenerating data
 
