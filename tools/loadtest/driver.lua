@@ -181,6 +181,36 @@ end
 
 local base = runAll("no talents")
 
+-- node run.js --classes DRUID --dump: what the addon shows for the highest rank of every spell, to read through
+-- a class' spell book. Level 60, 400 spell power, 800 attack power, no talents (see wow_env.lua).
+if __DUMP then
+    local top = {}
+    for _, id in ipairs(spellIds) do
+        local n = __SPELL_NAMES[id] or ("spell " .. id)
+        local cur = top[n]
+        if not cur or A.spellInfo[id].spellLevel > A.spellInfo[cur].spellLevel then top[n] = id end
+    end
+    local names = {}
+    for n in pairs(top) do names[#names + 1] = n end
+    table.sort(names)
+    for _, n in ipairs(names) do
+        local id = top[n]
+        local status, cs = checkSpell(id)
+        emit(("DUMP %s [%d] %s"):format(name(id), id, status == "ok" and "" or status))
+        if status == "ok" then
+            for i, e in ipairs(cs.effects) do
+                emit(("DUMP     effect %d: %s-%s avg %s, with crits %s, ticks %s, sp coef %s, ap coef %s, flags %s")
+                    :format(i, tostring(e.min), tostring(e.max), tostring(e.avg), tostring(e.avgCombined), tostring(e.ticks),
+                        tostring(e.effectiveSpCoef), tostring(e.effectiveApCoef), tostring(e.effectFlags)))
+            end
+            tooltipFor(id)
+            for _, line in ipairs(GameTooltip.__lines) do
+                emit("DUMP     | " .. line:gsub("|c%x%x%x%x%x%x%x%x", ""):gsub("|r", ""))
+            end
+        end
+    end
+end
+
 -- Paladin seals. Seal of Righteousness: the rank's base points / 100 * weapon speed * 0.85 with a one-hander or
 -- * 1.2 with a two-hander, plus 7.65% or 12% of spell power. Seal of Fury: its proc's base value plus 10% of spell
 -- power on every swing, whatever the weapon. Seal of Command: 70% of a weapon hit plus 29% of spell power. Improved
@@ -301,6 +331,84 @@ if __CLASS == "PALADIN" then
         end
     end
     if differ > 0 then emit(("FAIL %d spells differ after the seal checks: %s"):format(differ, table.concat(examples, ", "))) end
+end
+
+-- Channelled area spells (Hurricane, Blizzard, Rain of Fire): the cast spell only creates an area trigger on Forever;
+-- the generator takes the damage from the spell its tooltip names. One tick per period of the channel.
+do
+    local AREA_CHANNELS = {
+        DRUID = { id = 17402, name = "Hurricane", ticks = 10, base = 132 },
+        MAGE = { id = 10187, name = "Blizzard", ticks = 8, base = 146 },
+        WARLOCK = { id = 11678, name = "Rain of Fire", ticks = 4, base = 220 },
+    }
+    local want = AREA_CHANNELS[__CLASS]
+    if want then
+        local info = A.spellInfo[want.id]
+        local status, cs = checkSpell(want.id)
+        if not info or status ~= "ok" then
+            emit(("FAIL %s [%d] is not calculated: %s"):format(want.name, want.id, info and status or "no data"))
+        else
+            local data, e = info.effects[1], cs.effects[1]
+            local expected = data.valueBase + (math.min(60, info.maxLevel) - info.spellLevel) * (data.valuePerLevel or 0) + data.coef * 400
+            emit(("area channel: %s %.1f x %s ticks"):format(name(want.id), e.avg, tostring(e.ticks)))
+            if data.valueBase ~= want.base or e.ticks ~= want.ticks or math.abs(e.avg - expected) > 1e-6 or not info.isChannel then
+                emit(("FAIL %s: %s x %s ticks, expected %s x %d (base %d)"):format(want.name, tostring(e.avg), tostring(e.ticks), tostring(expected), want.ticks, want.base))
+            end
+        end
+    end
+end
+
+-- Druid. The stub reports 400 spell power for every school, physical included: feral abilities must not use it.
+-- Claw is (weapon + 115) * 140%, Ferocious Bite gets 3% of attack power per combo point (5 assumed), Lacerate adds
+-- 10% weapon damage per application already on the target (5 assumed) to its bleed, Swiftmend heals for all ticks
+-- of the highest Rejuvenation or Regrowth.
+if __CLASS == "DRUID" then
+    local function fx(id, n)
+        local status, cs = checkSpell(id)
+        if status ~= "ok" then return { }, status end
+        return cs.effects[n or 1] or { }, cs
+    end
+    local function near(a, b) return type(a) == "number" and math.abs(a - b) < 1e-4 end
+    local claw, swipe, maul, bite = fx(9850), fx(9908), fx(9881), fx(31018)
+    emit(("feral: Claw %s-%s, Swipe %s, Maul %s-%s, Ferocious Bite %s (%s of attack power)"):format(tostring(claw.min), tostring(claw.max),
+        tostring(swipe.avg), tostring(maul.min), tostring(maul.max), tostring(bite.avg), tostring(bite.effectiveApCoef)))
+    if not near(claw.min, (100 + 115) * 1.4) or not near(claw.max, (150 + 115) * 1.4) then emit("FAIL Claw rank 5 is not (weapon + 115) * 140%") end
+    if not near(swipe.avg, 83) then emit("FAIL Swipe rank 5 is not 83") end
+    if not near(maul.min, 100 + 128) or not near(maul.max, 150 + 128) then emit("FAIL Maul rank 7 is not weapon + 128") end
+    if not near(bite.avg, 102 + 5 * 181 + 0.03 * 5 * 900) then emit("FAIL Ferocious Bite rank 6 is not 102 + 181 and 3% of attack power per combo point") end
+    local withCoef, example = 0, nil
+    for _, id in ipairs(spellIds) do
+        local info = A.spellInfo[id]
+        if info.schoolMask == 1 then
+            for _, e in ipairs(info.effects) do
+                if (e.coef or 0) ~= 0 then withCoef, example = withCoef + 1, example or name(id) end
+            end
+        end
+    end
+    if withCoef > 0 then emit(("FAIL %d physical spell effects have a spell power coefficient, %s for one"):format(withCoef, example)) end
+
+    local hit, lacerate = fx(1235827, 1)
+    local bleed = fx(1235827, 2)
+    emit(("Lacerate: %s-%s weapon damage on 5 applications, bleed %s x %s"):format(tostring(hit.min), tostring(hit.max), tostring(bleed.avg), tostring(bleed.ticks)))
+    if not near(hit.min, 0.5 * 100) or not near(hit.max, 0.5 * 150) then emit("FAIL Lacerate rank 5 is not 50% weapon damage with 5 applications") end
+    if not near(bleed.avg, 15) or bleed.ticks ~= 5 or type(lacerate) ~= "table" or not bleed.auraStack then emit("FAIL Lacerate rank 5 bleed is not 15 x 5 with stacks") end
+    -- 95% to hit, 5% dodged; a bleed ignores armor
+    if not near(bleed.avgAfterMitigation, 15 * 5 * 0.90) then emit("FAIL Lacerate bleed is reduced by armor: " .. tostring(bleed.avgAfterMitigation)) end
+
+    local rejuv, regrowthHot, swiftmend = fx(25299), fx(9858, 2), fx(18562)
+    local rejuvTotal, regrowthTotal = (rejuv.avg or 0) * (rejuv.ticks or 0), (regrowthHot.avg or 0) * (regrowthHot.ticks or 0)
+    local parts = {}
+    for _, c in ipairs(swiftmend.consumed or {}) do parts[#parts + 1] = ("%s %.0f"):format(c.name, c.value) end
+    emit(("Swiftmend: %s-%s (%s)"):format(tostring(swiftmend.min), tostring(swiftmend.max), table.concat(parts, ", ")))
+    if rejuvTotal <= 0 or regrowthTotal <= 0 or #parts ~= 2
+        or not near(swiftmend.min, math.min(rejuvTotal, regrowthTotal)) or not near(swiftmend.max, math.max(rejuvTotal, regrowthTotal)) then
+        emit(("FAIL Swiftmend is %s-%s, Rejuvenation heals %s and Regrowth %s over their duration"):format(tostring(swiftmend.min), tostring(swiftmend.max), tostring(rejuvTotal), tostring(regrowthTotal)))
+    end
+    tooltipFor(18562)
+    local lines = table.concat(GameTooltip.__lines, " / ")
+    if not lines:find(__SPELL_NAMES[25299], 1, true) or not lines:find(__SPELL_NAMES[9858], 1, true) then emit("FAIL Swiftmend's tooltip doesn't name Rejuvenation and Regrowth") end
+
+    if A.spellInfo[22845] then emit("FAIL Frenzied Regeneration's empty heal [22845] is in the data") end
 end
 
 -- The options table must pass AceConfig validation (it is only validated when the panel opens in game)

@@ -294,6 +294,14 @@ export class SpellData
         return !!this.spellNames[spellId] && !!this.spellMiscs[spellId];
     }
 
+    /**
+     * IDs of all spells that have effects.
+     */
+    getAllSpellIds()
+    {
+        return Array.from(this.spellEffectsBySpellId.keys());
+    }
+
     getSpellsByName(spellName: string): number[]
     getSpellsByName(spellName: string, noerr: true): number[] | undefined
     getSpellsByName(spellName: string, noerr = false)

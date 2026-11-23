@@ -651,6 +651,92 @@ local function SchoolDamage(_, calcedSpell, effNum, spellInfo, spellName, spellI
     end
 end
 
+---Spells that consume one of the player's periodic heals on the target and heal for its full duration:
+---spell ID -> rank 1 of every periodic heal they can consume.
+---@type table<integer, integer[]>
+local HOT_CONSUMERS = {
+    [18562] = { 774, 8936 }, -- Swiftmend: Rejuvenation, Regrowth
+};
+
+---Ranks in the spell data by spell name, highest spell level first. Built on first use.
+---@type table<string, integer[]>|nil
+local ranksByName;
+
+---The highest rank of a spell the player knows; the highest rank of their level if the client can't tell.
+---@param rank1Id integer
+---@return integer|nil spellId
+---@return string|nil spellName
+local function HighestKnownRank(rank1Id)
+    local name = GetSpellInfo(rank1Id);
+    if not name then
+        return;
+    end
+
+    if not ranksByName then
+        ranksByName = {};
+        for id in pairs(_addon.spellInfo) do
+            local rankName = GetSpellInfo(id);
+            if rankName then
+                ranksByName[rankName] = ranksByName[rankName] or {};
+                table.insert(ranksByName[rankName], id);
+            end
+        end
+        for _, ids in pairs(ranksByName) do
+            table.sort(ids, function(a, b) return _addon.spellInfo[a].spellLevel > _addon.spellInfo[b].spellLevel end);
+        end
+    end
+
+    local ranks = ranksByName[name];
+    if not ranks then
+        return;
+    end
+
+    for _, id in ipairs(ranks) do
+        if (IsPlayerSpell and IsPlayerSpell(id)) or (IsSpellKnown and IsSpellKnown(id)) then
+            return id, name;
+        end
+    end
+
+    local level = UnitLevel("player");
+    for _, id in ipairs(ranks) do
+        if _addon.spellInfo[id].spellLevel <= level then
+            return id, name;
+        end
+    end
+end
+
+---What a spell from HOT_CONSUMERS heals for each periodic heal it can consume: every tick of the highest known
+---rank, as the addon calculates that spell.
+---@param calcedSpell CalcedSpell
+---@param rank1Ids integer[]
+---@return ConsumedEffectData[]
+local function ConsumedHots(calcedSpell, rank1Ids)
+    local consumed = {};
+    for _, rank1Id in ipairs(rank1Ids) do
+        local hotId, hotName = HighestKnownRank(rank1Id);
+        local hot = hotId and _addon:GetCalcedSpell(hotId);
+        if hot then
+            for _, hotEffect in ipairs(hot.effects) do
+                if hotEffect.ticks and bit.band(hotEffect.effectFlags, _addon.CONST.ADDON_EFFECT_FLAGS.HEAL) > 0 then
+                    table.insert(consumed, { name = hotName, value = hotEffect.avg * hotEffect.ticks });
+                    -- What changed the periodic heal counts for this spell too; many apply to both.
+                    for _, buffName in ipairs(hot.buffs) do
+                        local listed = false;
+                        for _, known in ipairs(calcedSpell.buffs) do
+                            listed = listed or known == buffName;
+                        end
+                        if not listed then
+                            table.insert(calcedSpell.buffs, buffName);
+                        end
+                    end
+                    break;
+                end
+            end
+        end
+    end
+    return consumed;
+end
+
 ---@param calcedSpell CalcedSpell
 ---@param effNum integer
 ---@param spellInfo SpellInfo
@@ -660,7 +746,25 @@ function HealEffect(_, calcedSpell, effNum, spellInfo, spellName, spellId)
     local calcedEffect = calcedSpell.effects[effNum];
     local effectData = spellInfo.effects[effNum];
 
-    FillBaseValues(calcedSpell, calcedEffect, spellId, spellInfo, spellName, effectData, calcedEffect.flatMod, calcedEffect.modBase, calcedEffect.effectivePower);
+    calcedEffect.consumed = nil;
+    if HOT_CONSUMERS[spellId] then
+        -- Swiftmend: the periodic heal's total with this spell's own modifiers, lowest to highest of the heals
+        -- it can consume.
+        local consumed = ConsumedHots(calcedSpell, HOT_CONSUMERS[spellId]);
+        local low, high = 0, 0;
+        for i, hot in ipairs(consumed) do
+            hot.value = (hot.value + calcedEffect.flatMod) * calcedEffect.modBase + calcedEffect.effectivePower;
+            low = i == 1 and hot.value or math.min(low, hot.value);
+            high = math.max(high, hot.value);
+        end
+        calcedEffect.min = low;
+        calcedEffect.max = high;
+        calcedEffect.avg = (low + high) * 0.5;
+        calcedEffect.avgCombined = calcedEffect.avg;
+        calcedEffect.consumed = consumed;
+    else
+        FillBaseValues(calcedSpell, calcedEffect, spellId, spellInfo, spellName, effectData, calcedEffect.flatMod, calcedEffect.modBase, calcedEffect.effectivePower);
+    end
     FillCritValues(calcedSpell, calcedEffect, spellId);
 
     calcedEffect.avgAfterMitigation = calcedEffect.avgCombined;

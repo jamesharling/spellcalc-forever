@@ -9,7 +9,8 @@
 // This catches load errors, missing data references, NaN/inf results and Lua errors in the
 // calculation and tooltip code. It cannot tell whether numbers match the live game.
 //
-// Usage: node run.js [--classes MAGE,PRIEST] [--verbose]
+// Usage: node run.js [--classes MAGE,PRIEST] [--verbose] [--dump]
+//   --dump prints what the addon shows for the highest rank of every spell (to read through a class).
 
 const fs = require("fs");
 const path = require("path");
@@ -25,6 +26,7 @@ const UNSUPPORTED = ["HUNTER", "ROGUE", "WARRIOR"];
 
 const args = process.argv.slice(2);
 const verbose = args.includes("--verbose");
+const dump = args.includes("--dump");
 const classArgIdx = args.indexOf("--classes");
 const classes = classArgIdx !== -1 ? args[classArgIdx + 1].toUpperCase().split(",") : [...SUPPORTED, ...UNSUPPORTED];
 
@@ -147,6 +149,7 @@ for (const cls of classes) {
     lua.lua_pushstring(L, to_luastring(cls)); lua.lua_setglobal(L, to_luastring("__CLASS"));
     lua.lua_pushstring(L, to_luastring(ADDON)); lua.lua_setglobal(L, to_luastring("__ADDON_NAME"));
     lua.lua_pushboolean(L, UNSUPPORTED.includes(cls)); lua.lua_setglobal(L, to_luastring("__UNSUPPORTED"));
+    lua.lua_pushboolean(L, dump); lua.lua_setglobal(L, to_luastring("__DUMP"));
     for (const [g, map] of [["__SPELL_NAMES", names.names], ["__SPELL_SUBTEXT", names.subtexts]]) {
         lua.lua_createtable(L, 0, map.size);
         for (const [id, text] of map) { lua.lua_pushinteger(L, id); lua.lua_pushstring(L, to_luastring(text)); lua.lua_rawset(L, -3); }
@@ -187,7 +190,7 @@ for (const cls of classes) {
     for (const e of runtimeErrors) { const key = e.split("\n")[0]; uniqueRuntime.set(key, { count: (uniqueRuntime.get(key)?.count || 0) + 1, full: e }); }
     for (const [key, v] of uniqueRuntime) console.log(`  RUNTIME ERROR (${v.count}x) ` + (verbose ? v.full : key));
     for (const p of errorPrints.slice(0, 10)) console.log("  ADDON ERROR PRINT " + p.replace(/\|c[0-9A-Fa-f]{8}|\|r/g, ""));
-    for (const l of lines) if (verbose || !l.startsWith("DETAIL")) console.log("  " + l);
+    for (const l of lines) if ((verbose || !l.startsWith("DETAIL")) && (dump || !l.startsWith("DUMP"))) console.log("  " + l);
 }
 
 const report = (title, map) => {

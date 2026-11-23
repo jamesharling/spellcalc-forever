@@ -243,6 +243,12 @@ export class ClassSpellLists
             // The addon has no handlers for spell dummy effects on Forever spells.
             if (effect.Effect == EFFECT_TYPE.SPELL_EFFECT_DUMMY) continue;
 
+            // A direct heal or damage effect without any value has nothing to calculate (the heal Frenzied
+            // Regeneration triggers: its amount comes from the rage spent).
+            if ((effect.Effect == EFFECT_TYPE.SPELL_EFFECT_HEAL || effect.Effect == EFFECT_TYPE.SPELL_EFFECT_SCHOOL_DAMAGE)
+                && !effect.EffectBasePointsF && !effect.Variance && !effect.EffectRealPointsPerLevel
+                && !effect.EffectBonusCoefficient && !effect.BonusCoefficientFromAP && !effect.EffectPointsPerResource) continue;
+
             validEffects.push(effect);
         }
 

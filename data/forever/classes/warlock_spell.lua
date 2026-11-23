@@ -536,6 +536,28 @@ _addon.spellInfo = {
             },
         }
     },
+    [5740] = { -- Rain of Fire (Rank 1)
+        spellLevel = 20,
+        maxLevel = 25,
+        duration = 8,
+        baseCost = 295,
+        school = 3,
+        schoolMask = 4,
+        isChannel = true,
+        defType = 1,
+        effects = {
+            [1] = {
+                effectType = 27,
+                auraType = 3,
+                tickPeriod = 2,
+                valueBase = 40,
+                valueRange = 0,
+                valuePerLevel = 0.30000001192,
+                coef = 0.08299999684,
+                coefAP = 0,
+            },
+        }
+    },
     [6217] = { -- Bane of Agony (Rank 3)
         spellLevel = 28,
         maxLevel = 0,
@@ -552,6 +574,28 @@ _addon.spellInfo = {
                 valueBase = 14,
                 valueRange = 0,
                 coef = 0.13300000131,
+                coefAP = 0,
+            },
+        }
+    },
+    [6219] = { -- Rain of Fire (Rank 2)
+        spellLevel = 34,
+        maxLevel = 39,
+        duration = 8,
+        baseCost = 605,
+        school = 3,
+        schoolMask = 4,
+        isChannel = true,
+        defType = 1,
+        effects = {
+            [1] = {
+                effectType = 27,
+                auraType = 3,
+                tickPeriod = 2,
+                valueBase = 91,
+                valueRange = 0,
+                valuePerLevel = 0.40000000596,
+                coef = 0.08299999684,
                 coefAP = 0,
             },
         }
@@ -968,6 +1012,50 @@ _addon.spellInfo = {
                 valueBase = 84,
                 valueRange = 0,
                 coef = 0.10000000149,
+                coefAP = 0,
+            },
+        }
+    },
+    [11677] = { -- Rain of Fire (Rank 3)
+        spellLevel = 46,
+        maxLevel = 51,
+        duration = 8,
+        baseCost = 885,
+        school = 3,
+        schoolMask = 4,
+        isChannel = true,
+        defType = 1,
+        effects = {
+            [1] = {
+                effectType = 27,
+                auraType = 3,
+                tickPeriod = 2,
+                valueBase = 149,
+                valueRange = 0,
+                valuePerLevel = 0.5,
+                coef = 0.08299999684,
+                coefAP = 0,
+            },
+        }
+    },
+    [11678] = { -- Rain of Fire (Rank 4)
+        spellLevel = 58,
+        maxLevel = 63,
+        duration = 8,
+        baseCost = 1185,
+        school = 3,
+        schoolMask = 4,
+        isChannel = true,
+        defType = 1,
+        effects = {
+            [1] = {
+                effectType = 27,
+                auraType = 3,
+                tickPeriod = 2,
+                valueBase = 220,
+                valueRange = 0,
+                valuePerLevel = 0.60000002384,
+                coef = 0.08299999684,
                 coefAP = 0,
             },
         }

@@ -62,6 +62,10 @@ local AuraStackData = {
 ---@field avgCrit number|nil
 ---@field avg number The average done with crits.
 
+---@class ConsumedEffectData What a spell does when it consumes one of the player's other effects (Swiftmend).
+---@field name string Name of the consumed spell.
+---@field value number
+
 ---@class CalcedEffect
 ---@field effectFlags AddonEffectFlags|0
 ---@field modBase number Modifier affecting the base value of the spell.
@@ -80,6 +84,7 @@ local AuraStackData = {
 ---@field avgCrit number Average critical value. 0 if effect doesn't crit.
 ---@field critExtraAvg number|nil If effect has added extra value on crit then this is the avg. done extra.
 ---@field hitExtra HitExtraData|nil If effect has added extra value on hit this holds the data.
+---@field consumed ConsumedEffectData[]|nil The value for each effect this one can consume (Swiftmend); min and max span them.
 ---@field avgCombined number Average combined value.
 ---@field avgAfterMitigation number Combined average done after all mitigation sources.
 ---@field perSec number Done per second. DPSC for non-channel duration spells.

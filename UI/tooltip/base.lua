@@ -144,6 +144,13 @@ local function AppendDirectEffect(calcedSpell, effectNum, isHeal, spellId)
         end
     end
 
+    if SpellCalc_settings.ttHit and calcedEffect.consumed then
+        -- Swiftmend: one line per periodic heal it can consume
+        for _, consumed in ipairs(calcedEffect.consumed) do
+            SCT:SingleLine(consumed.name, ("%d"):format(SCT:Round(consumed.value)));
+        end
+    end
+
     if SpellCalc_settings.ttCrit and calcedSpell.critChance > 0 and calcedEffect.minCrit > 0 then
         SCT:AppendMinMaxAvgLine(L["Critical"], calcedEffect.minCrit, calcedEffect.maxCrit, calcedEffect.avgCrit, nil, nil, SCT:CritStr(calcedSpell.critChance), true);
     end

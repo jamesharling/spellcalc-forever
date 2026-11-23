@@ -576,6 +576,9 @@ function buildRankInfo(spellId: number, effects: SpellEffect[]): RankInfo
     for (const effect of rankInfo.effects)
     {
         if (!effect) throw new Error("Effect list has a hole!");
+        // Physical abilities (Claw, Maul, Swipe, Ferocious Bite) carry the table's default coefficient of 1; they
+        // do not scale with spell power. No physical spell has another value.
+        if (spellMisc.SchoolMask === SCHOOL_MASK.PHYSICAL) effect.coef = 0;
         if (effect.effectType === EFFECT_TYPE.SPELL_EFFECT_WEAPON_DAMAGE
             && effect.weaponCoef === 0) throw new Error("Effect is SPELL_EFFECT_WEAPON_DAMAGE but no weapon coef is defined!");
     }

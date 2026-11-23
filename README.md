@@ -86,6 +86,14 @@ from upstream SpellCalc in more than the TOC:
   swing, whatever the weapon, and Judgement with it up is Judgement of Fury. Seal of Command adds its proc's
   29% spell power bonus to 70% of a weapon hit. Improved Seals applies to the Seal of Righteousness and Seal of
   Fury procs, which deal the damage.
+- **Druid.** Feral abilities don't add spell power: the client data carries a default coefficient of 1 on
+  every physical ability, which the generator drops. Ferocious Bite gets 3% of attack power per combo point and
+  Rip 1% per tick, as in Classic Era. Lacerate's bleed ignores armor, and its weapon damage (10% per
+  application already on the target) is shown for a full stack of 5, like the "Sustained 5 Stacks" numbers.
+  Swiftmend heals for every tick of the highest Rejuvenation or Regrowth you know; the tooltip shows both.
+  Frenzied Regeneration is not calculated, its heal depends on the rage spent.
+- **Channelled area spells** (Hurricane, Blizzard, Rain of Fire) only create an area trigger on Forever. The
+  generator takes their damage from the spell the tooltip names, one tick per period of the channel.
 - Settings open through the Settings API (`Settings.OpenToCategory`); Ace3 updated to r1386.
 
 ## Needs verification at launch
@@ -124,6 +132,10 @@ Nothing here has run on a live Forever client (the beta closed before this port 
     to a slow two-hander) with Classic Era's weapon speed formula. The bar value matched combat log hits at low
     level without spell power. Still to check: the spell power part (7.65% with a one-hander, 12% with a
     two-hander) once gear has spell power, with both weapon types.
+12. Druid: compare a feral ability's bar value with the combat log while wearing spell power gear (the addon
+    assumes spell power adds nothing). Ferocious Bite and Rip use Classic Era's attack power parts, 3% and 1%
+    per combo point; check both at 5 points. Check Lacerate's hit on a target with 5 applications, and
+    Swiftmend against the Rejuvenation it consumes.
 
 ## Regenerating data
 
@@ -218,7 +230,9 @@ npm test
   and follow every anchor, outline and shadow setting. It checks macro slots and Macro tooltips show the
   macro's current spell, including after the spell switches. For a paladin it checks the seals: Seal of
   Righteousness at level 1 and 60 with a one-handed and a two-handed weapon (bar value included), Seal of Fury,
-  Seal of Command, Improved Seals, and Judgement with Seal of Fury up. It validates the settings table with AceConfig,
+  Seal of Command, Improved Seals, and Judgement with Seal of Fury up. For a druid it checks feral abilities
+  ignore spell power, Ferocious Bite's attack power, Lacerate and Swiftmend; for druid, mage and warlock the
+  channelled area spell. It validates the settings table with AceConfig,
   and checks old saved
   settings migrate. Finally it equips the class's tier 0 set (hotfix-only items) and checks its set bonus
   applies, equips every item that has effects in the data, then unequips everything and checks the numbers
@@ -232,6 +246,9 @@ npm test
   and be re-read once a restriction state clears. Throughout, the addon's lookup tables raise an error when
   indexed with a secret value, as they do on the client. Lua errors,
   `NaN` or infinite results, min above max, and talents not read back fail the run.
+
+`node run.js --classes DRUID --dump` prints what the addon shows for the highest rank of every spell (values
+and tooltip lines), to read through a class's spell book.
 
 It catches load errors, broken data references and crashes in the calculation and tooltip code. The stub
 returns made-up stats, so it cannot tell whether numbers match the game. It also lists the globals the addon

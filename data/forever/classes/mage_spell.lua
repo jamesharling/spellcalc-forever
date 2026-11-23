@@ -9,6 +9,28 @@ end
 
 ---@type SpellInfoTable
 _addon.spellInfo = {
+    [10] = { -- Blizzard (Rank 1)
+        spellLevel = 20,
+        maxLevel = 25,
+        duration = 8,
+        baseCost = 320,
+        school = 5,
+        schoolMask = 16,
+        isChannel = true,
+        defType = 1,
+        effects = {
+            [1] = {
+                effectType = 27,
+                auraType = 3,
+                tickPeriod = 1,
+                valueBase = 24,
+                valueRange = 0,
+                valuePerLevel = 0.10000000149,
+                coef = 0.04199999943,
+                coefAP = 0,
+            },
+        }
+    },
     [116] = { -- Frostbolt (Rank 1)
         spellLevel = 4,
         maxLevel = 8,
@@ -493,6 +515,28 @@ _addon.spellInfo = {
             },
         }
     },
+    [6141] = { -- Blizzard (Rank 2)
+        spellLevel = 28,
+        maxLevel = 33,
+        duration = 8,
+        baseCost = 520,
+        school = 5,
+        schoolMask = 16,
+        isChannel = true,
+        defType = 1,
+        effects = {
+            [1] = {
+                effectType = 27,
+                auraType = 3,
+                tickPeriod = 1,
+                valueBase = 42,
+                valueRange = 0,
+                valuePerLevel = 0.20000000298,
+                coef = 0.04199999943,
+                coefAP = 0,
+            },
+        }
+    },
     [6143] = { -- Frost Ward (Rank 1)
         spellLevel = 22,
         maxLevel = 0,
@@ -891,6 +935,28 @@ _addon.spellInfo = {
                 valueRange = 52,
                 valuePerLevel = 1.29999995232,
                 coef = 0.15700000525,
+                coefAP = 0,
+            },
+        }
+    },
+    [8427] = { -- Blizzard (Rank 3)
+        spellLevel = 36,
+        maxLevel = 41,
+        duration = 8,
+        baseCost = 720,
+        school = 5,
+        schoolMask = 16,
+        isChannel = true,
+        defType = 1,
+        effects = {
+            [1] = {
+                effectType = 27,
+                auraType = 3,
+                tickPeriod = 1,
+                valueBase = 62,
+                valueRange = 0,
+                valuePerLevel = 0.20000000298,
+                coef = 0.04199999943,
                 coefAP = 0,
             },
         }
@@ -1384,6 +1450,72 @@ _addon.spellInfo = {
                 valueRange = 30,
                 valuePerLevel = 2.90000009537,
                 coef = 0.81400001049,
+                coefAP = 0,
+            },
+        }
+    },
+    [10185] = { -- Blizzard (Rank 4)
+        spellLevel = 44,
+        maxLevel = 49,
+        duration = 8,
+        baseCost = 935,
+        school = 5,
+        schoolMask = 16,
+        isChannel = true,
+        defType = 1,
+        effects = {
+            [1] = {
+                effectType = 27,
+                auraType = 3,
+                tickPeriod = 1,
+                valueBase = 87,
+                valueRange = 0,
+                valuePerLevel = 0.30000001192,
+                coef = 0.04199999943,
+                coefAP = 0,
+            },
+        }
+    },
+    [10186] = { -- Blizzard (Rank 5)
+        spellLevel = 52,
+        maxLevel = 57,
+        duration = 8,
+        baseCost = 1160,
+        school = 5,
+        schoolMask = 16,
+        isChannel = true,
+        defType = 1,
+        effects = {
+            [1] = {
+                effectType = 27,
+                auraType = 3,
+                tickPeriod = 1,
+                valueBase = 114,
+                valueRange = 0,
+                valuePerLevel = 0.30000001192,
+                coef = 0.04199999943,
+                coefAP = 0,
+            },
+        }
+    },
+    [10187] = { -- Blizzard (Rank 6)
+        spellLevel = 60,
+        maxLevel = 65,
+        duration = 8,
+        baseCost = 1400,
+        school = 5,
+        schoolMask = 16,
+        isChannel = true,
+        defType = 1,
+        effects = {
+            [1] = {
+                effectType = 27,
+                auraType = 3,
+                tickPeriod = 1,
+                valueBase = 146,
+                valueRange = 0,
+                valuePerLevel = 0.40000000596,
+                coef = 0.04199999943,
                 coefAP = 0,
             },
         }

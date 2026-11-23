@@ -1,6 +1,6 @@
 SpellCalc Forever data generation report
 Client build: wowf 1.60.1.71037
-Generated: 2026-11-21T18:50:25.708Z
+Generated: 2026-11-23T16:21:29.058Z
 
 Everything listed here was skipped or guessed by the generator and should be reviewed.
 
@@ -41,9 +41,7 @@ Everything listed here was skipped or guessed by the generator and should be rev
 
 == Spell level scaling (0)
 
-== Spell data: druid (2)
-  Frenzied Regeneration [22845]: no SpellLevels entry, using level 0 (no per-level scaling)
-  Frenzied Regeneration [22845]: no SpellCategories entry, defense type set to none
+== Spell data: druid (0)
 
 == Talents: druid (29)
   Bloom (1328621) effect 0 skipped: SPELL_AURA_DUMMY spell not handled! 1328621
@@ -237,7 +235,7 @@ Everything listed here was skipped or guessed by the generator and should be rev
   Elemental Focus (16164) uses a hand-written definition: CLEARCAST_CHANCE_DMG=100/pt
   Elemental Devastation (30160) effect 0 skipped: SPELL_AURA_DUMMY spell not handled! 30160
 
-== Item sets (535)
+== Item sets (536)
   Item set bonus spell 1301123 effect 0: Triggered spell needs some love: 1301124
   Item set bonus spell 1301123 effect 1: SPELL_AURA_DUMMY spell not handled! 1301123
   Item set bonus spell 1301123 effect 2: SPELL_AURA_DUMMY spell not handled! 1301123
@@ -735,6 +733,7 @@ Everything listed here was skipped or guessed by the generator and should be rev
   Item set 1792 (Black Dragon Mail): none of its items exist in Forever (no exported or hotfix detail row), skipped
   Item set 1793 (Devilsaur Armor): none of its items exist in Forever (no exported or hotfix detail row), skipped
   Item set 1795 (Zanzil's Concentration): none of its items exist in Forever (no exported or hotfix detail row), skipped
+  Item set 1801 (Eclipse of Stormrage): none of its items exist in Forever (no exported or hotfix detail row), skipped
   Item set 1802 (Bounty of Stormrage): none of its items exist in Forever (no exported or hotfix detail row), skipped
   Item set 1803 (Cunning of Stormrage): none of its items exist in Forever (no exported or hotfix detail row), skipped
   Item set 1809 (Merciful Judgement): none of its items exist in Forever (no exported or hotfix detail row), skipped

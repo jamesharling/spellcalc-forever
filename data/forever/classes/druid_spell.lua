@@ -82,7 +82,7 @@ _addon.spellInfo = {
                 effectType = 2,
                 valueBase = 36,
                 valueRange = 0,
-                coef = 1,
+                coef = 0,
                 coefAP = 0,
             },
         }
@@ -119,7 +119,7 @@ _addon.spellInfo = {
                 effectType = 2,
                 valueBase = 18,
                 valueRange = 0,
-                coef = 1,
+                coef = 0,
                 coefAP = 0,
             },
         }
@@ -136,7 +136,7 @@ _addon.spellInfo = {
                 effectType = 2,
                 valueBase = 25,
                 valueRange = 0,
-                coef = 1,
+                coef = 0,
                 coefAP = 0,
             },
         }
@@ -256,7 +256,7 @@ _addon.spellInfo = {
                 weaponCoef = 1.4,
                 valueBase = 27,
                 valueRange = 0,
-                coef = 1,
+                coef = 0,
                 coefAP = 0,
             },
         }
@@ -440,7 +440,7 @@ _addon.spellInfo = {
                 weaponCoef = 1.4,
                 valueBase = 39,
                 valueRange = 0,
-                coef = 1,
+                coef = 0,
                 coefAP = 0,
             },
         }
@@ -699,7 +699,7 @@ _addon.spellInfo = {
                 weaponCoef = 1.4,
                 valueBase = 57,
                 valueRange = 0,
-                coef = 1,
+                coef = 0,
                 coefAP = 0,
             },
         }
@@ -718,7 +718,7 @@ _addon.spellInfo = {
                 weaponCoef = 2,
                 valueBase = 22,
                 valueRange = 0,
-                coef = 1,
+                coef = 0,
                 coefAP = 0,
                 mechanic = 15,
             },
@@ -811,7 +811,7 @@ _addon.spellInfo = {
                 weaponCoef = 4.35,
                 valueBase = 42,
                 valueRange = 0,
-                coef = 1,
+                coef = 0,
                 coefAP = 0,
             },
         }
@@ -831,7 +831,7 @@ _addon.spellInfo = {
                 weaponCoef = 4.35,
                 valueBase = 62,
                 valueRange = 0,
-                coef = 1,
+                coef = 0,
                 coefAP = 0,
             },
         }
@@ -850,7 +850,7 @@ _addon.spellInfo = {
                 weaponCoef = 2,
                 valueBase = 32,
                 valueRange = 0,
-                coef = 1,
+                coef = 0,
                 coefAP = 0,
                 mechanic = 15,
             },
@@ -870,7 +870,7 @@ _addon.spellInfo = {
                 weaponCoef = 1,
                 valueBase = 18,
                 valueRange = 0,
-                coef = 1,
+                coef = 0,
                 coefAP = 0,
                 mechanic = 15,
             },
@@ -890,7 +890,7 @@ _addon.spellInfo = {
                 weaponCoef = 1,
                 valueBase = 27,
                 valueRange = 0,
-                coef = 1,
+                coef = 0,
                 coefAP = 0,
                 mechanic = 15,
             },
@@ -910,7 +910,7 @@ _addon.spellInfo = {
                 weaponCoef = 1,
                 valueBase = 37,
                 valueRange = 0,
-                coef = 1,
+                coef = 0,
                 coefAP = 0,
                 mechanic = 15,
             },
@@ -1417,7 +1417,7 @@ _addon.spellInfo = {
                 weaponCoef = 1,
                 valueBase = 49,
                 valueRange = 0,
-                coef = 1,
+                coef = 0,
                 coefAP = 0,
                 mechanic = 15,
             },
@@ -1437,7 +1437,7 @@ _addon.spellInfo = {
                 weaponCoef = 2,
                 valueBase = 44,
                 valueRange = 0,
-                coef = 1,
+                coef = 0,
                 coefAP = 0,
                 mechanic = 15,
             },
@@ -1544,7 +1544,7 @@ _addon.spellInfo = {
                 weaponCoef = 1,
                 valueBase = 71,
                 valueRange = 0,
-                coef = 1,
+                coef = 0,
                 coefAP = 0,
                 mechanic = 15,
             },
@@ -1613,7 +1613,7 @@ _addon.spellInfo = {
                 effectType = 2,
                 valueBase = 60,
                 valueRange = 0,
-                coef = 1,
+                coef = 0,
                 coefAP = 0,
             },
         }
@@ -1751,7 +1751,7 @@ _addon.spellInfo = {
                 weaponCoef = 2,
                 valueBase = 64,
                 valueRange = 0,
-                coef = 1,
+                coef = 0,
                 coefAP = 0,
                 mechanic = 15,
             },
@@ -1771,7 +1771,7 @@ _addon.spellInfo = {
                 weaponCoef = 2,
                 valueBase = 80,
                 valueRange = 0,
-                coef = 1,
+                coef = 0,
                 coefAP = 0,
                 mechanic = 15,
             },
@@ -1935,7 +1935,7 @@ _addon.spellInfo = {
                 weaponCoef = 1.4,
                 valueBase = 88,
                 valueRange = 0,
-                coef = 1,
+                coef = 0,
                 coefAP = 0,
             },
         }
@@ -1954,7 +1954,7 @@ _addon.spellInfo = {
                 weaponCoef = 1.4,
                 valueBase = 115,
                 valueRange = 0,
-                coef = 1,
+                coef = 0,
                 coefAP = 0,
             },
         }
@@ -2142,7 +2142,7 @@ _addon.spellInfo = {
                 weaponCoef = 4.35,
                 valueBase = 78,
                 valueRange = 0,
-                coef = 1,
+                coef = 0,
                 coefAP = 0,
             },
         }
@@ -2162,7 +2162,7 @@ _addon.spellInfo = {
                 weaponCoef = 4.35,
                 valueBase = 98,
                 valueRange = 0,
-                coef = 1,
+                coef = 0,
                 coefAP = 0,
             },
         }
@@ -2217,7 +2217,7 @@ _addon.spellInfo = {
                 weaponCoef = 1,
                 valueBase = 101,
                 valueRange = 0,
-                coef = 1,
+                coef = 0,
                 coefAP = 0,
                 mechanic = 15,
             },
@@ -2237,7 +2237,7 @@ _addon.spellInfo = {
                 weaponCoef = 1,
                 valueBase = 128,
                 valueRange = 0,
-                coef = 1,
+                coef = 0,
                 coefAP = 0,
                 mechanic = 15,
             },
@@ -2366,7 +2366,7 @@ _addon.spellInfo = {
                 effectType = 2,
                 valueBase = 83,
                 valueRange = 0,
-                coef = 1,
+                coef = 0,
                 coefAP = 0,
             },
         }
@@ -2408,6 +2408,72 @@ _addon.spellInfo = {
             },
         }
     },
+    [16914] = { -- Hurricane (Rank 1)
+        spellLevel = 40,
+        maxLevel = 46,
+        duration = 10,
+        baseCost = 880,
+        school = 4,
+        schoolMask = 8,
+        isChannel = true,
+        defType = 1,
+        effects = {
+            [1] = {
+                effectType = 27,
+                auraType = 3,
+                tickPeriod = 1,
+                valueBase = 68,
+                valueRange = 0,
+                valuePerLevel = 0.20000000298,
+                coef = 0.02999999933,
+                coefAP = 0,
+            },
+        }
+    },
+    [17401] = { -- Hurricane (Rank 2)
+        spellLevel = 50,
+        maxLevel = 56,
+        duration = 10,
+        baseCost = 1180,
+        school = 4,
+        schoolMask = 8,
+        isChannel = true,
+        defType = 1,
+        effects = {
+            [1] = {
+                effectType = 27,
+                auraType = 3,
+                tickPeriod = 1,
+                valueBase = 98,
+                valueRange = 0,
+                valuePerLevel = 0.20000000298,
+                coef = 0.02999999933,
+                coefAP = 0,
+            },
+        }
+    },
+    [17402] = { -- Hurricane (Rank 3)
+        spellLevel = 60,
+        maxLevel = 66,
+        duration = 10,
+        baseCost = 1495,
+        school = 4,
+        schoolMask = 8,
+        isChannel = true,
+        defType = 1,
+        effects = {
+            [1] = {
+                effectType = 27,
+                auraType = 3,
+                tickPeriod = 1,
+                valueBase = 132,
+                valueRange = 0,
+                valuePerLevel = 0.30000001192,
+                coef = 0.02999999933,
+                coefAP = 0,
+            },
+        }
+    },
     [18562] = { -- Swiftmend
         spellLevel = 1,
         maxLevel = 0,
@@ -2439,8 +2505,8 @@ _addon.spellInfo = {
                 valueBase = 17,
                 valueRange = 20,
                 perResouce = 45,
-                coef = 1,
-                coefAP = 0,
+                coef = 0,
+                coefAP = 0.03,
             },
         }
     },
@@ -2458,8 +2524,8 @@ _addon.spellInfo = {
                 valueBase = 25,
                 valueRange = 30,
                 perResouce = 74,
-                coef = 1,
-                coefAP = 0,
+                coef = 0,
+                coefAP = 0.03,
             },
         }
     },
@@ -2477,8 +2543,8 @@ _addon.spellInfo = {
                 valueBase = 37,
                 valueRange = 50,
                 perResouce = 115,
-                coef = 1,
-                coefAP = 0,
+                coef = 0,
+                coefAP = 0.03,
             },
         }
     },
@@ -2496,25 +2562,8 @@ _addon.spellInfo = {
                 valueBase = 56,
                 valueRange = 62,
                 perResouce = 160,
-                coef = 1,
-                coefAP = 0,
-            },
-        }
-    },
-    [22845] = { -- Frenzied Regeneration
-        spellLevel = 0,
-        maxLevel = 0,
-        school = 1,
-        schoolMask = 1,
-        defType = 0,
-        noCrit = true,
-        effects = {
-            [1] = {
-                effectType = 10,
-                valueBase = 0,
-                valueRange = 0,
                 coef = 0,
-                coefAP = 0,
+                coefAP = 0.03,
             },
         }
     },
@@ -2687,8 +2736,8 @@ _addon.spellInfo = {
                 valueBase = 65,
                 valueRange = 74,
                 perResouce = 181,
-                coef = 1,
-                coefAP = 0,
+                coef = 0,
+                coefAP = 0.03,
             },
         }
     },
@@ -2705,7 +2754,7 @@ _addon.spellInfo = {
                 weaponCoef = 1,
                 valueBase = 42,
                 valueRange = 0,
-                coef = 1,
+                coef = 0,
                 coefAP = 0,
             },
         }
@@ -2741,6 +2790,14 @@ _addon.spellInfo = {
         defType = 2,
         effects = {
             [1] = {
+                effectType = 31,
+                weaponCoef = 0.5,
+                valueBase = 0,
+                valueRange = 0,
+                coef = 0,
+                coefAP = 0,
+            },
+            [2] = {
                 effectType = 6,
                 auraType = 3,
                 tickPeriod = 3,
@@ -2749,6 +2806,7 @@ _addon.spellInfo = {
                 coef = 0,
                 coefAP = 0,
                 auraStacks = 5,
+                mechanic = 15,
             },
         }
     },
@@ -2762,6 +2820,14 @@ _addon.spellInfo = {
         defType = 2,
         effects = {
             [1] = {
+                effectType = 31,
+                weaponCoef = 0.5,
+                valueBase = 0,
+                valueRange = 0,
+                coef = 0,
+                coefAP = 0,
+            },
+            [2] = {
                 effectType = 6,
                 auraType = 3,
                 tickPeriod = 3,
@@ -2770,6 +2836,7 @@ _addon.spellInfo = {
                 coef = 0,
                 coefAP = 0,
                 auraStacks = 5,
+                mechanic = 15,
             },
         }
     },
@@ -2783,6 +2850,14 @@ _addon.spellInfo = {
         defType = 2,
         effects = {
             [1] = {
+                effectType = 31,
+                weaponCoef = 0.5,
+                valueBase = 0,
+                valueRange = 0,
+                coef = 0,
+                coefAP = 0,
+            },
+            [2] = {
                 effectType = 6,
                 auraType = 3,
                 tickPeriod = 3,
@@ -2791,6 +2866,7 @@ _addon.spellInfo = {
                 coef = 0,
                 coefAP = 0,
                 auraStacks = 5,
+                mechanic = 15,
             },
         }
     },
@@ -2807,7 +2883,7 @@ _addon.spellInfo = {
                 weaponCoef = 1,
                 valueBase = 62,
                 valueRange = 0,
-                coef = 1,
+                coef = 0,
                 coefAP = 0,
             },
         }
@@ -2825,7 +2901,7 @@ _addon.spellInfo = {
                 weaponCoef = 1,
                 valueBase = 77,
                 valueRange = 0,
-                coef = 1,
+                coef = 0,
                 coefAP = 0,
             },
         }
@@ -2882,6 +2958,14 @@ _addon.spellInfo = {
         defType = 2,
         effects = {
             [1] = {
+                effectType = 31,
+                weaponCoef = 0.5,
+                valueBase = 0,
+                valueRange = 0,
+                coef = 0,
+                coefAP = 0,
+            },
+            [2] = {
                 effectType = 6,
                 auraType = 3,
                 tickPeriod = 3,
@@ -2890,6 +2974,7 @@ _addon.spellInfo = {
                 coef = 0,
                 coefAP = 0,
                 auraStacks = 5,
+                mechanic = 15,
             },
         }
     },
@@ -2903,6 +2988,14 @@ _addon.spellInfo = {
         defType = 2,
         effects = {
             [1] = {
+                effectType = 31,
+                weaponCoef = 0.5,
+                valueBase = 0,
+                valueRange = 0,
+                coef = 0,
+                coefAP = 0,
+            },
+            [2] = {
                 effectType = 6,
                 auraType = 3,
                 tickPeriod = 3,
@@ -2911,6 +3004,7 @@ _addon.spellInfo = {
                 coef = 0,
                 coefAP = 0,
                 auraStacks = 5,
+                mechanic = 15,
             },
         }
     },
@@ -2928,8 +3022,8 @@ _addon.spellInfo = {
                 valueBase = 11,
                 valueRange = 12,
                 perResouce = 30,
-                coef = 1,
-                coefAP = 0,
+                coef = 0,
+                coefAP = 0.03,
             },
         }
     },

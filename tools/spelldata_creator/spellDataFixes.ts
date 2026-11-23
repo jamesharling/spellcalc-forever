@@ -315,6 +315,34 @@ function druidFixes(sd: SpellData)
         effects[0].EffectMechanic = SpellMechanic.BLEED;
     }
 
+    // Lacerate: a bleed (the effect does not carry the mechanic), "plus $s2% weapon damage per existing
+    // application of Lacerate on the target" as a dummy effect. Make that a weapon damage effect for a target that
+    // already has the full stack, which is what the bleed's "Sustained N Stacks" numbers assume as well.
+    const lacerates = sd.getSpellsByName("Lacerate", true) ?? [];
+    for (const spellId of lacerates)
+    {
+        if (sd.getSpellClassOption(spellId, true)?.SpellClassSet != 7) continue;
+        const effects = sd.getSpellEffects(spellId, true);
+        if (!effects) continue;
+        const bleed = effects.find(e => e.EffectIndex === 0 && e.EffectAura === AURA_TYPE.SPELL_AURA_PERIODIC_DAMAGE);
+        const perStack = effects.find(e => e.EffectIndex === 1 && e.Effect === EFFECT_TYPE.SPELL_EFFECT_DUMMY);
+        const stacks = sd.getSpellAuraOptions(spellId)?.CumulativeAura ?? 0;
+        if (!bleed) continue;
+        bleed.EffectMechanic = SpellMechanic.BLEED;
+        if (!perStack || stacks < 1)
+        {
+            report(`Lacerate ${spellId}: no weapon damage per application effect or no stack limit, bleed only`);
+            continue;
+        }
+        perStack.Effect = EFFECT_TYPE.SPELL_EFFECT_WEAPON_PERCENT_DAMAGE;
+        perStack.EffectBasePointsF = perStack.EffectBasePointsF * stacks;
+        perStack.EffectBonusCoefficient = 0;
+        // The addon expects the direct effect in slot 1.
+        perStack.EffectIndex = 0;
+        bleed.EffectIndex = 1;
+        effects.sort((a, b) => a.EffectIndex - b.EffectIndex);
+    }
+
     const mauls = sd.getSpellsByName("Maul", true) ?? [];
     const shreds = sd.getSpellsByName("Shred", true) ?? [];
     const mangleIncreasedSpells = [...mauls, ...shreds];
@@ -494,9 +522,55 @@ function coefFixes(sd: SpellData)
     }
 }
 
+/**
+ * Channelled area spells (Hurricane, Blizzard, Rain of Fire). On Forever the spell that is cast only creates an
+ * area trigger and carries a periodic dummy aura for the channel; the damage is a separate spell that nothing but
+ * the tooltip names ("causing $1278759s1 Nature damage to enemies every $t3 sec"). Rewrite the cast spell's dummy
+ * effect to the periodic area damage it stands for: the damage spell's values, ticking at the dummy aura's period.
+ */
+function areaChannelFix(sd: SpellData)
+{
+    const SPELL_EFFECT_CREATE_AREATRIGGER = 179;
+    let fixed = 0;
+
+    for (const spellId of sd.getAllSpellIds())
+    {
+        const effects = sd.getSpellEffects(spellId, true);
+        const misc = sd.getSpellMisc(spellId, true);
+        const spell = sd.getSpell(spellId, true);
+        const name = sd.getSpellName(spellId, true);
+        if (!effects || !misc || !spell || !name) continue;
+        if ((misc.Attributes_1 & SPELL_ATTR1.SPELL_ATTR_EX_CHANNELED_ANY) === 0) continue;
+
+        const dummy = effects.find(e => e.EffectIndex === 0 && e.Effect === EFFECT_TYPE.SPELL_EFFECT_DUMMY);
+        const channel = effects.find(e => e.Effect === EFFECT_TYPE.SPELL_EFFECT_APPLY_AURA
+            && e.EffectAura === AURA_TYPE.PERIODIC_DUMMY && e.EffectAuraPeriod > 0);
+        if (!dummy || !channel || !effects.some(e => e.Effect === SPELL_EFFECT_CREATE_AREATRIGGER)) continue;
+
+        const match = spell.Description_lang.match(/\$(\d+)[sm]1/);
+        if (!match) continue;
+        const damageId = parseInt(match[1]);
+        const damage = sd.getSpellEffects(damageId, true)?.find(e => e.EffectIndex === 0 && e.Effect === EFFECT_TYPE.SPELL_EFFECT_SCHOOL_DAMAGE);
+        if (!damage || sd.getSpellName(damageId, true)?.Name_lang !== name.Name_lang) continue;
+
+        dummy.Effect = EFFECT_TYPE.SPELL_EFFECT_PERSISTENT_AREA_AURA;
+        dummy.EffectAura = AURA_TYPE.SPELL_AURA_PERIODIC_DAMAGE;
+        dummy.EffectAuraPeriod = channel.EffectAuraPeriod;
+        dummy.EffectBasePointsF = damage.EffectBasePointsF;
+        dummy.Variance = damage.Variance;
+        dummy.EffectRealPointsPerLevel = damage.EffectRealPointsPerLevel;
+        dummy.EffectBonusCoefficient = damage.EffectBonusCoefficient;
+        dummy.BonusCoefficientFromAP = damage.BonusCoefficientFromAP;
+        fixed++;
+    }
+
+    console.log(`Channelled area spells: damage taken from the spell named in the tooltip for ${fixed} spells`);
+}
+
 export function fixSpellEffects(sd: SpellData)
 {
     reportSection("Spell data fixes");
+    areaChannelFix(sd);
     paladinFix(sd);
     priestFix(sd);
     druidFixes(sd);

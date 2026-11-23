@@ -2624,6 +2624,18 @@ _addon.aurasPlayer = {
             value = 100,
         },
     },
+    [467077] = { -- S03 - Item - T2 - Druid - Balance 2P Bonus
+        {
+            type = _addon.CONST.EFFECT_TYPE.SPELLMOD_PCT_DAMAGE_HEALING,
+            affectSpell = {4194304, 8388608, 4194304, 0},
+            value = 25,
+        },
+        {
+            type = _addon.CONST.EFFECT_TYPE.SPELLMOD_PCT_OVER_TIME,
+            affectSpell = {4194304, 8388608, 4194304, 0},
+            value = 25,
+        },
+    },
     [467088] = { -- Astral Power
         {
             type = _addon.CONST.EFFECT_TYPE.SPELLMOD_PCT_DAMAGE_HEALING,
