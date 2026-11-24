@@ -66,6 +66,11 @@ _addon.talentDataRaw = {
         maxRanks = 2,
         effects = {
             {
+                type = _addon.CONST.EFFECT_TYPE.SPELLMOD_PCT_DAMAGE_HEALING,
+                affectSpell = {0, 262144, 0, 0},
+                perPoint = 10,
+            },
+            {
                 type = _addon.CONST.EFFECT_TYPE.SPELLMOD_FLAT_DURATION,
                 affectSpell = {4096, 0, 0, 0},
                 perPoint = 10000,
@@ -81,6 +86,18 @@ _addon.talentDataRaw = {
                 type = _addon.CONST.EFFECT_TYPE.SPELLMOD_FLAT_CRIT_CHANCE,
                 affectSpell = {3, 0, 0, 0},
                 perPoint = 5,
+            },
+        }
+    },
+    { -- Lightning Overload (node 104759, 3 ranks)
+        name = "Lightning Overload",
+        spellId = 408438,
+        maxRanks = 3,
+        effects = {
+            {
+                type = _addon.CONST.EFFECT_TYPE.SHAMAN_LIGHTNING_OVERLOAD,
+                affectSpell = {3, 0, 0, 0},
+                perPoint = 10,
             },
         }
     },
@@ -149,6 +166,18 @@ _addon.talentDataRaw = {
                 type = _addon.CONST.EFFECT_TYPE.SPELLMOD_FLAT_CRIT_CHANCE,
                 affectSpell = {1472, 0, 16, 0},
                 perPoint = 1,
+            },
+        }
+    },
+    { -- Restorative Totems (node 104730, 5 ranks)
+        name = "Restorative Totems",
+        spellId = 16187,
+        maxRanks = 5,
+        effects = {
+            {
+                type = _addon.CONST.EFFECT_TYPE.SPELLMOD_PCT_OVER_TIME,
+                affectSpell = {8192, 0, 0, 0},
+                perPoint = 10,
             },
         }
     },

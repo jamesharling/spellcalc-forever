@@ -954,6 +954,118 @@ if __CLASS == "PRIEST" then
     if differ > 0 then emit(("FAIL %d spells differ after the priest checks: %s"):format(differ, table.concat(examples, ", "))) end
 end
 
+-- Shaman. Healing Stream Totem's heal is its totem aura's own value on Forever (the summon effect's base points
+-- are the totem's health), and Restorative Totems modifies that aura; Fire Nova's damage is a spell only its
+-- tooltip names; Lightning Overload adds the expected half-damage copy to Lightning Bolt and Chain Lightning;
+-- the shaman's Riptide on the heal target (assumed in the settings) adds 25% to Chain Heal; the Improved
+-- Stormstrike buff lets half the mana regeneration continue while casting.
+if __CLASS == "SHAMAN" then
+    -- A copy of the numbers: the addon recalculates a spell in place, so the tables themselves change later.
+    local function fx(id, n)
+        local status, cs = checkSpell(id)
+        if status ~= "ok" then return { } end
+        local e = cs.effects[n or 1] or { }
+        return { avg = e.avg, after = e.avgAfterMitigation, ticks = e.ticks, crit = cs.critChance, hit = cs.hitChance, triggered = e.triggeredSpell }
+    end
+    local function near(a, b) return type(a) == "number" and type(b) == "number" and math.abs(a - b) < 1e-4 end
+    local function baseOf(id, n)
+        local info = A.spellInfo[id]
+        local e = info and info.effects[n or 1]
+        if not e then return nil, { } end
+        return e.valueBase + e.valueRange / 2 + (math.min(60, info.maxLevel) - info.spellLevel) * (e.valuePerLevel or 0), e
+    end
+    local function talents(ranks)
+        for i = #__TALENT_TREE, 1, -1 do
+            __TALENT_RANKS[__TALENT_TREE[i].spellId] = nil
+            __TALENT_TREE[i] = nil
+        end
+        for spellId, rank in pairs(ranks) do
+            __TALENT_TREE[#__TALENT_TREE + 1] = { spellId = spellId, maxRanks = rank }
+            __TALENT_RANKS[spellId] = rank
+        end
+        __FireEvent("TRAIT_CONFIG_UPDATED", 4001)
+        settle()
+    end
+    local function assume(spellId, stacks)
+        SpellCalc_settings.assumedTargetAuras[spellId] = stacks
+        A:UpdateAssumedTargetAuras()
+        settle()
+    end
+    local STREAM, NOVA, NOVA_DAMAGE, BOLT, CHAIN_LIGHTNING, EARTH_SHOCK, CHAIN_HEAL, HEALING_WAVE = 10463, 408345, 408428, 15208, 10605, 10414, 10623, 25357
+    local RESTORATIVE, TRIAL, OVERLOAD, RIPTIDE, STORMSTRIKE_REGEN = 16187, 16086, 408438, 1239243, 1238931
+
+    local stream, wave = fx(STREAM), fx(HEALING_WAVE)
+    local streamBase, streamData = baseOf(STREAM)
+    talents({ [RESTORATIVE] = 5 })
+    local streamTotems, waveTotems = fx(STREAM), fx(HEALING_WAVE)
+    talents({})
+    emit(("shaman: Healing Stream Totem %s x %s, %s with Restorative Totems 5/5"):format(tostring(stream.avg), tostring(stream.ticks), tostring(streamTotems.avg)))
+    if streamBase ~= 11 or (streamData.coef or 0) <= 0 or stream.ticks ~= 150 or not near(stream.avg, 11 + streamData.coef * 700) then
+        emit("FAIL Healing Stream Totem rank 5 doesn't heal for 11 plus spell power every 2 s")
+    end
+    if not near(streamTotems.avg, (stream.avg or 0) * 1.5) or not near(waveTotems.avg, wave.avg) then
+        emit("FAIL Restorative Totems 5/5 doesn't add 50% to Healing Stream Totem only")
+    end
+
+    local nova, blast = fx(NOVA), fx(NOVA_DAMAGE)
+    local blastBase, blastData = baseOf(NOVA_DAMAGE)
+    talents({ [TRIAL] = 2 })
+    local blastTrial = fx(NOVA_DAMAGE)
+    talents({})
+    emit(("shaman: Fire Nova %s, %s with Trial by Fire 2/2"):format(tostring(blast.avg), tostring(blastTrial.avg)))
+    if nova.triggered ~= NOVA_DAMAGE or not blastBase or (blastData.coef or 0) <= 0 or not near(blast.avg, blastBase + blastData.coef * 400) then
+        emit("FAIL Fire Nova doesn't show the damage named in its tooltip")
+    end
+    if not near(blastTrial.avg, (blast.avg or 0) * 1.2) then emit("FAIL Trial by Fire 2/2 doesn't add 20% to Fire Nova") end
+
+    -- Lightning Overload 3/3: a 30% chance of a second spell for half the damage, which can miss
+    local bolt, chain, shock = fx(BOLT), fx(CHAIN_LIGHTNING), fx(EARTH_SHOCK)
+    talents({ [OVERLOAD] = 3 })
+    local boltOverload, chainOverload, shockOverload = fx(BOLT), fx(CHAIN_LIGHTNING), fx(EARTH_SHOCK)
+    talents({})
+    emit(("shaman: Lightning Bolt %s per cast, %s with Lightning Overload 3/3"):format(tostring(bolt.after), tostring(boltOverload.after)))
+    if not bolt.after or not near(boltOverload.after, bolt.after * (1 + 0.5 * 0.3 * bolt.hit / 100))
+        or not near(chainOverload.after, (chain.after or 0) * (1 + 0.5 * 0.3 * chain.hit / 100)) or not near(boltOverload.avg, bolt.avg) then
+        emit("FAIL Lightning Overload 3/3 doesn't add 30% of half a Lightning Bolt and Chain Lightning")
+    end
+    if not near(shockOverload.after, shock.after) then emit("FAIL Lightning Overload changes Earth Shock") end
+
+    -- The shaman's Riptide on the heal target
+    local chainHeal = fx(CHAIN_HEAL)
+    assume(RIPTIDE, 1)
+    local chainHealRiptide, waveRiptide = fx(CHAIN_HEAL), fx(HEALING_WAVE)
+    assume(RIPTIDE, nil)
+    emit(("shaman: Chain Heal %s, %s on a target with the shaman's Riptide"):format(tostring(chainHeal.avg), tostring(chainHealRiptide.avg)))
+    if not chainHeal.avg or not near(chainHealRiptide.avg, chainHeal.avg * 1.25) or not near(waveRiptide.avg, wave.avg) then
+        emit("FAIL Riptide on the target doesn't add 25% to Chain Heal only")
+    end
+
+    -- Improved Stormstrike's buff: half the mana regeneration while casting
+    local castingBefore = A.stats.manaRegCasting
+    __AURAS.player = { { name = __SPELL_NAMES[STORMSTRIKE_REGEN], spellId = STORMSTRIKE_REGEN, applications = 1, sourceUnit = "player",
+        auraInstanceID = 903, duration = 15, expirationTime = 0, isHelpful = true } }
+    __FireEvent("UNIT_AURA", "player", { isFullUpdate = true })
+    settle()
+    local castingBuff, regen = A.stats.manaRegCasting, A.stats.manaRegBase
+    __AURAS.player = {}
+    __FireEvent("UNIT_AURA", "player", { isFullUpdate = true })
+    settle()
+    emit(("shaman: mana regeneration while casting %s, %s with the Improved Stormstrike buff (%s when not casting)"):format(
+        tostring(castingBefore), tostring(castingBuff), tostring(regen)))
+    if regen <= 0 or not near(castingBuff, castingBefore + regen * 0.5) or not near(A.stats.manaRegCasting, castingBefore) then
+        emit("FAIL the Improved Stormstrike buff doesn't let 50% of the mana regeneration continue while casting")
+    end
+
+    local differ, examples = 0, {}
+    for id, v in pairs(runAll("shaman checked")) do
+        if base[id] and math.abs(base[id] - v) > 1e-6 then
+            differ = differ + 1
+            if #examples < 4 then examples[#examples + 1] = ("%s %.2f -> %.2f"):format(name(id), base[id], v) end
+        end
+    end
+    if differ > 0 then emit(("FAIL %d spells differ after the shaman checks: %s"):format(differ, table.concat(examples, ", "))) end
+end
+
 -- The options table must pass AceConfig validation (it is only validated when the panel opens in game)
 do
     local registry = LibStub("AceConfigRegistry-3.0")

@@ -425,7 +425,7 @@ _addon.spellInfo = {
                 tickPeriod = 2,
                 valueBase = 5,
                 valueRange = 0,
-                coef = 0,
+                coef = 0.02199999988,
                 coefAP = 0,
             },
         }
@@ -576,9 +576,9 @@ _addon.spellInfo = {
                 effectType = 35,
                 auraType = 8,
                 tickPeriod = 2,
-                valueBase = 5,
+                valueBase = 6,
                 valueRange = 0,
-                coef = 0,
+                coef = 0.02199999988,
                 coefAP = 0,
             },
         }
@@ -597,9 +597,9 @@ _addon.spellInfo = {
                 effectType = 35,
                 auraType = 8,
                 tickPeriod = 2,
-                valueBase = 5,
+                valueBase = 7,
                 valueRange = 0,
-                coef = 0,
+                coef = 0.02199999988,
                 coefAP = 0,
             },
         }
@@ -1268,9 +1268,9 @@ _addon.spellInfo = {
                 effectType = 35,
                 auraType = 8,
                 tickPeriod = 2,
-                valueBase = 5,
+                valueBase = 9,
                 valueRange = 0,
-                coef = 0,
+                coef = 0.02199999988,
                 coefAP = 0,
             },
         }
@@ -1289,9 +1289,9 @@ _addon.spellInfo = {
                 effectType = 35,
                 auraType = 8,
                 tickPeriod = 2,
-                valueBase = 5,
+                valueBase = 11,
                 valueRange = 0,
-                coef = 0,
+                coef = 0.02199999988,
                 coefAP = 0,
             },
         }
@@ -1784,6 +1784,181 @@ _addon.spellInfo = {
             },
         }
     },
+    [408341] = { -- Fire Nova (Rank 1)
+        spellLevel = 12,
+        maxLevel = 0,
+        baseCost = 65,
+        school = 3,
+        schoolMask = 4,
+        defType = 1,
+        effects = {
+            [1] = {
+                effectType = 64,
+                valueBase = 0,
+                valueRange = 0,
+                triggeredSpell = 408423,
+                coef = 0,
+                coefAP = 0,
+            },
+        }
+    },
+    [408342] = { -- Fire Nova (Rank 2)
+        spellLevel = 22,
+        maxLevel = 0,
+        baseCost = 120,
+        school = 3,
+        schoolMask = 4,
+        defType = 1,
+        effects = {
+            [1] = {
+                effectType = 64,
+                valueBase = 0,
+                valueRange = 0,
+                triggeredSpell = 408424,
+                coef = 0,
+                coefAP = 0,
+            },
+        }
+    },
+    [408343] = { -- Fire Nova (Rank 3)
+        spellLevel = 32,
+        maxLevel = 0,
+        baseCost = 210,
+        school = 3,
+        schoolMask = 4,
+        defType = 1,
+        effects = {
+            [1] = {
+                effectType = 64,
+                valueBase = 0,
+                valueRange = 0,
+                triggeredSpell = 408426,
+                coef = 0,
+                coefAP = 0,
+            },
+        }
+    },
+    [408344] = { -- Fire Nova (Rank 4)
+        spellLevel = 42,
+        maxLevel = 0,
+        baseCost = 290,
+        school = 3,
+        schoolMask = 4,
+        defType = 1,
+        effects = {
+            [1] = {
+                effectType = 64,
+                valueBase = 0,
+                valueRange = 0,
+                triggeredSpell = 408427,
+                coef = 0,
+                coefAP = 0,
+            },
+        }
+    },
+    [408345] = { -- Fire Nova (Rank 5)
+        spellLevel = 52,
+        maxLevel = 0,
+        baseCost = 375,
+        school = 3,
+        schoolMask = 4,
+        defType = 1,
+        effects = {
+            [1] = {
+                effectType = 64,
+                valueBase = 0,
+                valueRange = 0,
+                triggeredSpell = 408428,
+                coef = 0,
+                coefAP = 0,
+            },
+        }
+    },
+    [408423] = { -- Fire Nova (Rank 1)
+        spellLevel = 12,
+        maxLevel = 17,
+        school = 3,
+        schoolMask = 4,
+        defType = 1,
+        effects = {
+            [1] = {
+                effectType = 2,
+                valueBase = 30,
+                valueRange = 6,
+                valuePerLevel = 0.40000000596,
+                coef = 0.14300000668,
+                coefAP = 0,
+            },
+        }
+    },
+    [408424] = { -- Fire Nova (Rank 2)
+        spellLevel = 22,
+        maxLevel = 27,
+        school = 3,
+        schoolMask = 4,
+        defType = 1,
+        effects = {
+            [1] = {
+                effectType = 2,
+                valueBase = 51,
+                valueRange = 8,
+                valuePerLevel = 0.60000002384,
+                coef = 0.14300000668,
+                coefAP = 0,
+            },
+        }
+    },
+    [408426] = { -- Fire Nova (Rank 3)
+        spellLevel = 32,
+        maxLevel = 37,
+        school = 3,
+        schoolMask = 4,
+        defType = 1,
+        effects = {
+            [1] = {
+                effectType = 2,
+                valueBase = 122,
+                valueRange = 16,
+                valuePerLevel = 0.89999997616,
+                coef = 0.14300000668,
+                coefAP = 0,
+            },
+        }
+    },
+    [408427] = { -- Fire Nova (Rank 4)
+        spellLevel = 42,
+        maxLevel = 47,
+        school = 3,
+        schoolMask = 4,
+        defType = 1,
+        effects = {
+            [1] = {
+                effectType = 2,
+                valueBase = 168,
+                valueRange = 22,
+                valuePerLevel = 1.10000002384,
+                coef = 0.14300000668,
+                coefAP = 0,
+            },
+        }
+    },
+    [408428] = { -- Fire Nova (Rank 5)
+        spellLevel = 52,
+        maxLevel = 57,
+        school = 3,
+        schoolMask = 4,
+        defType = 1,
+        effects = {
+            [1] = {
+                effectType = 2,
+                valueBase = 226,
+                valueRange = 26,
+                valuePerLevel = 1.29999995232,
+                coef = 0.14300000668,
+                coefAP = 0,
+            },
+        }
+    },
     [408521] = { -- Riptide (Rank 1)
         spellLevel = 40,
         maxLevel = 48,
@@ -1993,11 +2168,16 @@ _addon.spellClassSet = {
             10587, -- Magma Totem (Rank 4)
         },
         [8192] = {
+            5394, -- Healing Stream Totem (Rank 1)
             5672, -- Healing Stream (Rank 1)
             6371, -- Healing Stream (Rank 2)
             6372, -- Healing Stream (Rank 3)
+            6375, -- Healing Stream Totem (Rank 2)
+            6377, -- Healing Stream Totem (Rank 3)
             10460, -- Healing Stream (Rank 4)
             10461, -- Healing Stream (Rank 5)
+            10462, -- Healing Stream Totem (Rank 4)
+            10463, -- Healing Stream Totem (Rank 5)
         },
         [16384] = {
             5677, -- Mana Spring (Rank 1)

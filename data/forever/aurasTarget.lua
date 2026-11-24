@@ -179,6 +179,13 @@ _addon.aurasTarget = {
             value = 20,
         },
     },
+    [1239243] = { -- Riptide (Rank 3)
+        {
+            type = _addon.CONST.EFFECT_TYPE.SPELLMOD_PCT_DAMAGE_HEALING,
+            affectSpell = {256, 0, 0, 0},
+            value = 25,
+        },
+    },
     [1311680] = { -- Curse of the Elements (Rank 4)
         {
             type = _addon.CONST.EFFECT_TYPE.SCHOOLMOD_RESISTANCE_PENETRATION,
@@ -249,6 +256,7 @@ _addon.assumableTargetAuras = {
     { spellId = 11198, class = "ROGUE", maxStacks = 1 }, -- Expose Armor (Rank 5)
     { spellId = 13224, class = "ROGUE", maxStacks = 5 }, -- Wound Poison (Rank 4)
     { spellId = 17364, class = "SHAMAN", maxStacks = 1, fromCaster = true }, -- Stormstrike
+    { spellId = 1239243, class = "SHAMAN", maxStacks = 1, fromCaster = true }, -- Riptide (Rank 3)
     { spellId = 1311680, class = "WARLOCK", maxStacks = 1 }, -- Curse of the Elements (Rank 4)
     { spellId = 1225841, class = "WARLOCK", maxStacks = 1 }, -- Curse of Recklessness (Rank 4)
     { spellId = 17794, class = "WARLOCK", maxStacks = 1, fromCaster = true }, -- Shadow Vulnerability

@@ -1358,6 +1358,13 @@ _addon.aurasPlayer = {
             value = -2,
         },
     },
+    [25102] = { -- Water Mastery
+        {
+            type = _addon.CONST.EFFECT_TYPE.SPELLMOD_FLAT_VALUE,
+            affectSpell = {8192, 0, 0, 0},
+            value = 7,
+        },
+    },
     [25656] = { -- Sand Trap
         {
             type = _addon.CONST.EFFECT_TYPE.GLOBAL_FLAT_HIT_CHANCE,

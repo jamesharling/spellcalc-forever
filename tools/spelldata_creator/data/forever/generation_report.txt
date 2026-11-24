@@ -1,6 +1,6 @@
 SpellCalc Forever data generation report
 Client build: wowf 1.60.1.71037
-Generated: 2026-11-24T16:44:57.682Z
+Generated: 2026-11-24T17:06:08.463Z
 
 Everything listed here was skipped or guessed by the generator and should be reviewed.
 
@@ -232,7 +232,7 @@ Everything listed here was skipped or guessed by the generator and should be rev
   Mental Dexterity (415140) effect 0: aura type 598 is not handled, effect skipped
   Mental Dexterity (415140) effect 1 skipped: SPELL_AURA_DUMMY spell not handled! 415140
   Lightning Mastery (16166) is an active ability, not applied as a permanent talent effect
-  Lightning Overload (408438) effect 0 skipped: SPELL_AURA_DUMMY spell not handled! 408438
+  Lightning Overload (408438) uses a hand-written definition: SHAMAN_LIGHTNING_OVERLOAD=10/pt
   Elemental Reach (28999) effect 1 skipped: SPELL_AURA_DUMMY spell not handled! 28999
   Elemental Reach (28999) effect 2 skipped: SPELL_AURA_DUMMY spell not handled! 28999
   Earthbound (1222988) effect 0 skipped: SPELL_AURA_DUMMY spell not handled! 1222988
@@ -917,7 +917,7 @@ The act of shapeshifting frees the caster of Polymorph and Movement Impairing ef
 
 == Target auras (0)
 
-== Assumable target auras (27)
+== Assumable target auras (28)
   PALADIN Oath of Light [1328548]: Holy Light +6.66666984558 per level (400 at 60)
   PALADIN Oath of Light [1328548]: Flash of Light +1.91666996479 per level (115 at 60)
   PALADIN Oath of Light [1328548]: Holy Shock +3.833329916 per level (230 at 60)
@@ -939,6 +939,7 @@ The act of shapeshifting frees the caster of Polymorph and Movement Impairing ef
   ROGUE: Expose Armor (Rank 5) [11198]
   ROGUE: Wound Poison (Rank 4) [13224], up to 5 stacks
   SHAMAN: Stormstrike [17364], caster's own damage only
+  SHAMAN: Riptide (Rank 3) [1239243], caster's own damage only
   WARLOCK: Curse of the Elements (Rank 4) [1311680]
   WARLOCK: Curse of Recklessness (Rank 4) [1225841]
   WARLOCK: Shadow Vulnerability [17794], caster's own damage only

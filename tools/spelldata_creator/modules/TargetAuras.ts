@@ -181,6 +181,22 @@ export class TargetAuras
             return [{ type: ADDON_EFFECT_TYPE.SCRIPT_SPELLMOD_DONE_PCT, affectSpell: ALL_SPELLS, scriptKey: "Mage_Fire_Effects", value: 1, hasStacks: true }];
         }
 
+        // "increases the effectiveness of your Chain Heal casts directly on that target by $s3%": a dummy effect of
+        // the shaman's own Riptide on the heal target.
+        if (entry.class === "SHAMAN" && entry.name === "Riptide")
+        {
+            const bonus = effects.find(e => e.EffectIndex === 2 && e.EffectAura === AURA_TYPE.SPELL_AURA_DUMMY);
+            const chainHeal = this.classMaskOf(entry.class, "Chain Heal",
+                id => this.spellData.getSpellEffects(id, true)?.some(e => e.EffectIndex === 0 && e.Effect === EFFECT_TYPE.SPELL_EFFECT_HEAL) ?? false)
+                .map(bits => bits >>> 0);
+            if (!bonus || getEffectBase(bonus) <= 0 || chainHeal.every(bits => bits === 0))
+            {
+                report(`${entry.class} ${entry.name} [${spellId}]: no Chain Heal bonus effect or no Chain Heal class mask, skipped`);
+                return [];
+            }
+            return [{ type: ADDON_EFFECT_TYPE.SPELLMOD_PCT_DAMAGE_HEALING, affectSpell: chainHeal, value: getEffectBase(bonus) }];
+        }
+
         if (entry.class === "PALADIN") return this.getPaladinExtraEffects(entry, spellId, effects);
 
         // Priest: states of the target that a talent's script asks for (data/forever/classes/priest.lua; the

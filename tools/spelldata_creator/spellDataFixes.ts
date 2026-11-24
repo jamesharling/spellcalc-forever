@@ -526,7 +526,48 @@ function shamanFix(sd: SpellData)
             effect.EffectAura = ttsEff.EffectAura;
             effect.EffectAuraPeriod = ttsEff.EffectAuraPeriod;
             effect.EffectTriggerSpell = ttsEff.EffectTriggerSpell;
+            // On Forever the totem's aura heals by itself (a party area aura with a periodic heal) instead of
+            // triggering a heal spell, so its values are the heal; the summon effect's own base points are the
+            // totem's health.
+            if (!ttsEff.EffectTriggerSpell)
+            {
+                effect.EffectBasePointsF = ttsEff.EffectBasePointsF;
+                effect.Variance = ttsEff.Variance;
+                effect.EffectRealPointsPerLevel = ttsEff.EffectRealPointsPerLevel;
+                effect.EffectBonusCoefficient = ttsEff.EffectBonusCoefficient;
+                effect.BonusCoefficientFromAP = ttsEff.BonusCoefficientFromAP;
+                // What modifies the aura (Restorative Totems names its class mask) modifies the spell shown.
+                const castOptions = sd.getSpellClassOption(totemSpellId, true);
+                const auraOptions = sd.getSpellClassOption(tts, true);
+                if (castOptions && auraOptions && castOptions.SpellClassSet === auraOptions.SpellClassSet)
+                {
+                    castOptions.SpellClassMask_0 |= auraOptions.SpellClassMask_0;
+                    castOptions.SpellClassMask_1 |= auraOptions.SpellClassMask_1;
+                    castOptions.SpellClassMask_2 |= auraOptions.SpellClassMask_2;
+                    castOptions.SpellClassMask_3 |= auraOptions.SpellClassMask_3;
+                }
+            }
         }
+    }
+
+    // Fire Nova: a dummy that makes the active Fire totem explode; the damage is a spell only the tooltip names
+    // ("Instantly inflicts $408428s1 fire damage to enemies within $408428a1 yd of your active Fire totem").
+    for (const novaId of sd.getSpellsByName("Fire Nova", true) ?? [])
+    {
+        const spell = sd.getSpell(novaId, true);
+        const effects = sd.getSpellEffects(novaId, true);
+        if (!spell || !effects || effects.length !== 1 || effects[0].Effect !== EFFECT_TYPE.SPELL_EFFECT_DUMMY) continue;
+        const match = spell.Description_lang.match(/inflicts \$(\d+)s1 fire damage/i);
+        if (!match) continue;
+        const damageId = parseInt(match[1]);
+        const damage = sd.getSpellEffects(damageId, true);
+        if (!damage || damage[0].Effect !== EFFECT_TYPE.SPELL_EFFECT_SCHOOL_DAMAGE)
+        {
+            report(`${sd.getSpellNameWithRank(novaId)} [${novaId}]: spell ${damageId} named in the description deals no damage, not generated`);
+            continue;
+        }
+        effects[0].Effect = EFFECT_TYPE.SPELL_EFFECT_TRIGGER_SPELL;
+        effects[0].EffectTriggerSpell = damageId;
     }
 }
 

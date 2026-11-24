@@ -279,6 +279,22 @@ function addShamanTalents(list: TalentDummyList, spellData: SpellData)
         type: ADDON_EFFECT_TYPE.CLEARCAST_CHANCE_DMG,
         valueForRank: (_v, _rank, spellId) => spellData.getSpellAuraOptions(spellId)?.ProcChance ?? 10,
     }];
+
+    // "Gives your Lightning Bolt and Chain Lightning spells a $m1% chance to cast a second, similar spell on the
+    // same target at no additional cost that causes half damage". The addon adds the expected extra damage
+    // (core/effectHandlers.lua). The two spells are the ones Call of Thunder names.
+    const callOfThunder = (spellData.getSpellsByName("Call of Thunder", true) ?? [])
+        .map(id => spellData.getSpellEffects(id, true)?.find(e => e.EffectAura === AURA_TYPE.SPELL_AURA_ADD_FLAT_MODIFIER))
+        .find(e => e && e.EffectSpellClassMask_0);
+    if (callOfThunder)
+    {
+        list["Lightning Overload"] = [{
+            type: ADDON_EFFECT_TYPE.SHAMAN_LIGHTNING_OVERLOAD,
+            affectSpell: [callOfThunder.EffectSpellClassMask_0, callOfThunder.EffectSpellClassMask_1,
+                callOfThunder.EffectSpellClassMask_2, callOfThunder.EffectSpellClassMask_3],
+            valueForRank: v => v[0],
+        }];
+    }
 }
 
 export function getTalentDummies(spellData: SpellData, classSpellSets: ClassSpellSets)

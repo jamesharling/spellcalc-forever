@@ -26,6 +26,14 @@ _addon.aurasPlayer[408510] = {
     }
 };
 
+-- Improved Stormstrike: "Regenerating $s1% of your normal Mana regeneration while casting spells."
+_addon.aurasPlayer[1238931] = {
+    {
+        type = _addon.CONST.EFFECT_TYPE.FSR_SPIRIT_REGEN,
+        value = 50,
+    }
+};
+
 -- TODO: Convert T3 effect to new system
 --[[ local T3LightningShieldEffect = {
     condition = _addon.CONST.BUFF_CONDITIONS.EARTHSHATTERER_8PCS,

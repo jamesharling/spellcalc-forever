@@ -136,6 +136,14 @@ from upstream SpellCalc in more than the TOC:
   bonus; "Target at or below 20% health" gives Shadow Word: Death the critical strike chance of Early Demise.
   Not calculated: Lightwell and Mana Burn (nothing scales, their tooltips give the amounts), Vampiric Embrace,
   Holy Binding's heal on the priest, and Litany of Light's mana return.
+- **Shaman.** Healing Stream Totem heals for its totem aura's own value (11 plus 2.2% of healing power every 2
+  seconds at rank 5, for 5 minutes); upstream showed the totem's 5 health as the heal. Restorative Totems
+  modifies that aura and now applies. Fire Nova shows the damage its tooltip names, with Trial by Fire.
+  Lightning Overload adds the expected half-damage second cast to Lightning Bolt and Chain Lightning. "Riptide"
+  under Settings > Target Auras (your own, on the heal target) adds its 25% to Chain Heal. The Improved
+  Stormstrike buff lets half the mana regeneration continue while casting. Not calculated: the weapon imbues
+  (Rockbiter, Flametongue, Frostbrand, Windfury) and Elemental Weapons, and Mana Spring and Mana Tide Totem
+  (their tooltips give the amounts). Water Shield's mana is an estimate of one globe every 50 seconds.
 - **Area spells that tick through an area trigger** (Hurricane, Blizzard, Rain of Fire, the burn of
   Flamestrike, Consecration) only create the trigger on Forever. The generator takes the damage of a tick from
   the spell the tooltip names, one tick per period.
@@ -201,6 +209,10 @@ Nothing here has run on a live Forever client (the beta closed before this port 
     assumes each is 10% or 20% larger than the one before, compounding. A Divine Aegis shield against 15% of
     the critical heal that made it. Dark Sacrifice's mana against 5 ticks plus Spirit. Penance at rank 2 and
     above against the combat log.
+16. Shaman: a Healing Stream Totem tick in the combat log against the addon, with and without Restorative
+    Totems (the data gives 10% per rank for Healing Stream, 5% for Mana Spring). Fire Nova against the combat
+    log. Whether Riptide's bonus applies to every jump of a Chain Heal cast on its target, as assumed, or only
+    to the first heal. Searing Totem's attack: the data gives it 1.7% of spell power.
 
 ## Regenerating data
 
@@ -305,7 +317,9 @@ npm test
   Holy Power, Two-Handed Weapon Specialization with and without a two-hander, Oath of Light, Boundless Light
   and Consecrated Ground. For a priest it checks Penance at every rank, Contingency Plan, Dark Sacrifice,
   Power Word: Shield's healing power, Divine Aegis, Improved Mind Flay, Spirit Tap, and Renewed Hope, Power in
-  Light and Early Demise with and without their target state. For every class it selects the
+  Light and Early Demise with and without their target state. For a shaman it checks Healing Stream Totem with
+  Restorative Totems, Fire Nova with Trial by Fire, Lightning Overload, Riptide's Chain Heal bonus and the
+  Improved Stormstrike buff. For every class it selects the
   own-damage target auras of the other classes and checks nothing changes. It validates the settings table
   with AceConfig,
   and checks old saved

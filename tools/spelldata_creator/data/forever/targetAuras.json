@@ -24,6 +24,7 @@
         { "class": "ROGUE", "name": "Wound Poison", "id": 13224, "note": "healing taken (the debuff, not the weapon coating)" },
 
         { "class": "SHAMAN", "name": "Stormstrike", "note": "from caster" },
+        { "class": "SHAMAN", "name": "Riptide", "note": "on the heal target: the shaman's own Chain Heal cast on it heals for more" },
 
         { "class": "WARLOCK", "name": "Curse of the Elements" },
         { "class": "WARLOCK", "name": "Curse of Recklessness", "note": "armor" },
