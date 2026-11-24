@@ -73,6 +73,43 @@ _addon.talentDataRaw = {
             },
         }
     },
+    { -- Consecrated Ground (node 110872, 2 ranks)
+        name = "Consecrated Ground",
+        spellId = 1310905,
+        maxRanks = 2,
+        effects = {
+            {
+                type = _addon.CONST.EFFECT_TYPE.SCRIPT_SPELLMOD_DONE_PCT,
+                affectSpell = {4294967295, 4294967295, 4294967295, 4294967295},
+                scriptKey = "Paladin_Consecrated_Ground",
+                perPoint = 5,
+            },
+        }
+    },
+    { -- Boundless Light (node 113631, 2 ranks)
+        name = "Boundless Light",
+        spellId = 1328550,
+        maxRanks = 2,
+        effects = {
+            {
+                type = _addon.CONST.EFFECT_TYPE.SCRIPT_SPELLMOD_CRIT_CHANCE,
+                affectSpell = {0, 65536, 0, 0},
+                scriptKey = "Paladin_Boundless_Light",
+                perPoint = 15,
+            },
+        }
+    },
+    { -- Holy Power (node 105321, 5 ranks)
+        name = "Holy Power",
+        spellId = 5923,
+        maxRanks = 5,
+        effects = {
+            {
+                type = _addon.CONST.EFFECT_TYPE.GLOBAL_MOD_CRITICAL_HEALING,
+                perPoint = 5,
+            },
+        }
+    },
     -----------------------------
     -- Column group 2
     -----------------------------
@@ -103,6 +140,19 @@ _addon.talentDataRaw = {
                 type = _addon.CONST.EFFECT_TYPE.SPELLMOD_PCT_DAMAGE_HEALING,
                 affectSpell = {0, 0, 0, 32768},
                 perPoint = 20,
+            },
+        }
+    },
+    { -- Two-Handed Weapon Specialization (node 105697, 3 ranks)
+        name = "Two-Handed Weapon Specialization",
+        spellId = 20111,
+        maxRanks = 3,
+        effects = {
+            {
+                type = _addon.CONST.EFFECT_TYPE.SCHOOLMOD_PCT_DAMAGE,
+                affectMask = 3,
+                neededWeaponMask = 136546,
+                perPoint = 2,
             },
         }
     },

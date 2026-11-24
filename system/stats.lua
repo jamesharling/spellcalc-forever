@@ -111,6 +111,7 @@ end
 ---@class InternalStats
 local stats = {
     manaMax = 0, -- Maximum mana
+    healthMax = 0, -- Maximum health
     manaCurrent = 0, -- Current mana if update is active
     baseMana = 0,
     manaRegBase = 0, -- Mana regen based on spirit /sec
@@ -402,9 +403,12 @@ end
 local function UpdateStats()
     if SkipIfRestricted() then return end
     local manaMax = UnitPowerMax("player", 0);
-    if AnySecret(manaMax) then return end
+    local healthMax = UnitHealthMax("player");
+    local manaSecret, healthSecret = AnySecret(manaMax), AnySecret(healthMax);
+    if manaSecret and healthSecret then return end
     _addon.util.PrintDebug("Updating stats");
-    stats.manaMax = Num(manaMax);
+    if not manaSecret then stats.manaMax = Num(manaMax) end
+    if not healthSecret then stats.healthMax = Num(healthMax) end
     _addon:TriggerUpdate();
 end
 
@@ -611,6 +615,12 @@ _addon.events.Register("UNIT_STATS", function (unit)
     if unit == "player" then
         UpdateStats();
         _addon:UpdateManaRegen();
+    end
+end);
+
+_addon.events.Register("UNIT_MAXHEALTH", function (unit)
+    if unit == "player" then
+        UpdateStats();
     end
 end);
 

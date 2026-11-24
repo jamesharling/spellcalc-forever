@@ -11,6 +11,9 @@
         { "class": "MAGE", "name": "Dampen Magic", "note": "healing taken on your heal target" },
 
         { "class": "PALADIN", "name": "Judgement of the Crusader", "note": "Holy damage taken" },
+        { "class": "PALADIN", "name": "Oath of Light", "note": "flat healing from the paladin's own Holy Light, Flash of Light and Holy Shock; without it Boundless Light adds Holy Shock crit" },
+        { "class": "PALADIN", "name": "Hammer of Justice", "label": "Stunned or incapacitated target", "note": "stands for any stun: Judgement of Command deals double damage" },
+        { "class": "PALADIN", "name": "Consecrated Ground", "id": 1310905, "label": "One of the first enemies in your Consecration", "note": "the talent: Holy damage against the first enemies that entered the Consecration" },
 
         { "class": "PRIEST", "name": "Shadow Vulnerability", "id": 15258, "note": "Shadow Weaving, from caster" },
 

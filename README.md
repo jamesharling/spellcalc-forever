@@ -45,8 +45,9 @@ from upstream SpellCalc in more than the TOC:
   target. Debuffs that only boost their caster's own damage (Shadow Weaving, Improved Scorch, Stormstrike,
   Winter's Chill, Improved Shadow Bolt) are only offered to that class, and a spell the client doesn't know
   (removed from Forever) is not offered at all. The settings are shared by every character of the account, so
-  such a debuff left selected by another class is not applied either. Two entries stand for a state of the
-  target instead of one debuff: "Frozen target" and "Your Fire effects on the target" (see *Mage* below).
+  such a debuff left selected by another class is not applied either. Some entries stand for a state of the
+  target instead of one debuff: "Frozen target" and "Your Fire effects on the target" (see *Mage* below),
+  "Stunned or incapacitated target" and "One of the first enemies in your Consecration" (see *Paladin*).
 - **Fixed assumptions instead of live state** where the live value is only readable when it doesn't matter:
   the mana pool always starts full (current mana is secret in combat), finishing moves use an assumed
   combo point count (Settings > Target), and the table of raid boss resistances by NPC ID is gone (unit
@@ -104,10 +105,27 @@ from upstream SpellCalc in more than the TOC:
   effect. Fingers of Frost procs are not tracked; select "Frozen target" to see those numbers. Ice Lance has no
   spell power coefficient in the client data, so none is added. Missile Barrage's shorter channel is not
   calculated.
+- **Paladin.** Consecration is shown for one of the first 4 enemies that enter it: its tick has a part every
+  enemy takes (12 at rank 5, no spell power) and a part only those first enemies take (27 plus 4.2% of spell
+  power), added together. Later enemies take the first part only. Templar's Bulwark absorbs your maximum health.
+  Hammer of the Righteous deals 3 times the main hand's damage per second (average hit over the current attack
+  speed). Light's Vigil shows the heal each party member gets from the Holy Shock that sets it off. Judgement of
+  Command shows the half damage it deals to a target that is not stunned. The Exorcist passive replaces every
+  rank of Exorcism with a spell that can be cast on any target and always crits Undead and Demons; the addon
+  calculates the replacement, also when the client reports the rank that was learned
+  (`C_Spell.GetOverrideSpell`). The crit bonus needs a target whose creature type can be read. Talents: Holy
+  Power raises critical heals from 150% to 175% at 5/5, Two-Handed Weapon Specialization adds its bonus to Holy
+  damage as well while a two-hander is equipped, Boundless Light adds its critical strike chance to Holy
+  Shock's heal. Assumed in Settings > Target Auras: "Oath of Light" on the heal target adds 400 / 115 / 230
+  (at level 60) to Holy Light, Flash of Light and Holy Shock and switches Boundless Light off;
+  "Stunned or incapacitated target" doubles Judgement of Command; "One of the first enemies in your
+  Consecration" gives Holy damage the Consecrated Ground bonus (Consecration itself always has it).
+  Not calculated: Seal of Light, Judgement of Light and Lay on Hands (their tooltips already give the amount,
+  nothing scales), Seal of Fury's absorb shield, and the mana returns of Sanctified Judgement and Shield
+  Specialization. The Vengeance buff counts 3% per application, the value of 3/3.
 - **Area spells that tick through an area trigger** (Hurricane, Blizzard, Rain of Fire, the burn of
-  Flamestrike) only create the trigger on Forever. The generator takes the damage of a tick from the spell the
-  tooltip names, one tick per period. Consecration ticks with two damage effects (every enemy, and more for the
-  first few) and is not calculated yet.
+  Flamestrike, Consecration) only create the trigger on Forever. The generator takes the damage of a tick from
+  the spell the tooltip names, one tick per period.
 - Settings open through the Settings API (`Settings.OpenToCategory`); Ace3 updated to r1386.
 
 ## Needs verification at launch
@@ -157,6 +175,14 @@ Nothing here has run on a live Forever client (the beta closed before this port 
     of your effects count (Fireball's and Pyroblast's burn, Ignite, Fire Vulnerability?) and whether its bonus
     multiplies with other damage bonuses, as assumed. Frost Ward's and Ice Barrier's tooltips against the addon
     with and without Frost Warding. A Flamestrike burn tick against the tooltip's "over 8 sec" total / 4.
+14. Paladin: does Exorcism show the addon's lines at all, and with which base damage (the Exorcist ranks have
+    more than the plain ones; `/sc debug` prints the spell ID that is calculated)? A Consecration tick on a
+    single target against the combat log, with and without Consecrated Ground. Hammer of the Righteous against
+    the combat log (3 times the character sheet's damage per second is assumed, without further spell power).
+    Judgement of Command on a stunned and an unstunned target: the addon halves the spell power part too.
+    Holy Light on an Oath of Light target with and without Healing Light: the addon adds the Oath's amount
+    before the talent's percentage. A critical heal with Holy Power (175% at 5/5 assumed). Templar's Bulwark's
+    tooltip against the addon.
 
 ## Regenerating data
 
@@ -255,7 +281,11 @@ npm test
   ignore spell power, Ferocious Bite's attack power, Lacerate and Swiftmend; for druid, mage and warlock the
   channelled area spell. For a mage it checks Arcane Wrath's mana scaling, Flamestrike's burn, Frost Ward, Ice
   Barrier and Frost Warding, Mana Shield's drain with and without Arcane Shielding, Mage Armor, Ice Lance and
-  Shatter on a frozen target, Fire Power, and Winter's Chill on Cone of Cold. For every class it selects the
+  Shatter on a frozen target, Fire Power, and Winter's Chill on Cone of Cold. For a paladin it also checks
+  Consecration's ticks, Templar's Bulwark, Hammer of the Righteous, Judgement of Command on a stunned target,
+  Light's Vigil, the Exorcism that Exorcist puts in place (a spell override in the stub, and an Undead target),
+  Holy Power, Two-Handed Weapon Specialization with and without a two-hander, Oath of Light, Boundless Light
+  and Consecrated Ground. For every class it selects the
   own-damage target auras of the other classes and checks nothing changes. It validates the settings table
   with AceConfig,
   and checks old saved

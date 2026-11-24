@@ -19,6 +19,7 @@ import { TraitData } from "./modules/TraitData";
 import { fillBaseAndRange, getEffectBase } from "./effectValues";
 import { createFileHead } from "./itemFunctions";
 import { report, reportSection, writeReport } from "./report";
+import { stunnedDamagePct } from "./spellDataFixes";
 import path from "path";
 
 console.log(`SpellCalc Forever data generator, client build ${getBuildInfo().product} ${getBuildInfo().version}`);
@@ -599,6 +600,48 @@ function buildRankInfo(spellId: number, effects: SpellEffect[]): RankInfo
         else report(`${nameWithRank} [${spellId}]: tooltip names effect ${frozenBonus[1]} as the bonus against frozen targets, but it has no value`);
     }
 
+    const description = spellData.getSpell(spellId, true)?.Description_lang ?? "";
+    /** The rank info effect made from the spell effect a tooltip calls $s<n>. */
+    const effectForToken = (n: number) => rankInfo.effects[effects.findIndex(e => e.EffectIndex === n - 1)];
+    const baseOfToken = (n: number) =>
+    {
+        const effect = spellData.getSpellEffects(spellId, true)?.find(e => e.EffectIndex === n - 1);
+        return effect ? getEffectBase(effect) : 0;
+    };
+
+    // "grants you an absorb shield equal to $s1% of your maximum health" (Templar's Bulwark).
+    const healthShield = description.match(/absorb shield equal to \$s(\d)% of your maximum health/i);
+    if (healthShield)
+    {
+        const effect = effectForToken(parseInt(healthShield[1]));
+        if (effect) effect.pctOfMaxHealth = true;
+        else report(`${nameWithRank} [${spellId}]: tooltip names effect ${healthShield[1]} as a percentage of maximum health, but it is not generated`);
+    }
+
+    // "causing Holy damage to each equal to $s3 times the damage per second of your main hand weapon" (Hammer of
+    // the Righteous): the multiplier is a dummy effect next to the damage effect.
+    const weaponDps = description.match(/equal to \$s(\d) times the damage per second of your main hand weapon/i);
+    if (weaponDps && rankInfo.effects[0])
+    {
+        const mult = baseOfToken(parseInt(weaponDps[1]));
+        if (mult > 0) rankInfo.effects[0].weaponDpsMult = mult;
+        else report(`${nameWithRank} [${spellId}]: tooltip names effect ${weaponDps[1]} as a multiple of weapon damage per second, but it has no value`);
+    }
+
+    // "has $s2% chance to crit against Demons and Undead" (the Exorcism ranks the Exorcist passive casts).
+    const versusCrit = description.match(/\$s(\d)% (?:increased )?(?:chance to crit|critical strike chance) against (\w+) and (\w+)/i);
+    if (versusCrit)
+    {
+        const CREATURE_TYPES: { [name: string]: number } = { Beasts: 1, Dragonkin: 2, Demons: 3, Elementals: 4, Giants: 5, Undead: 6, Humanoids: 7 };
+        const pct = baseOfToken(parseInt(versusCrit[1]));
+        const types = [CREATURE_TYPES[versusCrit[2]], CREATURE_TYPES[versusCrit[3]]];
+        if (pct > 0 && types[0] && types[1]) rankInfo.versusCritChance = { [types[0]]: pct, [types[1]]: pct };
+        else report(`${nameWithRank} [${spellId}]: critical strike chance against "${versusCrit[2]} and ${versusCrit[3]}" not understood, not applied`);
+    }
+
+    // Judgement of Command: stored with the damage against a target that is not stunned (spellDataFixes.ts).
+    if (stunnedDamagePct.has(spellId)) rankInfo.stunnedDamagePct = stunnedDamagePct.get(spellId);
+
     for (const effect of rankInfo.effects)
     {
         if (!effect) throw new Error("Effect list has a hole!");
@@ -669,6 +712,11 @@ function rankInfoToLua(sid: string | number, ri: RankInfo): string {
     if (ri.isOffhandAttack) str += `\t\tisOffhandAttack = true,\n`;
     if (ri.useScalingFormula) str += `\t\tuseScalingFormula = { id = ${ri.useScalingFormula.id}, label = "${ri.useScalingFormula.label}" },\n`;
     if (ri.frozenDamagePct) str += `\t\tfrozenDamagePct = ${ri.frozenDamagePct},\n`;
+    if (ri.stunnedDamagePct) str += `\t\tstunnedDamagePct = ${ri.stunnedDamagePct},\n`;
+    if (ri.versusCritChance)
+    {
+        str += `\t\tversusCritChance = { ${Object.keys(ri.versusCritChance).map(type => `[${type}] = ${ri.versusCritChance![Number(type)]}`).join(", ")} },\n`;
+    }
 
     str += `\t\teffects = {\n`;
 
@@ -695,6 +743,8 @@ function rankInfoToLua(sid: string | number, ri: RankInfo): string {
         }
         if (eff.spellPowerPctOfMana) str += `\t\t\t\tspellPowerPctOfMana = ${eff.spellPowerPctOfMana},\n`;
         if (eff.manaPerDamage) str += `\t\t\t\tmanaPerDamage = ${eff.manaPerDamage},\n`;
+        if (eff.pctOfMaxHealth) str += `\t\t\t\tpctOfMaxHealth = true,\n`;
+        if (eff.weaponDpsMult) str += `\t\t\t\tweaponDpsMult = ${eff.weaponDpsMult},\n`;
         if (eff.auraStacks) str += `\t\t\t\tauraStacks = ${eff.auraStacks},\n`;
         if (USEFUL_SPELL_MECHANICS[eff.mechanic]) str += `\t\t\t\tmechanic = ${eff.mechanic},\n`;
         str += `\t\t\t},\n`;

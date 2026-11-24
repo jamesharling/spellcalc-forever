@@ -1,10 +1,15 @@
 SpellCalc Forever data generation report
 Client build: wowf 1.60.1.71037
-Generated: 2026-11-24T08:17:19.488Z
+Generated: 2026-11-24T15:48:46.669Z
 
 Everything listed here was skipped or guessed by the generator and should be reviewed.
 
-== Spell data fixes (0)
+== Spell data fixes (5)
+  Consecration (Rank 4) [20923]: tick is 8 + 20 (every enemy + additional for the first enemies), shown as one value
+  Consecration (Rank 2) [20116]: tick is 3 + 7 (every enemy + additional for the first enemies), shown as one value
+  Consecration (Rank 3) [20922]: tick is 6 + 11 (every enemy + additional for the first enemies), shown as one value
+  Consecration (Rank 5) [20924]: tick is 12 + 27 (every enemy + additional for the first enemies), shown as one value
+  Consecration (Rank 1) [26573]: tick is 2 + 4 (every enemy + additional for the first enemies), shown as one value
 
 == Spell list: druid (4)
   druid: skill lines 134 (Feral Combat), 573 (Restoration), 574 (Balance)
@@ -28,15 +33,17 @@ Everything listed here was skipped or guessed by the generator and should be rev
   mage: 0 additional spells from trait tree 1112
   Combustion [11129, Fire] skipped: Triggered spell has no valid effects!
 
-== Spell list: paladin (3)
+== Spell list: paladin (4)
   paladin: skill lines 267 (Protection), 184 (Retribution), 594 (Holy)
-  paladin: 165 skill line spells, 53 passives ignored, 108 skill line entries point to removed spells
-  paladin: 0 additional spells from trait tree 1100
+  paladin: 171 skill line spells, 53 passives ignored, 108 skill line entries point to removed spells
+  paladin: 3 additional spells from trait tree 1100
+  paladin: replacement spells from passives: Exorcism (Rank 1) [415068] for 879; Exorcism (Rank 2) [415069] for 5614; Exorcism (Rank 3) [415070] for 5615; Exorcism (Rank 4) [415071] for 10312; Exorcism (Rank 5) [415072] for 10313; Exorcism (Rank 6) [415073] for 10314; Turn Evil (Rank 1) [1328374] for 2878; Turn Evil (Rank 2) [1328373] for 5627; Turn Evil (Rank 3) [1328372] for 10326
 
-== Spell list: shaman (4)
+== Spell list: shaman (5)
   shaman: skill lines 373 (Enhancement), 375 (Elemental Combat), 374 (Restoration)
-  shaman: 189 skill line spells, 60 passives ignored, 92 skill line entries point to removed spells
+  shaman: 190 skill line spells, 60 passives ignored, 92 skill line entries point to removed spells
   shaman: 1 additional spells from trait tree 1082
+  shaman: replacement spells from passives: Ghost Wolf [1238640] for 2645
   Water Shield [408510, trait tree 1082] skipped: Triggered spell has no valid effects!
 
 == Spell level scaling (0)
@@ -174,8 +181,8 @@ Everything listed here was skipped or guessed by the generator and should be rev
 
 == Spell data: paladin (0)
 
-== Talents: paladin (29)
-  Holy Power (5923) effect 0: aura type 50 is not handled, effect skipped
+== Talents: paladin (28)
+  Holy Power (5923) uses a hand-written definition: GLOBAL_MOD_CRITICAL_HEALING=5/pt
   Divine Precision (1310904) effect 1: aura type 232 is not handled, effect skipped
   Illumination (20210) uses a hand-written definition: ILLUMINATION=10/pt
   Unyielding Faith (9453) effect 0: aura type 232 is not handled, effect skipped
@@ -187,14 +194,13 @@ Everything listed here was skipped or guessed by the generator and should be rev
   Stoicism (1328546) effect 0: aura type 232 is not handled, effect skipped
   Stoicism (1328546) effect 1: aura type 232 is not handled, effect skipped
   Vengeance (20049) effect 0: aura type 231 is not handled, effect skipped
-  Two-Handed Weapon Specialization (20111) requires weapon subclass mask 136546; its SCHOOLMOD_PCT_DAMAGE effect only applies to that weapon's damage and is dropped
   Eye for an Eye (9799) effect 0 skipped: SPELL_AURA_DUMMY spell not handled! 9799
   Sanctified Judgement (1311074) effect 0 skipped: SPELL_AURA_DUMMY spell not handled! 1311074
   Sanctified Judgement (1311074) effect 1 skipped: SPELL_AURA_DUMMY spell not handled! 1311074
   Vindication (9452) effect 0 skipped: SPELL_AURA_DUMMY spell not handled! 9452
   Vindication (9452) effect 1 skipped: SPELL_AURA_DUMMY spell not handled! 9452
   Conviction (20117) effect 0: aura type 290 is not handled, effect skipped
-  Consecrated Ground (1310905) effect 0 skipped: SPELL_AURA_DUMMY spell not handled! 1310905
+  Consecrated Ground (1310905) uses a hand-written definition: SCRIPT_SPELLMOD_DONE_PCT=5/pt
   Infusion of Light (426065) effect 0 skipped: SPELL_AURA_DUMMY spell not handled! 426065
   Shield Specialization (20150) effect 0: aura type 272 is not handled, effect skipped
   Shield Specialization (20150) effect 1 skipped: Triggered spell needs some love: 1310925
@@ -203,7 +209,7 @@ Everything listed here was skipped or guessed by the generator and should be rev
   Turn Evil (1328370) effect 2: aura type 332 is not handled, effect skipped
   Turn Evil (1328370) effect 3: aura type 332 is not handled, effect skipped
   Turn Evil (1328370) effect 4: aura type 332 is not handled, effect skipped
-  Boundless Light (1328550) effect 0 skipped: SPELL_AURA_DUMMY spell not handled! 1328550
+  Boundless Light (1328550) uses a hand-written definition: SCRIPT_SPELLMOD_CRIT_CHANCE=15/pt
 
 == Spell data: shaman (0)
 
@@ -914,7 +920,10 @@ The act of shapeshifting frees the caster of Polymorph and Movement Impairing ef
 
 == Target auras (0)
 
-== Assumable target auras (18)
+== Assumable target auras (24)
+  PALADIN Oath of Light [1328548]: Holy Light +6.66666984558 per level (400 at 60)
+  PALADIN Oath of Light [1328548]: Flash of Light +1.91666996479 per level (115 at 60)
+  PALADIN Oath of Light [1328548]: Holy Shock +3.833329916 per level (230 at 60)
   DRUID: Faerie Fire (Rank 4) [9907]
   MAGE: Fire Vulnerability [22959], up to 5 stacks, caster's own damage only
   MAGE: Winter's Chill [12579], up to 5 stacks, caster's own damage only
@@ -923,6 +932,9 @@ The act of shapeshifting frees the caster of Polymorph and Movement Impairing ef
   MAGE: Amplify Magic (Rank 4) [10170]
   MAGE: Dampen Magic (Rank 5) [10174]
   PALADIN: Judgement of the Crusader (Rank 6) [20303]
+  PALADIN: Oath of Light [1328548], caster's own damage only
+  PALADIN: Hammer of Justice (Rank 4) [10308] as "Stunned or incapacitated target", caster's own damage only
+  PALADIN: Consecrated Ground [1310905] as "One of the first enemies in your Consecration", caster's own damage only
   PRIEST: Shadow Weaving [15258], up to 5 stacks, caster's own damage only
   ROGUE: Expose Armor (Rank 5) [11198]
   ROGUE: Wound Poison (Rank 4) [13224], up to 5 stacks

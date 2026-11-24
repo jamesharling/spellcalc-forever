@@ -509,7 +509,10 @@ C_Spell = namespace("C_Spell", {
     IsSpellPassive = function() return false end,
     DoesSpellExist = function(ident) local id = spellIdOf(ident); return id ~= nil and __SPELL_NAMES[id] ~= nil end,
     GetSpellLink = function(ident) local id = spellIdOf(ident); return id and ("|Hspell:" .. id .. "|h[" .. (__SPELL_NAMES[id] or "?") .. "]|h") end,
+    -- The spell a passive currently puts in a spell's place (the driver fills __SPELL_OVERRIDES), else the spell itself.
+    GetOverrideSpell = function(id) return __SPELL_OVERRIDES[id] or id end,
 })
+__SPELL_OVERRIDES = {}
 C_SpellBook = namespace("C_SpellBook", {
     FindSpellBookSlotForSpell = function() return nil end,
     GetSpellBookItemInfo = function() return nil end,
@@ -693,7 +696,7 @@ C_RestrictedActions = namespace("C_RestrictedActions", {
 C_Secrets = namespace("C_Secrets", {
     ShouldAurasBeSecret = function() return restricted() end,
 })
-for _, name in ipairs({ "UnitStat", "UnitPower", "UnitPowerMax", "UnitArmor", "UnitResistance", "UnitAttackPower",
+for _, name in ipairs({ "UnitStat", "UnitPower", "UnitPowerMax", "UnitHealthMax", "UnitArmor", "UnitResistance", "UnitAttackPower",
     "UnitRangedAttackPower", "UnitDamage", "UnitRangedDamage", "UnitAttackSpeed", "GetSpellBonusDamage", "GetSpellBonusHealing",
     "GetSpellCritChance", "GetCritChance", "GetRangedCritChance", "GetHitModifier", "GetSpellHitModifier", "GetManaRegen",
     "GetCombatRatingBonus", "GetWeaponEnchantInfo" }) do

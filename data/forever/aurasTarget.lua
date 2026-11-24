@@ -89,6 +89,46 @@ _addon.aurasTarget = {
             value = 161,
         },
     },
+    [1328548] = { -- Oath of Light
+        {
+            type = _addon.CONST.EFFECT_TYPE.SCRIPT_SPELLMOD_EFFECT_PRE,
+            affectSpell = {16384, 0, 0, 0},
+            value = 6.66666984558,
+            scriptKey = "Paladin_Oath_Holy_Light",
+        },
+        {
+            type = _addon.CONST.EFFECT_TYPE.SCRIPT_SPELLMOD_EFFECT_PRE,
+            affectSpell = {8192, 0, 0, 0},
+            value = 1.91666996479,
+            scriptKey = "Paladin_Oath_Flash_of_Light",
+        },
+        {
+            type = _addon.CONST.EFFECT_TYPE.SCRIPT_SPELLMOD_EFFECT_PRE,
+            affectSpell = {0, 65536, 0, 0},
+            value = 3.833329916,
+            scriptKey = "Paladin_Oath_Holy_Shock",
+        },
+        {
+            type = _addon.CONST.EFFECT_TYPE.SCRIPT_SET_VALUE,
+            value = 1,
+            scriptKey = "Paladin_Oath_of_Light",
+        },
+    },
+    [10308] = { -- Hammer of Justice (Rank 4)
+        {
+            type = _addon.CONST.EFFECT_TYPE.SCRIPT_SPELLMOD_DONE_PCT,
+            affectSpell = {4294967295, 4294967295, 4294967295, 4294967295},
+            value = 0,
+            scriptKey = "Paladin_Stunned_Damage",
+        },
+    },
+    [1310905] = { -- Consecrated Ground
+        {
+            type = _addon.CONST.EFFECT_TYPE.SCRIPT_SET_VALUE,
+            value = 1,
+            scriptKey = "Paladin_In_Consecration",
+        },
+    },
     [15258] = { -- Shadow Weaving
         {
             type = _addon.CONST.EFFECT_TYPE.TARGET_SCHOOLMOD_DMG_TAKEN_PCT,
@@ -178,6 +218,9 @@ _addon.assumableTargetAuras = {
     { spellId = 10170, class = "MAGE", maxStacks = 1 }, -- Amplify Magic (Rank 4)
     { spellId = 10174, class = "MAGE", maxStacks = 1 }, -- Dampen Magic (Rank 5)
     { spellId = 20303, class = "PALADIN", maxStacks = 1 }, -- Judgement of the Crusader (Rank 6)
+    { spellId = 1328548, class = "PALADIN", maxStacks = 1, fromCaster = true }, -- Oath of Light
+    { spellId = 10308, class = "PALADIN", maxStacks = 1, fromCaster = true, label = "Stunned or incapacitated target" }, -- Hammer of Justice (Rank 4)
+    { spellId = 1310905, class = "PALADIN", maxStacks = 1, fromCaster = true, label = "One of the first enemies in your Consecration" }, -- Consecrated Ground
     { spellId = 15258, class = "PRIEST", maxStacks = 5, fromCaster = true }, -- Shadow Weaving
     { spellId = 11198, class = "ROGUE", maxStacks = 1 }, -- Expose Armor (Rank 5)
     { spellId = 13224, class = "ROGUE", maxStacks = 5 }, -- Wound Poison (Rank 4)

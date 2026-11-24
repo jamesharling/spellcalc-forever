@@ -237,6 +237,10 @@ interface EffectInfo {
     spellPowerPctOfMana?: number,
     /** Mana Shield: mana drained per point of damage absorbed. */
     manaPerDamage?: number,
+    /** The value is a percentage of the caster's maximum health (Templar's Bulwark). */
+    pctOfMaxHealth?: boolean,
+    /** Adds this many times the damage per second of the main hand weapon (Hammer of the Righteous). */
+    weaponDpsMult?: number,
 }
 
 const enum PowerType {
@@ -270,6 +274,10 @@ interface RankInfo {
     useScalingFormula: { label: string, id: number } | undefined,
     /** Percent more damage against frozen targets (Ice Lance). */
     frozenDamagePct?: number,
+    /** Percent more damage against stunned or incapacitated targets (Judgement of Command). */
+    stunnedDamagePct?: number,
+    /** Critical strike chance added against creature types (Exorcism with Exorcist): creature type ID -> percent. */
+    versusCritChance?: { [creatureType: number]: number },
     effects: EffectInfo[]
 }
 
@@ -335,6 +343,8 @@ const enum ADDON_EFFECT_TYPE {
     SPELLMOD_PCT_SPELL_SCALE = "_addon.CONST.EFFECT_TYPE.SPELLMOD_PCT_SPELL_SCALE",
     SCRIPT_SPELLMOD_CRIT_CHANCE = "_addon.CONST.EFFECT_TYPE.SCRIPT_SPELLMOD_CRIT_CHANCE",
     SCRIPT_SPELLMOD_DONE_PCT = "_addon.CONST.EFFECT_TYPE.SCRIPT_SPELLMOD_DONE_PCT",
+    SCRIPT_SPELLMOD_EFFECT_PRE = "_addon.CONST.EFFECT_TYPE.SCRIPT_SPELLMOD_EFFECT_PRE",
+    GLOBAL_MOD_CRITICAL_HEALING = "_addon.CONST.EFFECT_TYPE.GLOBAL_MOD_CRITICAL_HEALING",
     SCHOOLMOD_PCT_DAMAGE = "_addon.CONST.EFFECT_TYPE.SCHOOLMOD_PCT_DAMAGE",
     GLOBAL_FLAT_HIT_CHANCE = "_addon.CONST.EFFECT_TYPE.GLOBAL_FLAT_HIT_CHANCE",
     GLOBAL_FLAT_HIT_CHANCE_SPELL = "_addon.CONST.EFFECT_TYPE.GLOBAL_FLAT_HIT_CHANCE_SPELL",

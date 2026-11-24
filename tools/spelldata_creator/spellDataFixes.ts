@@ -5,6 +5,12 @@ import { getSpellIdFromEffect } from "./effectValues";
 import { report, reportSection } from "./report";
 import * as fs from "fs";
 
+/**
+ * Spells stored with their damage against a target that is not stunned, and the percentage a stunned or
+ * incapacitated target adds (Judgement of Command). Filled by fixSpellEffects.
+ */
+export const stunnedDamagePct = new Map<number, number>();
+
 // This isn't used anywhere, just put something there just in case
 let effCustIndex = 999900;
 
@@ -248,6 +254,46 @@ function paladinFix(sd: SpellData)
                 sc.DefenseType = DEFENSE_TYPE.MAGIC;
             }
         }
+    }
+
+    // Light's Vigil: two dummy effects; the party heal the next Holy Shock sets off is only named in the description
+    // ("heals the target and their party for $1311596s1"). Shown as the spell's heal, per target.
+    for (const vigilId of sd.getSpellsByName("Light's Vigil", true) ?? [])
+    {
+        const spell = sd.getSpell(vigilId, true);
+        const effects = sd.getSpellEffects(vigilId, true);
+        if (!spell || !effects || effects[0].Effect !== EFFECT_TYPE.SPELL_EFFECT_DUMMY) continue;
+        const match = spell.Description_lang.match(/party for \$(\d+)s1/);
+        if (!match) continue;
+        const healId = parseInt(match[1]);
+        const heal = effectsOf(sd, healId, `Light's Vigil ${vigilId} heal`);
+        if (!heal || heal[0].Effect !== EFFECT_TYPE.SPELL_EFFECT_HEAL)
+        {
+            report(`Light's Vigil ${vigilId}: spell ${healId} named in the description is no heal, skipped`);
+            continue;
+        }
+        effects[0].Effect = EFFECT_TYPE.SPELL_EFFECT_TRIGGER_SPELL;
+        effects[0].EffectTriggerSpell = healId;
+    }
+
+    // Judgement of Command: "instantly causing $/2;20467s1 Holy damage, $20467s1 if the target is stunned or
+    // incapacitated." The judgement spell holds the full value; store the usual one (base, per level and spell
+    // power alike) and how much a stunned target adds (stunnedDamagePct in the spell data, applied by the assumed
+    // "stunned target" aura).
+    for (const sealId of sd.getSpellsByName("Seal of Command", true) ?? [])
+    {
+        const match = sd.getSpell(sealId, true)?.Description_lang.match(/\$\/(\d+);(\d+)s1 Holy damage, \$(\d+)s1 if the target is stunned/);
+        if (!match || match[2] !== match[3]) continue;
+        const divisor = parseInt(match[1]);
+        const judgementId = parseInt(match[2]);
+        if (divisor <= 1 || stunnedDamagePct.has(judgementId)) continue;
+        const damage = sd.getSpellEffects(judgementId, true)?.find(e => e.Effect === EFFECT_TYPE.SPELL_EFFECT_SCHOOL_DAMAGE);
+        if (!damage) continue;
+        damage.EffectBasePointsF /= divisor;
+        damage.EffectRealPointsPerLevel /= divisor;
+        damage.EffectBonusCoefficient /= divisor;
+        damage.BonusCoefficientFromAP /= divisor;
+        stunnedDamagePct.set(judgementId, (divisor - 1) * 100);
     }
 
     const spellIdsSoC = getSeals(SealType.SOC);
@@ -561,18 +607,32 @@ function areaTriggerFix(sd: SpellData)
         const damageEffects = sd.getSpellEffects(damageId, true)?.filter(e => e.Effect === EFFECT_TYPE.SPELL_EFFECT_SCHOOL_DAMAGE) ?? [];
         const damage = damageEffects.find(e => e.EffectIndex === 0);
         if (!damage || sd.getSpellName(damageId, true)?.Name_lang !== name.Name_lang) continue;
-        // A tick with two damage effects (Consecration: every enemy, and more for the first few) is not one value.
-        if (damageEffects.length !== 1) continue;
+        // A tick with more damage effects is one value only when the tooltip adds them up for the same enemy.
+        // Consecration: "doing ${$1280349m1*8} Holy damage over $d to enemies who enter the area. The first $s3
+        // enemies who enter the area will take an additional ${$1280349m2*8} damage" - the spell is shown for one
+        // of those first enemies, who takes both parts.
+        const additional = damageEffects.filter(e => e !== damage);
+        if (additional.length > 0)
+        {
+            const allNamed = additional.every(e => new RegExp(`additional \\$\\{\\$${damageId}m${e.EffectIndex + 1}\\b`).test(spell.Description_lang));
+            if (!allNamed || damageEffects.some(e => e.Variance))
+            {
+                report(`${sd.getSpellNameWithRank(spellId)} [${spellId}]: tick spell ${damageId} has ${damageEffects.length} damage effects the tooltip does not add up, no periodic damage generated`);
+                continue;
+            }
+            report(`${sd.getSpellNameWithRank(spellId)} [${spellId}]: tick is ${damageEffects.map(e => e.EffectBasePointsF).join(" + ")} (every enemy + additional for the first enemies), shown as one value`);
+        }
+        const sum = (get: (e: SpellEffect) => number) => damageEffects.reduce((total, e) => total + (get(e) || 0), 0);
 
         const period = periodic.EffectAuraPeriod;
         target.Effect = EFFECT_TYPE.SPELL_EFFECT_PERSISTENT_AREA_AURA;
         target.EffectAura = AURA_TYPE.SPELL_AURA_PERIODIC_DAMAGE;
         target.EffectAuraPeriod = period;
-        target.EffectBasePointsF = damage.EffectBasePointsF;
+        target.EffectBasePointsF = sum(e => e.EffectBasePointsF);
         target.Variance = damage.Variance;
-        target.EffectRealPointsPerLevel = damage.EffectRealPointsPerLevel;
-        target.EffectBonusCoefficient = damage.EffectBonusCoefficient;
-        target.BonusCoefficientFromAP = damage.BonusCoefficientFromAP;
+        target.EffectRealPointsPerLevel = sum(e => e.EffectRealPointsPerLevel);
+        target.EffectBonusCoefficient = sum(e => e.EffectBonusCoefficient);
+        target.BonusCoefficientFromAP = sum(e => e.BonusCoefficientFromAP);
         if (isChannel) channelled++; else other++;
     }
 

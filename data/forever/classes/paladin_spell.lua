@@ -666,6 +666,26 @@ _addon.spellInfo = {
             },
         }
     },
+    [20116] = { -- Consecration (Rank 2)
+        spellLevel = 30,
+        maxLevel = 0,
+        duration = 8,
+        baseCost = 235,
+        school = 2,
+        schoolMask = 2,
+        defType = 1,
+        effects = {
+            [1] = {
+                effectType = 27,
+                auraType = 3,
+                tickPeriod = 1,
+                valueBase = 10,
+                valueRange = 0,
+                coef = 0.04199999943,
+                coefAP = 0,
+            },
+        }
+    },
     [20154] = { -- Seal of Righteousness (Rank 1)
         spellLevel = 1,
         maxLevel = 7,
@@ -1195,13 +1215,14 @@ _addon.spellInfo = {
         schoolMask = 2,
         defType = 2,
         cantDogeParryBlock = true,
+        stunnedDamagePct = 100,
         effects = {
             [1] = {
                 effectType = 2,
-                valueBase = 93,
-                valueRange = 8,
-                valuePerLevel = 5.59999990463,
-                coef = 0.42899999022,
+                valueBase = 47,
+                valueRange = 3,
+                valuePerLevel = 2.799999952315,
+                coef = 0.21449999511,
                 coefAP = 0,
             },
         }
@@ -1308,6 +1329,66 @@ _addon.spellInfo = {
                 valueBase = 0,
                 valueRange = 0,
                 coef = 0.28999999166,
+                coefAP = 0,
+            },
+        }
+    },
+    [20922] = { -- Consecration (Rank 3)
+        spellLevel = 40,
+        maxLevel = 0,
+        duration = 8,
+        baseCost = 320,
+        school = 2,
+        schoolMask = 2,
+        defType = 1,
+        effects = {
+            [1] = {
+                effectType = 27,
+                auraType = 3,
+                tickPeriod = 1,
+                valueBase = 17,
+                valueRange = 0,
+                coef = 0.04199999943,
+                coefAP = 0,
+            },
+        }
+    },
+    [20923] = { -- Consecration (Rank 4)
+        spellLevel = 50,
+        maxLevel = 0,
+        duration = 8,
+        baseCost = 435,
+        school = 2,
+        schoolMask = 2,
+        defType = 1,
+        effects = {
+            [1] = {
+                effectType = 27,
+                auraType = 3,
+                tickPeriod = 1,
+                valueBase = 28,
+                valueRange = 0,
+                coef = 0.04199999943,
+                coefAP = 0,
+            },
+        }
+    },
+    [20924] = { -- Consecration (Rank 5)
+        spellLevel = 60,
+        maxLevel = 0,
+        duration = 8,
+        baseCost = 565,
+        school = 2,
+        schoolMask = 2,
+        defType = 1,
+        effects = {
+            [1] = {
+                effectType = 27,
+                auraType = 3,
+                tickPeriod = 1,
+                valueBase = 39,
+                valueRange = 0,
+                coef = 0.04199999943,
                 coefAP = 0,
             },
         }
@@ -1431,13 +1512,14 @@ _addon.spellInfo = {
         schoolMask = 2,
         defType = 2,
         cantDogeParryBlock = true,
+        stunnedDamagePct = 100,
         effects = {
             [1] = {
                 effectType = 2,
-                valueBase = 146,
-                valueRange = 14,
-                valuePerLevel = 6.09999990463,
-                coef = 0.42899999022,
+                valueBase = 73,
+                valueRange = 7,
+                valuePerLevel = 3.049999952315,
+                coef = 0.21449999511,
                 coefAP = 0,
             },
         }
@@ -1449,13 +1531,14 @@ _addon.spellInfo = {
         schoolMask = 2,
         defType = 2,
         cantDogeParryBlock = true,
+        stunnedDamagePct = 100,
         effects = {
             [1] = {
                 effectType = 2,
-                valueBase = 204,
-                valueRange = 20,
-                valuePerLevel = 5.59999990463,
-                coef = 0.42899999022,
+                valueBase = 102,
+                valueRange = 10,
+                valuePerLevel = 2.799999952315,
+                coef = 0.21449999511,
                 coefAP = 0,
             },
         }
@@ -1467,13 +1550,14 @@ _addon.spellInfo = {
         schoolMask = 2,
         defType = 2,
         cantDogeParryBlock = true,
+        stunnedDamagePct = 100,
         effects = {
             [1] = {
                 effectType = 2,
-                valueBase = 261,
-                valueRange = 26,
-                valuePerLevel = 6.09999990463,
-                coef = 0.42899999022,
+                valueBase = 130,
+                valueRange = 14,
+                valuePerLevel = 3.049999952315,
+                coef = 0.21449999511,
                 coefAP = 0,
             },
         }
@@ -1485,13 +1569,14 @@ _addon.spellInfo = {
         schoolMask = 2,
         defType = 2,
         cantDogeParryBlock = true,
+        stunnedDamagePct = 100,
         effects = {
             [1] = {
                 effectType = 2,
-                valueBase = 339,
-                valueRange = 34,
-                valuePerLevel = 6.09999990463,
-                coef = 0.42899999022,
+                valueBase = 170,
+                valueRange = 16,
+                valuePerLevel = 3.049999952315,
+                coef = 0.21449999511,
                 coefAP = 0,
             },
         }
@@ -1704,6 +1789,26 @@ _addon.spellInfo = {
             },
         }
     },
+    [26573] = { -- Consecration (Rank 1)
+        spellLevel = 20,
+        maxLevel = 0,
+        duration = 8,
+        baseCost = 135,
+        school = 2,
+        schoolMask = 2,
+        defType = 1,
+        effects = {
+            [1] = {
+                effectType = 27,
+                auraType = 3,
+                tickPeriod = 1,
+                valueBase = 6,
+                valueRange = 0,
+                coef = 0.04199999943,
+                coefAP = 0,
+            },
+        }
+    },
     [407632] = { -- Hammer of the Righteous
         spellLevel = 40,
         maxLevel = 0,
@@ -1718,6 +1823,121 @@ _addon.spellInfo = {
                 valueBase = 1,
                 valueRange = 0,
                 coef = 0,
+                coefAP = 0,
+                weaponDpsMult = 3,
+            },
+        }
+    },
+    [415068] = { -- Exorcism (Rank 1)
+        spellLevel = 20,
+        maxLevel = 25,
+        baseCost = 85,
+        school = 2,
+        schoolMask = 2,
+        defType = 1,
+        versusCritChance = { [3] = 100, [6] = 100 },
+        effects = {
+            [1] = {
+                effectType = 2,
+                valueBase = 84,
+                valueRange = 12,
+                valuePerLevel = 1.20000004768,
+                coef = 0.42899999022,
+                coefAP = 0,
+            },
+        }
+    },
+    [415069] = { -- Exorcism (Rank 2)
+        spellLevel = 28,
+        maxLevel = 33,
+        baseCost = 135,
+        school = 2,
+        schoolMask = 2,
+        defType = 1,
+        versusCritChance = { [3] = 100, [6] = 100 },
+        effects = {
+            [1] = {
+                effectType = 2,
+                valueBase = 152,
+                valueRange = 20,
+                valuePerLevel = 1.60000002384,
+                coef = 0.42899999022,
+                coefAP = 0,
+            },
+        }
+    },
+    [415070] = { -- Exorcism (Rank 3)
+        spellLevel = 36,
+        maxLevel = 41,
+        baseCost = 180,
+        school = 2,
+        schoolMask = 2,
+        defType = 1,
+        versusCritChance = { [3] = 100, [6] = 100 },
+        effects = {
+            [1] = {
+                effectType = 2,
+                valueBase = 217,
+                valueRange = 28,
+                valuePerLevel = 2,
+                coef = 0.42899999022,
+                coefAP = 0,
+            },
+        }
+    },
+    [415071] = { -- Exorcism (Rank 4)
+        spellLevel = 44,
+        maxLevel = 49,
+        baseCost = 235,
+        school = 2,
+        schoolMask = 2,
+        defType = 1,
+        versusCritChance = { [3] = 100, [6] = 100 },
+        effects = {
+            [1] = {
+                effectType = 2,
+                valueBase = 304,
+                valueRange = 38,
+                valuePerLevel = 2.40000009537,
+                coef = 0.42899999022,
+                coefAP = 0,
+            },
+        }
+    },
+    [415072] = { -- Exorcism (Rank 5)
+        spellLevel = 52,
+        maxLevel = 57,
+        baseCost = 285,
+        school = 2,
+        schoolMask = 2,
+        defType = 1,
+        versusCritChance = { [3] = 100, [6] = 100 },
+        effects = {
+            [1] = {
+                effectType = 2,
+                valueBase = 393,
+                valueRange = 46,
+                valuePerLevel = 2.79999995232,
+                coef = 0.42899999022,
+                coefAP = 0,
+            },
+        }
+    },
+    [415073] = { -- Exorcism (Rank 6)
+        spellLevel = 60,
+        maxLevel = 65,
+        baseCost = 345,
+        school = 2,
+        schoolMask = 2,
+        defType = 1,
+        versusCritChance = { [3] = 100, [6] = 100 },
+        effects = {
+            [1] = {
+                effectType = 2,
+                valueBase = 505,
+                valueRange = 58,
+                valuePerLevel = 3.20000004768,
+                coef = 0.42899999022,
                 coefAP = 0,
             },
         }
@@ -1742,6 +1962,41 @@ _addon.spellInfo = {
             },
         }
     },
+    [1310911] = { -- Light's Vigil (Rank 1)
+        spellLevel = 40,
+        maxLevel = 49,
+        baseCost = 730,
+        school = 2,
+        schoolMask = 2,
+        defType = 1,
+        effects = {
+            [1] = {
+                effectType = 64,
+                valueBase = 0,
+                valueRange = 0,
+                triggeredSpell = 1310912,
+                coef = 0,
+                coefAP = 0,
+            },
+        }
+    },
+    [1310912] = { -- Light's Vigil (Rank 1)
+        spellLevel = 40,
+        maxLevel = 49,
+        school = 2,
+        schoolMask = 2,
+        defType = 1,
+        effects = {
+            [1] = {
+                effectType = 10,
+                valueBase = 315,
+                valueRange = 18,
+                valuePerLevel = 1.20000004768,
+                coef = 0.14300000668,
+                coefAP = 0,
+            },
+        }
+    },
     [1311015] = { -- Templar's Bulwark
         spellLevel = 0,
         maxLevel = 0,
@@ -1758,6 +2013,77 @@ _addon.spellInfo = {
                 valueBase = 100,
                 valueRange = 0,
                 coef = 0,
+                coefAP = 0,
+                pctOfMaxHealth = true,
+            },
+        }
+    },
+    [1311590] = { -- Light's Vigil (Rank 2)
+        spellLevel = 50,
+        maxLevel = 59,
+        baseCost = 1000,
+        school = 2,
+        schoolMask = 2,
+        defType = 1,
+        effects = {
+            [1] = {
+                effectType = 64,
+                valueBase = 0,
+                valueRange = 0,
+                triggeredSpell = 1311591,
+                coef = 0,
+                coefAP = 0,
+            },
+        }
+    },
+    [1311591] = { -- Light's Vigil (Rank 2)
+        spellLevel = 50,
+        maxLevel = 59,
+        school = 2,
+        schoolMask = 2,
+        defType = 1,
+        effects = {
+            [1] = {
+                effectType = 10,
+                valueBase = 473,
+                valueRange = 28,
+                valuePerLevel = 1.5,
+                coef = 0.14300000668,
+                coefAP = 0,
+            },
+        }
+    },
+    [1311595] = { -- Light's Vigil (Rank 3)
+        spellLevel = 60,
+        maxLevel = 69,
+        baseCost = 1340,
+        school = 2,
+        schoolMask = 2,
+        defType = 1,
+        effects = {
+            [1] = {
+                effectType = 64,
+                valueBase = 0,
+                valueRange = 0,
+                triggeredSpell = 1311596,
+                coef = 0,
+                coefAP = 0,
+            },
+        }
+    },
+    [1311596] = { -- Light's Vigil (Rank 3)
+        spellLevel = 60,
+        maxLevel = 69,
+        school = 2,
+        schoolMask = 2,
+        defType = 1,
+        effects = {
+            [1] = {
+                effectType = 10,
+                valueBase = 684,
+                valueRange = 40,
+                valuePerLevel = 1.79999995232,
+                coef = 0.14300000668,
                 coefAP = 0,
             },
         }

@@ -181,6 +181,88 @@ export class TargetAuras
             return [{ type: ADDON_EFFECT_TYPE.SCRIPT_SPELLMOD_DONE_PCT, affectSpell: ALL_SPELLS, scriptKey: "Mage_Fire_Effects", value: 1, hasStacks: true }];
         }
 
+        if (entry.class === "PALADIN") return this.getPaladinExtraEffects(entry, spellId, effects);
+
+        return [];
+    }
+
+    /**
+     * Class mask bits of the spells of a class with the given name (all ranks).
+     */
+    private classMaskOf(cls: string, name: string, filter?: (spellId: number) => boolean)
+    {
+        const mask = [0, 0, 0, 0];
+        for (const spellId of this.spellData.getSpellsByName(name, true) ?? [])
+        {
+            const options = this.spellData.getSpellClassOption(spellId, true);
+            if (!options || options.SpellClassSet !== CLASS_SET[cls]) continue;
+            if (filter && !filter(spellId)) continue;
+            mask[0] |= options.SpellClassMask_0;
+            mask[1] |= options.SpellClassMask_1;
+            mask[2] |= options.SpellClassMask_2;
+            mask[3] |= options.SpellClassMask_3;
+        }
+        return mask;
+    }
+
+    /**
+     * The scripts are in data/forever/classes/paladin.lua.
+     */
+    private getPaladinExtraEffects(entry: CuratedAura, spellId: number, effects: SpellEffect[]): AddonEffectData[]
+    {
+        // "increasing the healing of your Holy Light on them by up to $s1, your Flash of Light by up to $s2, and
+        // your Holy Shock by up to $s3." Three effects without a class mask whose values are all per caster level.
+        // Each becomes a script on the spell it names, with the amount per level as its value. The spells' own
+        // bits are the ones Healing Light lists (the same three spells); a set value tells Boundless Light's
+        // script that the target has the Oath.
+        if (entry.name === "Oath of Light")
+        {
+            const isHeal = (id: number) => this.spellData.getSpellEffects(id, true)?.some(e => e.EffectIndex === 0 && e.Effect === EFFECT_TYPE.SPELL_EFFECT_HEAL) ?? false;
+            const healingLight = (this.spellData.getSpellsByName("Healing Light", true) ?? [])
+                .map(id => this.spellData.getSpellEffects(id, true)?.find(e => e.EffectAura === AURA_TYPE.SPELL_AURA_ADD_PCT_MODIFIER))
+                .find(e => e && (e.EffectSpellClassMask_0 || e.EffectSpellClassMask_1));
+            if (!healingLight)
+            {
+                report(`${entry.class} ${entry.name} [${spellId}]: Healing Light not found, cannot tell the three heals apart, skipped`);
+                return [];
+            }
+            const listed = [healingLight.EffectSpellClassMask_0, healingLight.EffectSpellClassMask_1, healingLight.EffectSpellClassMask_2, healingLight.EffectSpellClassMask_3];
+            const targets = [
+                { index: 0, name: "Holy Light", key: "Paladin_Oath_Holy_Light" },
+                { index: 1, name: "Flash of Light", key: "Paladin_Oath_Flash_of_Light" },
+                { index: 2, name: "Holy Shock", key: "Paladin_Oath_Holy_Shock" },
+            ];
+            const result: AddonEffectData[] = [];
+            for (const target of targets)
+            {
+                const effect = effects.find(e => e.EffectIndex === target.index);
+                const mask = this.classMaskOf(entry.class, target.name, isHeal).map((bits, i) => (bits & listed[i]) >>> 0);
+                if (!effect || !(effect.EffectRealPointsPerLevel > 0) || mask.every(bits => bits === 0))
+                {
+                    report(`${entry.class} ${entry.name} [${spellId}]: no per-level value or class mask for ${target.name}, that part is not applied`);
+                    continue;
+                }
+                report(`${entry.class} ${entry.name} [${spellId}]: ${target.name} +${effect.EffectRealPointsPerLevel} per level (${Math.round(effect.EffectRealPointsPerLevel * 60)} at 60)`);
+                result.push({ type: ADDON_EFFECT_TYPE.SCRIPT_SPELLMOD_EFFECT_PRE, affectSpell: mask, scriptKey: target.key, value: effect.EffectRealPointsPerLevel });
+            }
+            if (result.length > 0) result.push({ type: ADDON_EFFECT_TYPE.SCRIPT_SET_VALUE, scriptKey: "Paladin_Oath_of_Light", value: 1 });
+            return result;
+        }
+
+        // A stunned or incapacitated target, offered under Hammer of Justice: the Paladin_Stunned_Damage script
+        // applies a spell's own bonus against such targets (Judgement of Command, stunnedDamagePct in its data).
+        if (entry.name === "Hammer of Justice")
+        {
+            return [{ type: ADDON_EFFECT_TYPE.SCRIPT_SPELLMOD_DONE_PCT, affectSpell: ALL_SPELLS, scriptKey: "Paladin_Stunned_Damage", value: 0 }];
+        }
+
+        // One of the first enemies that entered the paladin's Consecration, offered under the Consecrated Ground
+        // talent, whose script adds Holy damage against them.
+        if (entry.name === "Consecrated Ground")
+        {
+            return [{ type: ADDON_EFFECT_TYPE.SCRIPT_SET_VALUE, scriptKey: "Paladin_In_Consecration", value: 1 }];
+        }
+
         return [];
     }
 

@@ -582,6 +582,198 @@ if __CLASS == "MAGE" then
     if differ > 0 then emit(("FAIL %d spells differ after the mage checks: %s"):format(differ, table.concat(examples, ", "))) end
 end
 
+-- Paladin. Consecration ticks through an area trigger (the tick spell has a part for every enemy and one for the
+-- first enemies; shown together); Templar's Bulwark absorbs the paladin's maximum health; Hammer of the Righteous
+-- deals 3 times the main hand's damage per second; Judgement of Command deals half its damage unless the target is
+-- stunned (assumed in the settings); Light's Vigil shows the party heal its tooltip names; the Exorcist passive
+-- replaces Exorcism with ranks that always crit Undead and Demons. Talents: Holy Power (critical heals), Two-Handed
+-- Weapon Specialization (Holy damage too, with a two-hander), Consecrated Ground, Boundless Light. Oath of Light
+-- (assumed on the heal target) adds a flat amount per level to three heals.
+if __CLASS == "PALADIN" then
+    -- A copy of the numbers: the addon recalculates a spell in place, so the tables themselves change later.
+    local function fx(id, n)
+        local status, cs = checkSpell(id)
+        if status ~= "ok" then return { } end
+        local e = cs.effects[n or 1] or { }
+        return { avg = e.avg, min = e.min, max = e.max, ticks = e.ticks, crit = cs.critChance, critMult = cs.critMult,
+            triggered = e.triggeredSpell }
+    end
+    local function near(a, b) return type(a) == "number" and type(b) == "number" and math.abs(a - b) < 1e-4 end
+    local function baseOf(id, n)
+        local info = A.spellInfo[id]
+        local e = info and info.effects[n or 1]
+        if not e then return nil, { } end
+        return e.valueBase + e.valueRange / 2 + (math.min(60, info.maxLevel) - info.spellLevel) * (e.valuePerLevel or 0), e
+    end
+    local function talents(ranks)
+        for i = #__TALENT_TREE, 1, -1 do
+            __TALENT_RANKS[__TALENT_TREE[i].spellId] = nil
+            __TALENT_TREE[i] = nil
+        end
+        for spellId, rank in pairs(ranks) do
+            __TALENT_TREE[#__TALENT_TREE + 1] = { spellId = spellId, maxRanks = rank }
+            __TALENT_RANKS[spellId] = rank
+        end
+        __FireEvent("TRAIT_CONFIG_UPDATED", 4001)
+        settle()
+    end
+    local function assume(spellId, stacks)
+        SpellCalc_settings.assumedTargetAuras[spellId] = stacks
+        A:UpdateAssumedTargetAuras()
+        settle()
+    end
+    local function wield(itemId)
+        __INVENTORY[16] = itemId
+        __FireEvent("UNIT_INVENTORY_CHANGED", "player")
+        settle()
+    end
+    local function target(t)
+        __TARGET = t
+        __FireEvent("PLAYER_TARGET_CHANGED")
+        settle()
+    end
+    local CONSECRATION, BULWARK, HAMMER, JOC, VIGIL, VIGIL_HEAL = 20924, 1311015, 407632, 20966, 1311595, 1311596
+    local EXORCISM, EXORCISM_ANY, HOLY_LIGHT, FLASH, SHOCK_HEAL, SHOCK_DAMAGE = 10314, 415073, 25292, 19943, 25903, 25902
+    local OATH, STUN, GROUND, HOLY_POWER, TWO_HAND, BOUNDLESS = 1328548, 10308, 1310905, 5923, 20111, 1328550
+
+    local cons = fx(CONSECRATION)
+    local consBase, consData = baseOf(CONSECRATION)
+    emit(("paladin: Consecration %s x %s"):format(tostring(cons.avg), tostring(cons.ticks)))
+    if consBase ~= 12 + 27 or cons.ticks ~= 8 or (consData.coef or 0) <= 0 or not near(cons.avg, 39 + consData.coef * 400) then
+        emit("FAIL Consecration rank 5 doesn't tick 8 times for 12 + 27 plus spell power")
+    end
+
+    local bulwark = fx(BULWARK)
+    local health = A.stats.healthMax or 0
+    emit(("paladin: Templar's Bulwark absorbs %s with %s maximum health"):format(tostring(bulwark.avg), tostring(health)))
+    if health <= 0 or not near(bulwark.avg, health) then emit("FAIL Templar's Bulwark doesn't absorb 100% of maximum health") end
+
+    local hammer = fx(HAMMER)
+    local _, hammerData = baseOf(HAMMER)
+    local dps = (A.stats.attackDmg.mainhand.min + A.stats.attackDmg.mainhand.max) / 2 / A.stats.attackSpeed.mainhand
+    emit(("paladin: Hammer of the Righteous %s with %.2f weapon damage per second"):format(tostring(hammer.avg), dps))
+    if hammerData.weaponDpsMult ~= 3 or not near(hammer.avg, hammerData.valueBase + 3 * dps) then
+        emit("FAIL Hammer of the Righteous doesn't deal 3 times the main hand's damage per second")
+    end
+
+    -- Judgement of Command rank 5: 356 + 6.1 per level and 42.9% of spell power in the client data, halved
+    local joc, exorcism = fx(JOC), fx(EXORCISM)
+    local jocBase, jocData = baseOf(JOC)
+    assume(STUN, 1)
+    local jocStunned, exorcismStunned = fx(JOC), fx(EXORCISM)
+    assume(STUN, nil)
+    emit(("paladin: Judgement of Command %s, %s on a stunned target"):format(tostring(joc.avg), tostring(jocStunned.avg)))
+    if jocBase ~= 178 or A.spellInfo[JOC].stunnedDamagePct ~= 100 or not near(joc.avg, jocBase + jocData.coef * 400)
+        or math.abs(jocData.coef - 0.429 / 2) > 1e-6 then
+        emit("FAIL Judgement of Command isn't stored with half its damage")
+    end
+    if not joc.avg or not near(jocStunned.avg, joc.avg * 2) then emit("FAIL Judgement of Command doesn't deal double damage to a stunned target") end
+    if not near(exorcismStunned.avg, exorcism.avg) then emit("FAIL a stunned target changes Exorcism") end
+    local stunOption
+    for _, group in pairs(A.AssumedTargetAuraSettings()) do
+        if type(group) == "table" and group.type == "group" and group.args["aura" .. STUN] then stunOption = group.args["aura" .. STUN].name end
+    end
+    if type(stunOption) ~= "string" or not stunOption:find("Stunned or incapacitated target", 1, true) then
+        emit("FAIL the stunned target option isn't offered as \"Stunned or incapacitated target (...)\": " .. tostring(stunOption))
+    end
+
+    local vigil, vigilHeal = fx(VIGIL), fx(VIGIL_HEAL)
+    local vigilBase, vigilData = baseOf(VIGIL_HEAL)
+    emit(("paladin: Light's Vigil heals each party member for %s"):format(tostring(vigilHeal.avg)))
+    if vigil.triggered ~= VIGIL_HEAL or not vigilBase or not near(vigilHeal.avg, vigilBase + vigilData.coef * 700) or (vigilData.coef or 0) <= 0 then
+        emit("FAIL Light's Vigil doesn't show the party heal named in its tooltip")
+    end
+
+    -- Exorcist: the client reports the override; Undead and Demons are always crit
+    local any = fx(EXORCISM_ANY)
+    __SPELL_OVERRIDES[EXORCISM] = EXORCISM_ANY
+    local handled = A:GetHandledSpellID(EXORCISM)
+    __SPELL_OVERRIDES[EXORCISM] = nil
+    target({ name = "Risen Guard", level = 60, creatureType = { "Undead", 6 }, class = "WARRIOR", isPlayer = false })
+    local anyUndead, plainUndead = fx(EXORCISM_ANY), fx(EXORCISM)
+    target({ name = "Defias Thug", level = 60, creatureType = { "Humanoid", 7 }, class = "WARRIOR", isPlayer = false })
+    local anyHumanoid = fx(EXORCISM_ANY)
+    target(nil)
+    emit(("paladin: Exorcism %s, %s as replaced by Exorcist (crit %s%%, %s%% against Undead)"):format(tostring(exorcism.avg), tostring(any.avg),
+        tostring(any.crit), tostring(anyUndead.crit)))
+    if handled ~= EXORCISM_ANY or A:GetHandledSpellID(EXORCISM) ~= EXORCISM then emit("FAIL a replaced Exorcism isn't calculated as the spell that replaces it") end
+    if not any.avg or not exorcism.avg or any.avg <= exorcism.avg then emit("FAIL the Exorcism ranks of Exorcist aren't generated with their own values") end
+    if anyUndead.crit ~= 100 or not near(anyHumanoid.crit, any.crit) or not near(plainUndead.crit, exorcism.crit) then
+        emit("FAIL Exorcism with Exorcist doesn't always crit Undead, or crits other targets or the plain spell more often")
+    end
+
+    -- Holy Power 5/5: critical heals for 175%; Two-Handed Weapon Specialization 3/3: 6% Holy damage with a two-hander
+    local light, shockDamage = fx(HOLY_LIGHT), fx(SHOCK_DAMAGE)
+    talents({ [HOLY_POWER] = 5, [TWO_HAND] = 3 })
+    local lightPower, exorcismUnarmed = fx(HOLY_LIGHT), fx(EXORCISM)
+    __WEAPONS[90001] = { subclass = Enum.ItemWeaponSubclass.Mace2H, low = 5, high = 9, speed = 2.9 }
+    __WEAPONS[90002] = { subclass = Enum.ItemWeaponSubclass.Mace1H, low = 3, high = 7, speed = 2.6 }
+    wield(90001)
+    local exorcismTwoHand, lightTwoHand = fx(EXORCISM), fx(HOLY_LIGHT)
+    wield(90002)
+    local exorcismOneHand = fx(EXORCISM)
+    wield(nil)
+    talents({})
+    emit(("paladin: Holy Light crits for x%s, x%s with Holy Power 5/5; Exorcism %s, %s with Two-Handed Weapon Specialization 3/3 and a two-hander"):format(
+        tostring(light.critMult), tostring(lightPower.critMult), tostring(exorcism.avg), tostring(exorcismTwoHand.avg)))
+    if not near(light.critMult, 1.5) or not near(lightPower.critMult, 1.75) or not near(exorcismUnarmed.critMult, exorcism.critMult) then
+        emit("FAIL Holy Power 5/5 doesn't raise critical heals to 175%, or changes damage crits")
+    end
+    if not near(exorcismTwoHand.avg, (exorcism.avg or 0) * 1.06) or not near(exorcismUnarmed.avg, exorcism.avg) or not near(exorcismOneHand.avg, exorcism.avg)
+        or not near(lightTwoHand.avg, light.avg) then
+        emit("FAIL Two-Handed Weapon Specialization 3/3 doesn't add 6% Holy damage with a two-hander only")
+    end
+
+    -- Oath of Light on the heal target; Boundless Light 2/2 only without it
+    local flash, shockHeal = fx(FLASH), fx(SHOCK_HEAL)
+    assume(OATH, 1)
+    local lightOath, flashOath, shockOath, shockDamageOath = fx(HOLY_LIGHT), fx(FLASH), fx(SHOCK_HEAL), fx(SHOCK_DAMAGE)
+    talents({ [BOUNDLESS] = 2 })
+    local shockOathBoundless = fx(SHOCK_HEAL)
+    assume(OATH, nil)
+    local shockBoundless, shockDamageBoundless, lightBoundless = fx(SHOCK_HEAL), fx(SHOCK_DAMAGE), fx(HOLY_LIGHT)
+    talents({})
+    emit(("paladin: Oath of Light: Holy Light %s -> %s, Flash of Light %s -> %s, Holy Shock %s -> %s; Boundless Light 2/2: Holy Shock heal crit %s%% -> %s%%"):format(
+        tostring(light.avg), tostring(lightOath.avg), tostring(flash.avg), tostring(flashOath.avg), tostring(shockHeal.avg), tostring(shockOath.avg),
+        tostring(shockHeal.crit), tostring(shockBoundless.crit)))
+    if not light.avg or math.abs((lightOath.avg or 0) - light.avg - 400) > 0.01 or math.abs((flashOath.avg or 0) - flash.avg - 115) > 0.01
+        or math.abs((shockOath.avg or 0) - shockHeal.avg - 230) > 0.01 then
+        emit("FAIL Oath of Light doesn't add 400 / 115 / 230 to Holy Light, Flash of Light and Holy Shock at level 60")
+    end
+    if not near(shockDamageOath.avg, shockDamage.avg) then emit("FAIL Oath of Light changes Holy Shock's damage") end
+    if not near(shockBoundless.crit, (shockHeal.crit or 0) + 30) or not near(shockOathBoundless.crit, shockHeal.crit)
+        or not near(shockDamageBoundless.crit, shockDamage.crit) or not near(lightBoundless.crit, light.crit) then
+        emit("FAIL Boundless Light 2/2 doesn't add 30% critical strike chance to Holy Shock heals without Oath of Light only")
+    end
+
+    -- Consecrated Ground 2/2: Consecration always, other Holy damage against the first enemies in it
+    talents({ [GROUND] = 2 })
+    local consGround, exorcismGround = fx(CONSECRATION), fx(EXORCISM)
+    assume(GROUND, 1)
+    local consInside, exorcismInside, lightInside = fx(CONSECRATION), fx(EXORCISM), fx(HOLY_LIGHT)
+    talents({})
+    local exorcismNoTalent = fx(EXORCISM)
+    assume(GROUND, nil)
+    emit(("paladin: Consecrated Ground 2/2: Consecration %s -> %s; Exorcism %s -> %s against the first enemies in it"):format(
+        tostring(cons.avg), tostring(consGround.avg), tostring(exorcism.avg), tostring(exorcismInside.avg)))
+    if not near(consGround.avg, (cons.avg or 0) * 1.1) or not near(consInside.avg, (cons.avg or 0) * 1.1) then
+        emit("FAIL Consecrated Ground 2/2 doesn't add 10% to Consecration (once)")
+    end
+    if not near(exorcismGround.avg, exorcism.avg) or not near(exorcismInside.avg, (exorcism.avg or 0) * 1.1) or not near(exorcismNoTalent.avg, exorcism.avg)
+        or not near(lightInside.avg, light.avg) then
+        emit("FAIL Consecrated Ground 2/2 doesn't add 10% Holy damage against the first enemies in the Consecration only")
+    end
+
+    local differ, examples = 0, {}
+    for id, v in pairs(runAll("paladin checked")) do
+        if base[id] and math.abs(base[id] - v) > 1e-6 then
+            differ = differ + 1
+            if #examples < 4 then examples[#examples + 1] = ("%s %.2f -> %.2f"):format(name(id), base[id], v) end
+        end
+    end
+    if differ > 0 then emit(("FAIL %d spells differ after the paladin checks: %s"):format(differ, table.concat(examples, ", "))) end
+end
+
 -- The options table must pass AceConfig validation (it is only validated when the panel opens in game)
 do
     local registry = LibStub("AceConfigRegistry-3.0")

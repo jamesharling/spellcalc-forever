@@ -205,18 +205,25 @@ export class TalentsCreator
      * Talents that require an equipped weapon type (weapon specializations, Wand Specialization) only
      * modify damage done with that weapon. Physical damage bonuses get the weapon requirement so the
      * addon applies them only while such a weapon is equipped; bonuses to magic schools would apply to
-     * every spell instead of the weapon's own damage (wand shots), so they are dropped.
+     * every spell instead of the weapon's own damage (wand shots), so they are dropped. Unless the tooltip
+     * says the bonus is to the damage the player deals while the weapon is equipped (the paladin's
+     * Two-Handed Weapon Specialization: "Increases the Physical and Holy damage you deal by $s1% ... while a
+     * two-handed melee weapon is equipped"): that one covers the spells of its schools as well.
      */
     private applyWeaponRequirement(talentName: string, spellId: number, effects: AddonTalentData[]): AddonTalentData[]
     {
         const equipped = this.spellData.getSpellEquipeedItems(spellId);
         if (!equipped || equipped.EquippedItemClass !== ItemClass.ITEM_CLASS_WEAPON || !equipped.EquippedItemSubclass) return effects;
 
+        const description = this.spellData.getSpell(spellId, true)?.Description_lang ?? "";
+        const whileEquipped = /damage you deal\b[^.]*\bwhile an? [^.]*\bequipped/i.test(description);
+
         const kept: AddonTalentData[] = [];
         for (const eff of effects)
         {
             const physicalOnly = eff.affectMask === SCHOOL_MASK.PHYSICAL && !eff.affectSpell;
-            if (physicalOnly)
+            const schoolDamage = whileEquipped && eff.type === ADDON_EFFECT_TYPE.SCHOOLMOD_PCT_DAMAGE && !eff.affectSpell;
+            if (physicalOnly || schoolDamage)
             {
                 eff.neededWeaponMask = equipped.EquippedItemSubclass;
                 kept.push(eff);

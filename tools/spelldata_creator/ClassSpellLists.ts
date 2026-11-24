@@ -43,6 +43,9 @@ const DO_AURAS = [
     AURA_TYPE.SPELL_AURA_PERIODIC_TRIGGER_SPELL_WITH_VALUE
 ];
 
+/** Aura type that replaces a spell (misc value) with another one (base points) while the aura is up. */
+const SPELL_AURA_OVERRIDE_ACTIONBAR_SPELLS = 332;
+
 /** Spells whose proc trigger aura is not interesting for the calculator. */
 const TRIGGER_SPELL_IGNORE: { [spellName: string]: boolean } = {
     "Feedback": true,
@@ -265,6 +268,7 @@ export class ClassSpellLists
     {
         const spells = new Map<number, string>();
         let passives = 0;
+        const replacements: string[] = [];
 
         const addSpell = (spellId: number, source: string, skipPassive: boolean) =>
         {
@@ -274,6 +278,16 @@ export class ClassSpellLists
                 // Passive spells (talents, weapon/armor skills) are no castable spells; passive auras
                 // with calculator effects are collected by PlayerAuras instead.
                 passives++;
+                // A passive can replace spells with ones nobody learns directly (Exorcist: every rank of Exorcism
+                // becomes a spell that can be cast on any target). Those are what the player casts then.
+                for (const effect of this.spellData.getSpellEffects(spellId, true) ?? [])
+                {
+                    if (effect.Effect !== EFFECT_TYPE.SPELL_EFFECT_APPLY_AURA || effect.EffectAura !== SPELL_AURA_OVERRIDE_ACTIONBAR_SPELLS) continue;
+                    const replacementId = getSpellIdFromEffect(effect);
+                    if (!this.spellData.spellExists(replacementId) || spells.has(replacementId)) continue;
+                    spells.set(replacementId, `${source}, replaces ${effect.EffectMiscValue_0}`);
+                    replacements.push(`${this.spellData.getSpellNameWithRank(replacementId)} [${replacementId}] for ${effect.EffectMiscValue_0}`);
+                }
                 return true;
             }
             if (!spells.has(spellId)) spells.set(spellId, source);
@@ -299,6 +313,7 @@ export class ClassSpellLists
                 addSpell(spellId, "trait tree " + treeId, true);
             }
             report(`${pclass}: ${spells.size - before} additional spells from trait tree ${treeId}`);
+            if (replacements.length > 0) report(`${pclass}: replacement spells from passives: ${replacements.join("; ")}`);
         }
 
         const extrasFile = cfg.dataDir + "class_spells/" + pclass + ".json";

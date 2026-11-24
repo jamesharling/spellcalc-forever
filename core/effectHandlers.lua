@@ -430,6 +430,15 @@ local function AbsorbAura(calcedSpell, effNum, spellInfo, spellName, spellId)
 
     FillBaseValues(calcedSpell, calcedEffect, spellId, spellInfo, spellName, effectData, calcedEffect.flatMod, calcedEffect.modBase, calcedEffect.effectivePower);
 
+    -- "an absorb shield equal to $s1% of your maximum health" (Templar's Bulwark).
+    if effectData.pctOfMaxHealth then
+        local pct = stats.healthMax / 100;
+        calcedEffect.min = calcedEffect.min * pct;
+        calcedEffect.max = calcedEffect.max * pct;
+        calcedEffect.avg = calcedEffect.avg * pct;
+        calcedEffect.avgCombined = calcedEffect.avg;
+    end
+
     if stats.spellModExtraOnHit[spellId] and stats.spellModExtraOnHit[spellId].val ~= 0 then
         if not calcedEffect.hitExtra then calcedEffect.hitExtra = {} end
         calcedEffect.hitExtra.avgHit = calcedEffect.min * stats.spellModExtraOnHit[spellId].val / 100;
@@ -619,8 +628,19 @@ auraHandler[AURA_TYPES.SPELL_AURA_MOD_POWER_REGEN] = PeriodicEnergize;
 local function SchoolDamage(_, calcedSpell, effNum, spellInfo, spellName, spellId)
     local calcedEffect = calcedSpell.effects[effNum];
     local effectData = spellInfo.effects[effNum];
+    local flat = calcedEffect.flatMod;
 
-    FillBaseValues(calcedSpell, calcedEffect, spellId, spellInfo, spellName, effectData, calcedEffect.flatMod, calcedEffect.modBase, calcedEffect.effectivePower);
+    -- "damage ... equal to $s3 times the damage per second of your main hand weapon" (Hammer of the Righteous):
+    -- the average hit over the current attack speed, like the character sheet's damage per second.
+    if effectData.weaponDpsMult then
+        local weapon = stats.attackDmg.mainhand;
+        local speed = stats.attackSpeed.mainhand;
+        if speed and speed > 0 then
+            flat = flat + effectData.weaponDpsMult * (weapon.min + weapon.max) * 0.5 / speed;
+        end
+    end
+
+    FillBaseValues(calcedSpell, calcedEffect, spellId, spellInfo, spellName, effectData, flat, calcedEffect.modBase, calcedEffect.effectivePower);
     FillCritValues(calcedSpell, calcedEffect, spellId);
     Mitigate(spellName, calcedSpell, calcedEffect);
 

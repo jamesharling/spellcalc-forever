@@ -109,7 +109,9 @@ function addMageTalents(list: TalentDummyList, spellData: SpellData, classSpellS
     }];
 }
 
-function addPaladinTalents(list: TalentDummyList)
+const ALL_SPELLS = [0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF];
+
+function addPaladinTalents(list: TalentDummyList, spellData: SpellData)
 {
     // "After getting a critical effect from your Flash of Light, Holy Light, Light's Vigil, or Holy Shock heal spell
     //  you have a $m1% chance to gain Mana equal to $m3% of the base cost of the spell."
@@ -118,6 +120,51 @@ function addPaladinTalents(list: TalentDummyList)
         type: ADDON_EFFECT_TYPE.ILLUMINATION,
         valueForRank: v => v[0] * v[2] / 100,
     }];
+
+    // "Increases the critical strike healing bonus of your Holy spells by $s1%." A critical heal's bonus is 50% of
+    // the heal; the addon effect adds to the critical multiplier of heals (all of a paladin's are Holy), so half
+    // the percentage: 1.5 + 0.25 = 1.75 with all five ranks.
+    list["Holy Power"] = [{
+        type: ADDON_EFFECT_TYPE.GLOBAL_MOD_CRITICAL_HEALING,
+        valueForRank: v => v[0] / 2,
+    }];
+
+    // "Gives your Holy spells $m1% increased damage against the first $20924s3 enemies that enter your
+    // Consecration." A script on every spell (data/forever/classes/paladin.lua): Consecration always, other Holy
+    // damage while the target is assumed to be one of those enemies (modules/TargetAuras.ts).
+    list["Consecrated Ground"] = [{
+        type: ADDON_EFFECT_TYPE.SCRIPT_SPELLMOD_DONE_PCT,
+        affectSpell: ALL_SPELLS,
+        scriptKey: "Paladin_Consecrated_Ground",
+        valueForRank: v => v[0],
+    }];
+
+    // "Increases the critical strike chance of your Holy Shock spell by $s1% when cast on allies not affected by
+    // your Oath of Light." A script on the heal Holy Shock triggers: the class mask bits only those spells have.
+    const set = SpellClassSetId.PALADIN;
+    const healMask = [0, 0, 0, 0];
+    const otherMask = [0, 0, 0, 0];
+    for (const spellId of spellData.getSpellsByName("Holy Shock", true) ?? [])
+    {
+        const options = spellData.getSpellClassOption(spellId, true);
+        if (!options || options.SpellClassSet !== set) continue;
+        const isHeal = spellData.getSpellEffects(spellId, true)?.some(e => e.EffectIndex === 0 && e.Effect === EFFECT_TYPE.SPELL_EFFECT_HEAL);
+        const mask = isHeal ? healMask : otherMask;
+        mask[0] |= options.SpellClassMask_0;
+        mask[1] |= options.SpellClassMask_1;
+        mask[2] |= options.SpellClassMask_2;
+        mask[3] |= options.SpellClassMask_3;
+    }
+    const healOnly = healMask.map((bits, i) => (bits & ~otherMask[i]) >>> 0);
+    if (healOnly.some(bits => bits !== 0))
+    {
+        list["Boundless Light"] = [{
+            type: ADDON_EFFECT_TYPE.SCRIPT_SPELLMOD_CRIT_CHANCE,
+            affectSpell: healOnly,
+            scriptKey: "Paladin_Boundless_Light",
+            valueForRank: v => v[0],
+        }];
+    }
 }
 
 function addShamanTalents(list: TalentDummyList, spellData: SpellData)
@@ -135,7 +182,7 @@ export function getTalentDummies(spellData: SpellData, classSpellSets: ClassSpel
     const list: TalentDummyList = {};
 
     addMageTalents(list, spellData, classSpellSets);
-    addPaladinTalents(list);
+    addPaladinTalents(list, spellData);
     addShamanTalents(list, spellData);
 
     return list;

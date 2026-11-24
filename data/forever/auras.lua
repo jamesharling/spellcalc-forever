@@ -2658,6 +2658,13 @@ _addon.aurasPlayer = {
             value = 5,
         },
     },
+    [467507] = { -- S03 - Item - T2 - Paladin - Holy 4P Bonus
+        {
+            type = _addon.CONST.EFFECT_TYPE.SPELLMOD_PCT_OVER_TIME,
+            affectSpell = {32, 0, 0, 0},
+            value = 50,
+        },
+    },
     [467518] = { -- S03 - Item - T2 - Paladin - Retribution 2P Bonus
         {
             type = _addon.CONST.EFFECT_TYPE.SPELLMOD_PCT_DAMAGE_HEALING,

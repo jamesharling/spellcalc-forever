@@ -4,6 +4,7 @@ local _addon = select(2, ...);
 local GetSpellInfo = _addon.api.GetSpellInfo;
 local GetSpellPowerCost = _addon.api.GetSpellPowerCost;
 local Unsecret = _addon.api.Unsecret;
+local GetOverrideSpell = C_Spell and C_Spell.GetOverrideSpell or FindSpellOverrideByID;
 local ADDON_EFFECT_FLAGS = _addon.CONST.ADDON_EFFECT_FLAGS;
 local NewCalcedSpell = _addon.NewCalcedSpell;
 local SCHOOL = _addon.CONST.SCHOOL;
@@ -406,6 +407,13 @@ local function CalcSpell(spellId, calcedSpell, parentSpellData, parentValue)
     if calcedSpell.critChance > 0 and stats.spellModFlatCritChance[spellId] ~= nil then
         calcedSpell.critChance = calcedSpell.critChance + stats.spellModFlatCritChance[spellId].val;
         calcedSpell:AddToBuffList(stats.spellModFlatCritChance[spellId].buffs);
+    end
+
+    -- "has $s2% chance to crit against Demons and Undead" (Exorcism with the Exorcist passive). The creature
+    -- type is only known while the target can be read.
+    local versusCrit = spellInfo.versusCritChance and spellInfo.versusCritChance[_addon.Target.creatureType];
+    if versusCrit and calcedSpell.critChance > 0 then
+        calcedSpell.critChance = calcedSpell.critChance + versusCrit;
     end
 
     scripting.DoSpell(EFFECT_TYPE.SCRIPT_SPELLMOD_CRIT_CHANCE, calcedSpell, nil, spellId, spellInfo, spellName);
@@ -977,6 +985,16 @@ function _addon:GetHandledSpellID(spellID)
             return;
         end
         spellID = self.judgementSpell;
+    end
+
+    -- A passive can replace a spell with another one (Exorcist: every rank of Exorcism). Tooltips and action
+    -- buttons may still report the spell that was learned; calculate the one that is cast.
+    if GetOverrideSpell then
+        local override = GetOverrideSpell(spellID);
+        override = Unsecret(override);
+        if override and override ~= spellID and self.spellInfo[override] then
+            spellID = override;
+        end
     end
 
     if self.spellInfo[spellID] == nil then

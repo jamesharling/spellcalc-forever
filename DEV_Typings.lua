@@ -22,11 +22,15 @@ local _addon = select(2, ...);
 ---@field perResouce integer|nil
 ---@field spellPowerPctOfMana number|nil Percent of maximum mana the effect gains as spell power (Arcane Wrath)
 ---@field manaPerDamage number|nil Mana Shield: mana drained per point of damage absorbed
+---@field pctOfMaxHealth boolean|nil The value is a percentage of the caster's maximum health (Templar's Bulwark)
+---@field weaponDpsMult number|nil Adds this many times the main hand weapon's damage per second (Hammer of the Righteous)
 
 ---@class SpellInfo
 ---@field school SpellSchool
 ---@field schoolMask integer
 ---@field frozenDamagePct number|nil Percent more damage against frozen targets (Ice Lance)
+---@field stunnedDamagePct number|nil Percent more damage against stunned or incapacitated targets (Judgement of Command)
+---@field versusCritChance table<integer, number>|nil Critical strike chance added against creature types (Exorcism with Exorcist)
 ---@field isChannel boolean|nil
 ---@field isBinary boolean|nil
 ---@field GCD number|nil In seconds
