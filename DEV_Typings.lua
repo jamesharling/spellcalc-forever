@@ -20,9 +20,13 @@ local _addon = select(2, ...);
 ---@field auraStacks integer|nil
 ---@field mechanic SpellMechanic|nil
 ---@field perResouce integer|nil
+---@field spellPowerPctOfMana number|nil Percent of maximum mana the effect gains as spell power (Arcane Wrath)
+---@field manaPerDamage number|nil Mana Shield: mana drained per point of damage absorbed
 
 ---@class SpellInfo
 ---@field school SpellSchool
+---@field schoolMask integer
+---@field frozenDamagePct number|nil Percent more damage against frozen targets (Ice Lance)
 ---@field isChannel boolean|nil
 ---@field isBinary boolean|nil
 ---@field GCD number|nil In seconds

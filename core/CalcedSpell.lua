@@ -173,11 +173,20 @@ local CalcedSpell = {
 CalcedSpell.__index = CalcedSpell;
 
 
---- Add buff names to buff list
+--- Add buff names to buff list. A name is listed once, however many effects of the spell it changes.
 ---@param buffs string[] The table of buff names to add
 function CalcedSpell:AddToBuffList(buffs)
     for _, buffName in ipairs(buffs) do
-        table.insert(self.buffs, buffName);
+        local listed = false;
+        for _, existing in ipairs(self.buffs) do
+            if existing == buffName then
+                listed = true;
+                break;
+            end
+        end
+        if not listed then
+            table.insert(self.buffs, buffName);
+        end
     end
 end
 

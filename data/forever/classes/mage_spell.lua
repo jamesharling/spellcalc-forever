@@ -288,6 +288,7 @@ _addon.spellInfo = {
                 valueRange = 0,
                 coef = 0,
                 coefAP = 0,
+                manaPerDamage = 2,
             },
         }
     },
@@ -308,6 +309,15 @@ _addon.spellInfo = {
                 coef = 0.15700000525,
                 coefAP = 0,
             },
+            [2] = {
+                effectType = 27,
+                auraType = 3,
+                tickPeriod = 2,
+                valueBase = 11,
+                valueRange = 0,
+                coef = 0.03200000152,
+                coefAP = 0,
+            },
         }
     },
     [2121] = { -- Flamestrike (Rank 2)
@@ -325,6 +335,15 @@ _addon.spellInfo = {
                 valueRange = 26,
                 valuePerLevel = 0.80000001192,
                 coef = 0.15700000525,
+                coefAP = 0,
+            },
+            [2] = {
+                effectType = 27,
+                auraType = 3,
+                tickPeriod = 2,
+                valueBase = 21,
+                valueRange = 0,
+                coef = 0.03200000152,
                 coefAP = 0,
             },
         }
@@ -551,7 +570,7 @@ _addon.spellInfo = {
                 auraType = 69,
                 valueBase = 162,
                 valueRange = 0,
-                coef = 0,
+                coef = 0.1,
                 coefAP = 0,
             },
         }
@@ -918,6 +937,15 @@ _addon.spellInfo = {
                 coef = 0.15700000525,
                 coefAP = 0,
             },
+            [2] = {
+                effectType = 27,
+                auraType = 3,
+                tickPeriod = 2,
+                valueBase = 33,
+                valueRange = 0,
+                coef = 0.03200000152,
+                coefAP = 0,
+            },
         }
     },
     [8423] = { -- Flamestrike (Rank 4)
@@ -935,6 +963,15 @@ _addon.spellInfo = {
                 valueRange = 52,
                 valuePerLevel = 1.29999995232,
                 coef = 0.15700000525,
+                coefAP = 0,
+            },
+            [2] = {
+                effectType = 27,
+                auraType = 3,
+                tickPeriod = 2,
+                valueBase = 47,
+                valueRange = 0,
+                coef = 0.03200000152,
                 coefAP = 0,
             },
         }
@@ -1121,7 +1158,7 @@ _addon.spellInfo = {
                 auraType = 69,
                 valueBase = 284,
                 valueRange = 0,
-                coef = 0,
+                coef = 0.1,
                 coefAP = 0,
             },
         }
@@ -1140,7 +1177,7 @@ _addon.spellInfo = {
                 auraType = 69,
                 valueBase = 463,
                 valueRange = 0,
-                coef = 0,
+                coef = 0.1,
                 coefAP = 0,
             },
         }
@@ -1181,6 +1218,7 @@ _addon.spellInfo = {
                 valueRange = 0,
                 coef = 0,
                 coefAP = 0,
+                manaPerDamage = 2,
             },
         }
     },
@@ -1200,6 +1238,7 @@ _addon.spellInfo = {
                 valueRange = 0,
                 coef = 0,
                 coefAP = 0,
+                manaPerDamage = 2,
             },
         }
     },
@@ -1389,7 +1428,7 @@ _addon.spellInfo = {
                 auraType = 69,
                 valueBase = 668,
                 valueRange = 0,
-                coef = 0,
+                coef = 0.1,
                 coefAP = 0,
             },
         }
@@ -1536,6 +1575,7 @@ _addon.spellInfo = {
                 valueRange = 0,
                 coef = 0,
                 coefAP = 0,
+                manaPerDamage = 2,
             },
         }
     },
@@ -1555,6 +1595,7 @@ _addon.spellInfo = {
                 valueRange = 0,
                 coef = 0,
                 coefAP = 0,
+                manaPerDamage = 2,
             },
         }
     },
@@ -1574,6 +1615,7 @@ _addon.spellInfo = {
                 valueRange = 0,
                 coef = 0,
                 coefAP = 0,
+                manaPerDamage = 2,
             },
         }
     },
@@ -1764,6 +1806,15 @@ _addon.spellInfo = {
                 coef = 0.15700000525,
                 coefAP = 0,
             },
+            [2] = {
+                effectType = 27,
+                auraType = 3,
+                tickPeriod = 2,
+                valueBase = 64,
+                valueRange = 0,
+                coef = 0.03200000152,
+                coefAP = 0,
+            },
         }
     },
     [10216] = { -- Flamestrike (Rank 6)
@@ -1781,6 +1832,15 @@ _addon.spellInfo = {
                 valueRange = 84,
                 valuePerLevel = 1.70000004768,
                 coef = 0.15700000525,
+                coefAP = 0,
+            },
+            [2] = {
+                effectType = 27,
+                auraType = 3,
+                tickPeriod = 2,
+                valueBase = 83,
+                valueRange = 0,
+                coef = 0.03200000152,
                 coefAP = 0,
             },
         }
@@ -2418,7 +2478,7 @@ _addon.spellInfo = {
                 auraType = 69,
                 valueBase = 913,
                 valueRange = 0,
-                coef = 0,
+                coef = 0.1,
                 coefAP = 0,
             },
         }
@@ -2448,6 +2508,7 @@ _addon.spellInfo = {
         school = 5,
         schoolMask = 16,
         defType = 1,
+        frozenDamagePct = 300,
         effects = {
             [1] = {
                 effectType = 2,
@@ -2625,6 +2686,7 @@ _addon.spellInfo = {
         school = 5,
         schoolMask = 16,
         defType = 1,
+        frozenDamagePct = 300,
         effects = {
             [1] = {
                 effectType = 2,
@@ -2643,6 +2705,7 @@ _addon.spellInfo = {
         school = 5,
         schoolMask = 16,
         defType = 1,
+        frozenDamagePct = 300,
         effects = {
             [1] = {
                 effectType = 2,
@@ -2661,6 +2724,7 @@ _addon.spellInfo = {
         school = 5,
         schoolMask = 16,
         defType = 1,
+        frozenDamagePct = 300,
         effects = {
             [1] = {
                 effectType = 2,
@@ -2679,6 +2743,7 @@ _addon.spellInfo = {
         school = 5,
         schoolMask = 16,
         defType = 1,
+        frozenDamagePct = 300,
         effects = {
             [1] = {
                 effectType = 2,
@@ -2697,6 +2762,7 @@ _addon.spellInfo = {
         school = 5,
         schoolMask = 16,
         defType = 1,
+        frozenDamagePct = 300,
         effects = {
             [1] = {
                 effectType = 2,
@@ -2723,6 +2789,7 @@ _addon.spellInfo = {
                 valuePerLevel = 1.39999997616,
                 coef = 1,
                 coefAP = 0,
+                spellPowerPctOfMana = 5,
             },
         }
     },
@@ -2741,6 +2808,7 @@ _addon.spellInfo = {
                 valuePerLevel = 2.29999995232,
                 coef = 1,
                 coefAP = 0,
+                spellPowerPctOfMana = 5,
             },
         }
     },
@@ -2759,6 +2827,7 @@ _addon.spellInfo = {
                 valuePerLevel = 2.40000009537,
                 coef = 1,
                 coefAP = 0,
+                spellPowerPctOfMana = 5,
             },
         }
     },
@@ -2777,6 +2846,7 @@ _addon.spellInfo = {
                 valuePerLevel = 3,
                 coef = 1,
                 coefAP = 0,
+                spellPowerPctOfMana = 5,
             },
         }
     },

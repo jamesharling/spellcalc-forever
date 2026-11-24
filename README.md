@@ -44,7 +44,9 @@ from upstream SpellCalc in more than the TOC:
   Fire, Judgement of the Crusader, Mortal Strike, Amplify Magic, ...). The ones you pick apply to every
   target. Debuffs that only boost their caster's own damage (Shadow Weaving, Improved Scorch, Stormstrike,
   Winter's Chill, Improved Shadow Bolt) are only offered to that class, and a spell the client doesn't know
-  (removed from Forever) is not offered at all.
+  (removed from Forever) is not offered at all. The settings are shared by every character of the account, so
+  such a debuff left selected by another class is not applied either. Two entries stand for a state of the
+  target instead of one debuff: "Frozen target" and "Your Fire effects on the target" (see *Mage* below).
 - **Fixed assumptions instead of live state** where the live value is only readable when it doesn't matter:
   the mana pool always starts full (current mana is secret in combat), finishing moves use an assumed
   combo point count (Settings > Target), and the table of raid boss resistances by NPC ID is gone (unit
@@ -92,8 +94,20 @@ from upstream SpellCalc in more than the TOC:
   application already on the target) is shown for a full stack of 5, like the "Sustained 5 Stacks" numbers.
   Swiftmend heals for every tick of the highest Rejuvenation or Regrowth you know; the tooltip shows both.
   Frenzied Regeneration is not calculated, its heal depends on the rage spent.
-- **Channelled area spells** (Hurricane, Blizzard, Rain of Fire) only create an area trigger on Forever. The
-  generator takes their damage from the spell the tooltip names, one tick per period of the channel.
+- **Mage.** Arcane Wrath gains 5% of maximum mana as spell power. Frost Ward absorbs 10% of Frost spell power
+  on top of its base, like Ice Barrier, and Frost Warding adds 10% per rank to both. Mana Shield drains 2 mana
+  per point absorbed (the value in the data; the calculator used 1.5), less with Arcane Shielding. Mage Armor
+  keeps 50% of the mana regeneration while casting. Winter's Chill adds 7% of spell power per application to
+  Cone of Cold besides the 20% damage. Three bonuses depend on the target and are assumed in Settings > Target
+  Auras: "Frozen target" makes Ice Lance deal 300% more damage and adds Shatter's critical strike chance to
+  every spell; "Your Fire effects on the target" (0–4) gives Fire spells the Fire Power talent's bonus per
+  effect. Fingers of Frost procs are not tracked; select "Frozen target" to see those numbers. Ice Lance has no
+  spell power coefficient in the client data, so none is added. Missile Barrage's shorter channel is not
+  calculated.
+- **Area spells that tick through an area trigger** (Hurricane, Blizzard, Rain of Fire, the burn of
+  Flamestrike) only create the trigger on Forever. The generator takes the damage of a tick from the spell the
+  tooltip names, one tick per period. Consecration ticks with two damage effects (every enemy, and more for the
+  first few) and is not calculated yet.
 - Settings open through the Settings API (`Settings.OpenToCategory`); Ace3 updated to r1386.
 
 ## Needs verification at launch
@@ -119,9 +133,10 @@ Nothing here has run on a live Forever client (the beta closed before this port 
    with the character sheet. The mana oils (5/10/15 mp5 on Forever) are tracked through
    `data/forever/enchants.lua` in case `GetManaRegen` leaves temporary enchants out; the larger-value rule
    covers them too.
-8. Conditional talents (Fire Power per Fire effect on the target, Shadow Weaving, Eclipse, Maelstrom Weapon,
-   procs and target-state bonuses) are listed in `generation_report.txt` and have no effect in the calculator,
-   same as upstream. Active talents (Arcane Power, Inner Focus, ...) only count while their buff is up.
+8. Conditional talents (Eclipse, Maelstrom Weapon, procs and target-state bonuses) are listed in
+   `generation_report.txt` and have no effect in the calculator, same as upstream, unless a target aura in the
+   settings stands for their condition (Shadow Weaving, Fire Power, Shatter). Active talents (Arcane Power,
+   Inner Focus, ...) only count while their buff is up.
 9. Target auras: if aura data on the target turns out to be readable in combat (in the open world, say), the
    removed target scan is in the git history (`system/unitAuras.lua` before the assumed target auras).
    Also check the "from caster" debuffs (aura types 270 and 271) really only boost their caster's damage.
@@ -136,6 +151,12 @@ Nothing here has run on a live Forever client (the beta closed before this port 
     assumes spell power adds nothing). Ferocious Bite and Rip use Classic Era's attack power parts, 3% and 1%
     per combo point; check both at 5 points. Check Lacerate's hit on a target with 5 applications, and
     Swiftmend against the Rejuvenation it consumes.
+13. Mage: Ice Lance has no spell power coefficient in the client data; compare its bar value with the combat
+    log once gear has spell power, and on a frozen target with "Frozen target" selected (4 times the damage is
+    assumed). Arcane Wrath against the combat log (5% of maximum mana at a coefficient of 1). Fire Power: which
+    of your effects count (Fireball's and Pyroblast's burn, Ignite, Fire Vulnerability?) and whether its bonus
+    multiplies with other damage bonuses, as assumed. Frost Ward's and Ice Barrier's tooltips against the addon
+    with and without Frost Warding. A Flamestrike burn tick against the tooltip's "over 8 sec" total / 4.
 
 ## Regenerating data
 
@@ -232,7 +253,11 @@ npm test
   Righteousness at level 1 and 60 with a one-handed and a two-handed weapon (bar value included), Seal of Fury,
   Seal of Command, Improved Seals, and Judgement with Seal of Fury up. For a druid it checks feral abilities
   ignore spell power, Ferocious Bite's attack power, Lacerate and Swiftmend; for druid, mage and warlock the
-  channelled area spell. It validates the settings table with AceConfig,
+  channelled area spell. For a mage it checks Arcane Wrath's mana scaling, Flamestrike's burn, Frost Ward, Ice
+  Barrier and Frost Warding, Mana Shield's drain with and without Arcane Shielding, Mage Armor, Ice Lance and
+  Shatter on a frozen target, Fire Power, and Winter's Chill on Cone of Cold. For every class it selects the
+  own-damage target auras of the other classes and checks nothing changes. It validates the settings table
+  with AceConfig,
   and checks old saved
   settings migrate. Finally it equips the class's tier 0 set (hotfix-only items) and checks its set bonus
   applies, equips every item that has effects in the data, then unequips everything and checks the numbers

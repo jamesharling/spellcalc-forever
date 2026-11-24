@@ -756,6 +756,11 @@ local function CalcSpell(spellId, calcedSpell, parentSpellData, parentValue)
                 calcedEffect.spellPower = stats.spellPower[spellInfo.school] + extraSpellPower;
             end
 
+            -- "This spell gains additional Spell Damage equal to 5% of your maximum Mana" (Arcane Wrath).
+            if effectData.spellPowerPctOfMana then
+                calcedEffect.spellPower = calcedEffect.spellPower + stats.manaMax * effectData.spellPowerPctOfMana / 100;
+            end
+
             if effectData.coef > 0 then
                 local coef = effectData.coef;
 

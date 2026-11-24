@@ -38,9 +38,12 @@ end
 -- WoW's bit library is Lua BitOp: arguments wrap to 32 bits and results are SIGNED 32 bit
 -- integers, so a result with bit 31 set is negative (bit.band(2^31, 2^31) == -2147483648).
 local M32 = 0xFFFFFFFF
+-- This Lua's integers are 32 bit, so a number of 2^31 or more (a class mask with bit 31 set, 0xFFFFFFFF for
+-- "every spell") is a float without an integer form: wrap it into the signed range first, as BitOp does.
 local function u32(x)
-    x = math.floor(x)
-    return math.tointeger(x) and (math.tointeger(x) & M32) or 0
+    x = math.floor(x) % 4294967296.0
+    if x >= 2147483648.0 then x = x - 4294967296.0 end
+    return math.tointeger(x) & M32
 end
 local function s32(v)
     v = v & M32

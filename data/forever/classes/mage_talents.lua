@@ -50,6 +50,18 @@ _addon.talentDataRaw = {
             },
         }
     },
+    { -- Arcane Shielding (node 105805, 2 ranks)
+        name = "Arcane Shielding",
+        spellId = 11252,
+        maxRanks = 2,
+        effects = {
+            {
+                type = _addon.CONST.EFFECT_TYPE.SCRIPT_SET_VALUE,
+                scriptKey = "Mage_Arcane_Shielding",
+                values = {17, 33},
+            },
+        }
+    },
     { -- Arcane Meditation (node 105803, 3 ranks)
         name = "Arcane Meditation",
         spellId = 18462,
@@ -152,9 +164,38 @@ _addon.talentDataRaw = {
             },
         }
     },
+    { -- Fire Power (node 105782, 3 ranks)
+        name = "Fire Power",
+        spellId = 11124,
+        maxRanks = 3,
+        effects = {
+            {
+                type = _addon.CONST.EFFECT_TYPE.SCRIPT_SET_VALUE,
+                scriptKey = "Mage_Fire_Power",
+                perPoint = 1,
+            },
+        }
+    },
     -----------------------------
     -- Column group 3
     -----------------------------
+    { -- Frost Warding (node 105780, 2 ranks)
+        name = "Frost Warding",
+        spellId = 11189,
+        maxRanks = 2,
+        effects = {
+            {
+                type = _addon.CONST.EFFECT_TYPE.SPELLMOD_PCT_EFFECT,
+                affectSpell = {256, 1, 0, 0},
+                perPoint = 10,
+            },
+            {
+                type = _addon.CONST.EFFECT_TYPE.SPELLMOD_PCT_SPELL_SCALE,
+                affectSpell = {256, 1, 0, 0},
+                perPoint = 10,
+            },
+        }
+    },
     { -- Precision (node 105778, 3 ranks)
         name = "Precision",
         spellId = 29438,
@@ -175,6 +216,18 @@ _addon.talentDataRaw = {
                 type = _addon.CONST.EFFECT_TYPE.SPELLMOD_PCT_CRIT_MULT,
                 affectSpell = {131808, 4096, 0, 0},
                 perPoint = 20,
+            },
+        }
+    },
+    { -- Shatter (node 105768, 3 ranks)
+        name = "Shatter",
+        spellId = 11170,
+        maxRanks = 3,
+        effects = {
+            {
+                type = _addon.CONST.EFFECT_TYPE.SCRIPT_SET_VALUE,
+                scriptKey = "Mage_Shatter",
+                values = {17, 33, 50},
             },
         }
     },

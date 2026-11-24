@@ -4,7 +4,9 @@
         { "class": "DRUID", "name": "Faerie Fire", "note": "armor" },
 
         { "class": "MAGE", "name": "Fire Vulnerability", "note": "Improved Scorch, from caster" },
-        { "class": "MAGE", "name": "Winter's Chill", "note": "Cone of Cold damage taken, from caster" },
+        { "class": "MAGE", "name": "Winter's Chill", "note": "Cone of Cold damage taken and spell power coefficient, from caster" },
+        { "class": "MAGE", "name": "Frost Nova", "label": "Frozen target", "note": "stands for any freeze: Ice Lance's bonus damage, Shatter's critical strike chance" },
+        { "class": "MAGE", "name": "Fire Power", "id": 11124, "label": "Your Fire effects on the target", "maxStacks": 4, "note": "the talent: Fire damage per own Fire effect on the target, at most 4 (its tooltip: up to $s1*4 percent)" },
         { "class": "MAGE", "name": "Amplify Magic", "note": "healing taken on your heal target" },
         { "class": "MAGE", "name": "Dampen Magic", "note": "healing taken on your heal target" },
 

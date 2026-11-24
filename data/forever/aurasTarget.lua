@@ -30,6 +30,35 @@ _addon.aurasTarget = {
             value = 20,
             hasStacks = true,
         },
+        {
+            type = _addon.CONST.EFFECT_TYPE.SPELLMOD_FLAT_SPELL_SCALE,
+            affectSpell = {512, 0, 0, 0},
+            value = 7,
+            hasStacks = true,
+        },
+    },
+    [10230] = { -- Frost Nova (Rank 4)
+        {
+            type = _addon.CONST.EFFECT_TYPE.SCRIPT_SPELLMOD_DONE_PCT,
+            affectSpell = {4294967295, 4294967295, 4294967295, 4294967295},
+            value = 0,
+            scriptKey = "Mage_Frozen_Damage",
+        },
+        {
+            type = _addon.CONST.EFFECT_TYPE.SCRIPT_SPELLMOD_CRIT_CHANCE,
+            affectSpell = {4294967295, 4294967295, 4294967295, 4294967295},
+            value = 0,
+            scriptKey = "Mage_Frozen_Crit",
+        },
+    },
+    [11124] = { -- Fire Power
+        {
+            type = _addon.CONST.EFFECT_TYPE.SCRIPT_SPELLMOD_DONE_PCT,
+            affectSpell = {4294967295, 4294967295, 4294967295, 4294967295},
+            value = 1,
+            scriptKey = "Mage_Fire_Effects",
+            hasStacks = true,
+        },
     },
     [10170] = { -- Amplify Magic (Rank 4)
         {
@@ -144,6 +173,8 @@ _addon.assumableTargetAuras = {
     { spellId = 9907, class = "DRUID", maxStacks = 1 }, -- Faerie Fire (Rank 4)
     { spellId = 22959, class = "MAGE", maxStacks = 5, fromCaster = true }, -- Fire Vulnerability
     { spellId = 12579, class = "MAGE", maxStacks = 5, fromCaster = true }, -- Winter's Chill
+    { spellId = 10230, class = "MAGE", maxStacks = 1, fromCaster = true, label = "Frozen target" }, -- Frost Nova (Rank 4)
+    { spellId = 11124, class = "MAGE", maxStacks = 4, fromCaster = true, label = "Your Fire effects on the target" }, -- Fire Power
     { spellId = 10170, class = "MAGE", maxStacks = 1 }, -- Amplify Magic (Rank 4)
     { spellId = 10174, class = "MAGE", maxStacks = 1 }, -- Dampen Magic (Rank 5)
     { spellId = 20303, class = "PALADIN", maxStacks = 1 }, -- Judgement of the Crusader (Rank 6)

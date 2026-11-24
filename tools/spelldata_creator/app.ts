@@ -195,6 +195,11 @@ function applyAuraAreaAura(rankInfo: RankInfo, effect: SpellEffect, effectNum: n
         case AURA_TYPE.SPELL_AURA_SCHOOL_ABSORB:
         case AURA_TYPE.SPELL_AURA_MANA_SHIELD:
             if (spellName == "Power Word: Shield") rankInfo.effects[effectNum].forceScaleWithHeal = true;
+            // "Drains $e mana per damage absorbed": $e is the effect's amplitude.
+            if (effect.EffectAura === AURA_TYPE.SPELL_AURA_MANA_SHIELD && effect.EffectAmplitude > 0)
+            {
+                rankInfo.effects[effectNum].manaPerDamage = effect.EffectAmplitude;
+            }
             break;
         case AURA_TYPE.SPELL_AURA_DAMAGE_SHIELD:
             break;
@@ -573,6 +578,27 @@ function buildRankInfo(spellId: number, effects: SpellEffect[]): RankInfo
         rankInfo.effects.splice(1, 1);
     }
 
+    // "This spell gains additional Spell Damage equal to $s2% of your maximum Mana." (Arcane Wrath): the
+    // percentage is a dummy effect next to the damage effect.
+    const manaScaling = spellData.getSpell(spellId, true)?.Description_lang.match(/Spell Damage equal to \$s(\d)% of your maximum Mana/i);
+    if (manaScaling && rankInfo.effects[0])
+    {
+        const pctEffect = spellData.getSpellEffects(spellId, true)?.find(e => e.EffectIndex === parseInt(manaScaling[1]) - 1);
+        const pct = pctEffect ? getEffectBase(pctEffect) : 0;
+        if (pct > 0) rankInfo.effects[0].spellPowerPctOfMana = pct;
+        else report(`${nameWithRank} [${spellId}]: tooltip names effect ${manaScaling[1]} as a percentage of maximum mana, but it has no value`);
+    }
+
+    // "Deals $s2% increased damage to Frozen targets." (Ice Lance): another dummy effect.
+    const frozenBonus = spellData.getSpell(spellId, true)?.Description_lang.match(/\$s(\d)% increased damage to Frozen targets/i);
+    if (frozenBonus)
+    {
+        const pctEffect = spellData.getSpellEffects(spellId, true)?.find(e => e.EffectIndex === parseInt(frozenBonus[1]) - 1);
+        const pct = pctEffect ? getEffectBase(pctEffect) : 0;
+        if (pct > 0) rankInfo.frozenDamagePct = pct;
+        else report(`${nameWithRank} [${spellId}]: tooltip names effect ${frozenBonus[1]} as the bonus against frozen targets, but it has no value`);
+    }
+
     for (const effect of rankInfo.effects)
     {
         if (!effect) throw new Error("Effect list has a hole!");
@@ -642,6 +668,7 @@ function rankInfoToLua(sid: string | number, ri: RankInfo): string {
     if (ri.onNextAttack) str += `\t\tonNextSwing = true,\n`;
     if (ri.isOffhandAttack) str += `\t\tisOffhandAttack = true,\n`;
     if (ri.useScalingFormula) str += `\t\tuseScalingFormula = { id = ${ri.useScalingFormula.id}, label = "${ri.useScalingFormula.label}" },\n`;
+    if (ri.frozenDamagePct) str += `\t\tfrozenDamagePct = ${ri.frozenDamagePct},\n`;
 
     str += `\t\teffects = {\n`;
 
@@ -666,6 +693,8 @@ function rankInfoToLua(sid: string | number, ri: RankInfo): string {
             str += `\t\t\t\tchains = ${eff.chainInfo.chains},\n`;
             str += `\t\t\t\tchainMult = ${eff.chainInfo.mult},\n`;
         }
+        if (eff.spellPowerPctOfMana) str += `\t\t\t\tspellPowerPctOfMana = ${eff.spellPowerPctOfMana},\n`;
+        if (eff.manaPerDamage) str += `\t\t\t\tmanaPerDamage = ${eff.manaPerDamage},\n`;
         if (eff.auraStacks) str += `\t\t\t\tauraStacks = ${eff.auraStacks},\n`;
         if (USEFUL_SPELL_MECHANICS[eff.mechanic]) str += `\t\t\t\tmechanic = ${eff.mechanic},\n`;
         str += `\t\t\t},\n`;

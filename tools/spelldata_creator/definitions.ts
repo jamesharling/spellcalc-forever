@@ -233,6 +233,10 @@ interface EffectInfo {
     mechanic: number,
     /** Paladin seals: the proc spell that deals the damage (spell modifiers on it apply). */
     procSpell?: number,
+    /** Percent of maximum mana the effect gains as spell power (Arcane Wrath). */
+    spellPowerPctOfMana?: number,
+    /** Mana Shield: mana drained per point of damage absorbed. */
+    manaPerDamage?: number,
 }
 
 const enum PowerType {
@@ -264,6 +268,8 @@ interface RankInfo {
     onNextAttack: boolean,
     isOffhandAttack: boolean,
     useScalingFormula: { label: string, id: number } | undefined,
+    /** Percent more damage against frozen targets (Ice Lance). */
+    frozenDamagePct?: number,
     effects: EffectInfo[]
 }
 
@@ -326,6 +332,9 @@ const enum ADDON_EFFECT_TYPE {
     SCRIPT_SET_VALUE = "_addon.CONST.EFFECT_TYPE.SCRIPT_SET_VALUE",
     SPELLMOD_CHARGES = "_addon.CONST.EFFECT_TYPE.SPELLMOD_CHARGES",
     SPELLMOD_FLAT_SPELL_SCALE = "_addon.CONST.EFFECT_TYPE.SPELLMOD_FLAT_SPELL_SCALE",
+    SPELLMOD_PCT_SPELL_SCALE = "_addon.CONST.EFFECT_TYPE.SPELLMOD_PCT_SPELL_SCALE",
+    SCRIPT_SPELLMOD_CRIT_CHANCE = "_addon.CONST.EFFECT_TYPE.SCRIPT_SPELLMOD_CRIT_CHANCE",
+    SCRIPT_SPELLMOD_DONE_PCT = "_addon.CONST.EFFECT_TYPE.SCRIPT_SPELLMOD_DONE_PCT",
     SCHOOLMOD_PCT_DAMAGE = "_addon.CONST.EFFECT_TYPE.SCHOOLMOD_PCT_DAMAGE",
     GLOBAL_FLAT_HIT_CHANCE = "_addon.CONST.EFFECT_TYPE.GLOBAL_FLAT_HIT_CHANCE",
     GLOBAL_FLAT_HIT_CHANCE_SPELL = "_addon.CONST.EFFECT_TYPE.GLOBAL_FLAT_HIT_CHANCE_SPELL",

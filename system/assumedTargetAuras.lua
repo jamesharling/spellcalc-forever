@@ -18,6 +18,7 @@ local L = _addon:GetLocalization();
 ---@field class string Class token of the caster
 ---@field maxStacks integer
 ---@field fromCaster boolean|nil Only increases damage done by the aura's caster (offered to that class only)
+---@field label string|nil Name of the option when the aura stands for a state (a frozen target under Frost Nova)
 
 local _, playerClass = UnitClass("player");
 
@@ -32,6 +33,20 @@ local applied = {};
 ---@return boolean
 local function SpellExists(spellId)
     return GetSpellName(spellId) ~= nil;
+end
+
+---True if the aura is one this character can assume. "From caster" debuffs (Shadow Weaving, Improved Scorch,
+---Stormstrike, a frozen target for Ice Lance, ...) only change their own class's spells; the settings are shared
+---by every character of the account, so a selection made on another class must not be applied here.
+---@param spellId integer
+---@return boolean
+local function IsUsable(spellId)
+    for _, aura in ipairs(_addon.assumableTargetAuras or {}) do
+        if aura.spellId == spellId then
+            return not aura.fromCaster or aura.class == playerClass;
+        end
+    end
+    return false;
 end
 
 ---@param spellId integer
@@ -68,7 +83,8 @@ function _addon:UpdateAssumedTargetAuras()
     end
 
     for spellId, stacks in pairs(wanted) do
-        if type(stacks) == "number" and stacks > 0 and applied[spellId] == nil and self.aurasTarget[spellId] and SpellExists(spellId) then
+        if type(stacks) == "number" and stacks > 0 and applied[spellId] == nil and self.aurasTarget[spellId]
+            and IsUsable(spellId) and SpellExists(spellId) then
             SetAura(spellId, stacks, true);
             applied[spellId] = stacks;
             changed = true;
@@ -124,7 +140,7 @@ function _addon.AssumedTargetAuraSettings()
         -- caster's own damage, so another class assuming them would get a bonus it never has.
         if not SpellExists(aura.spellId) then
             _addon.util.PrintDebug("Target aura " .. aura.spellId .. " doesn't exist on this client, not offered");
-        elseif not aura.fromCaster or aura.class == playerClass then
+        elseif IsUsable(aura.spellId) then
             byClass[aura.class] = byClass[aura.class] or {};
             table.insert(byClass[aura.class], aura);
         end
@@ -144,7 +160,7 @@ function _addon.AssumedTargetAuraSettings()
                 local spellId, maxStacks = aura.spellId, aura.maxStacks;
                 local option = {
                     order = i,
-                    name = AuraName(spellId),
+                    name = aura.label and (L[aura.label] .. " (" .. AuraName(spellId) .. ")") or AuraName(spellId),
                     desc = function() return AuraDesc(spellId) end,
                 };
                 if maxStacks > 1 then

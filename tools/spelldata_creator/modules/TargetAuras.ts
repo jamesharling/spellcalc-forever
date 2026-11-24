@@ -4,6 +4,7 @@ import { SpellData, SpellEffect } from "../SpellData";
 import { TargetAuraHandlers } from "./TargetAuraHandlers";
 import { report, reportSection } from "../report";
 import { cfg } from "../config";
+import { getEffectBase } from "../effectValues";
 
 /**
  * Target auras the player can choose to assume (Settings > Target Auras).
@@ -50,6 +51,10 @@ interface CuratedAura
     name: string,
     id?: number,
     note?: string,
+    /** Name of the option instead of the spell's name (the aura stands for a state, e.g. a frozen target). */
+    label?: string,
+    /** Highest count to offer when the spell itself is not a stacking aura. */
+    maxStacks?: number,
 }
 
 interface AssumableAura
@@ -59,7 +64,10 @@ interface AssumableAura
     maxStacks: number,
     fromCaster: boolean,
     effects: AddonEffectData[],
+    label?: string,
 }
+
+const ALL_SPELLS = [0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF];
 
 export class TargetAuras
 {
@@ -126,6 +134,56 @@ export class TargetAuras
         return best;
     }
 
+    /**
+     * Effects the handlers cannot read from the aura: dummy effects, and states a debuff stands for.
+     */
+    private getExtraEffects(entry: CuratedAura, spellId: number): AddonEffectData[]
+    {
+        const effects = this.spellData.getSpellEffects(spellId);
+
+        // "Taking $s1% increased damage and $s2% increased spell power coefficient from the caster's next Cone of
+        // Cold spell." The talent: "it gains an additional $s3% of your spell damage" per application. The second
+        // effect is a dummy; the first one names Cone of Cold.
+        if (entry.class === "MAGE" && entry.name === "Winter's Chill")
+        {
+            const damage = effects.find(e => e.EffectAura === AURA_TYPE.MOD_SPELL_DAMAGE_FROM_CASTER);
+            const coef = effects.find(e => e.EffectIndex === 1 && e.EffectAura === AURA_TYPE.SPELL_AURA_DUMMY);
+            if (!damage || !coef || getEffectBase(coef) <= 0)
+            {
+                report(`${entry.class} ${entry.name} [${spellId}]: no spell power coefficient effect found, only the damage taken part is applied`);
+                return [];
+            }
+            return [{
+                type: ADDON_EFFECT_TYPE.SPELLMOD_FLAT_SPELL_SCALE,
+                affectSpell: [damage.EffectSpellClassMask_0, damage.EffectSpellClassMask_1, damage.EffectSpellClassMask_2, damage.EffectSpellClassMask_3],
+                value: getEffectBase(coef),
+                hasStacks: this.spellData.getSpellAuraOptions(spellId)!.CumulativeAura > 1,
+            }];
+        }
+
+        // A frozen target, offered under Frost Nova. Both effects are scripts in data/forever/classes/mage.lua that
+        // run for every spell: Mage_Frozen_Damage applies a spell's own bonus against frozen targets (Ice Lance,
+        // frozenDamagePct in its spell data), Mage_Frozen_Crit adds the critical strike chance of Shatter (the
+        // talent stores its value).
+        if (entry.class === "MAGE" && entry.name === "Frost Nova")
+        {
+            return [
+                { type: ADDON_EFFECT_TYPE.SCRIPT_SPELLMOD_DONE_PCT, affectSpell: ALL_SPELLS, scriptKey: "Mage_Frozen_Damage", value: 0 },
+                { type: ADDON_EFFECT_TYPE.SCRIPT_SPELLMOD_CRIT_CHANCE, affectSpell: ALL_SPELLS, scriptKey: "Mage_Frozen_Crit", value: 0 },
+            ];
+        }
+
+        // The player's own Fire effects on the target, offered under the Fire Power talent, which adds Fire damage
+        // for each of them. The effect's value is the number of effects (1 per application); the Mage_Fire_Effects
+        // script multiplies it with the percentage the talent stores.
+        if (entry.class === "MAGE" && entry.name === "Fire Power")
+        {
+            return [{ type: ADDON_EFFECT_TYPE.SCRIPT_SPELLMOD_DONE_PCT, affectSpell: ALL_SPELLS, scriptKey: "Mage_Fire_Effects", value: 1, hasStacks: true }];
+        }
+
+        return [];
+    }
+
     private getAssumableAuras()
     {
         const curated: CuratedAura[] = JSON.parse(fs.readFileSync(cfg.dataDir + "targetAuras.json", "utf8")).auras;
@@ -140,7 +198,14 @@ export class TargetAuras
                 continue;
             }
 
-            const { effects, fromCaster } = this.processEffects(spellId);
+            let { effects, fromCaster } = this.processEffects(spellId);
+            const extra = this.getExtraEffects(entry, spellId);
+            if (extra.length > 0)
+            {
+                // Hand-written effects change the player's own spells only.
+                effects = effects.concat(extra);
+                fromCaster = true;
+            }
             if (effects.length === 0)
             {
                 report(`${entry.class} ${this.spellData.getSpellNameWithRank(spellId)} [${spellId}]: no effects the addon models, skipped`);
@@ -148,7 +213,7 @@ export class TargetAuras
             }
 
             const cumulative = this.spellData.getSpellAuraOptions(spellId)?.CumulativeAura ?? 0;
-            auras.push({ spellId, cls: entry.class, maxStacks: cumulative > 1 ? cumulative : 1, fromCaster, effects });
+            auras.push({ spellId, cls: entry.class, maxStacks: entry.maxStacks ?? (cumulative > 1 ? cumulative : 1), fromCaster, effects, label: entry.label });
         }
 
         return auras;
@@ -181,8 +246,8 @@ _addon.aurasTarget = {\n`;
         luaStr += `}\n\n---@type AssumableTargetAura[]\n_addon.assumableTargetAuras = {\n`;
         for (const aura of auras)
         {
-            luaStr += `    { spellId = ${aura.spellId}, class = "${aura.cls}", maxStacks = ${aura.maxStacks}${aura.fromCaster ? ", fromCaster = true" : ""} }, -- ${this.spellData.getSpellNameWithRank(aura.spellId)}\n`;
-            report(`${aura.cls}: ${this.spellData.getSpellNameWithRank(aura.spellId)} [${aura.spellId}]${aura.maxStacks > 1 ? `, up to ${aura.maxStacks} stacks` : ""}${aura.fromCaster ? ", caster's own damage only" : ""}`);
+            luaStr += `    { spellId = ${aura.spellId}, class = "${aura.cls}", maxStacks = ${aura.maxStacks}${aura.fromCaster ? ", fromCaster = true" : ""}${aura.label ? `, label = ${JSON.stringify(aura.label)}` : ""} }, -- ${this.spellData.getSpellNameWithRank(aura.spellId)}\n`;
+            report(`${aura.cls}: ${this.spellData.getSpellNameWithRank(aura.spellId)} [${aura.spellId}]${aura.label ? ` as "${aura.label}"` : ""}${aura.maxStacks > 1 ? `, up to ${aura.maxStacks} stacks` : ""}${aura.fromCaster ? ", caster's own damage only" : ""}`);
         }
         luaStr += `}\n`;
 

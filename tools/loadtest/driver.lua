@@ -184,17 +184,31 @@ local base = runAll("no talents")
 -- node run.js --classes DRUID --dump: what the addon shows for the highest rank of every spell, to read through
 -- a class' spell book. Level 60, 400 spell power, 800 attack power, no talents (see wow_env.lua).
 if __DUMP then
+    -- The top rank of every name: by rank number, then by spell level. Two spells can share a name and rank (a
+    -- channel and the spell it triggers every tick, such as Arcane Missiles); both are printed.
+    local function rankOf(id)
+        return tonumber(name(id):match("%(Rank (%d+)%)")) or 0
+    end
     local top = {}
     for _, id in ipairs(spellIds) do
         local n = __SPELL_NAMES[id] or ("spell " .. id)
         local cur = top[n]
-        if not cur or A.spellInfo[id].spellLevel > A.spellInfo[cur].spellLevel then top[n] = id end
+        local rank, level = rankOf(id), A.spellInfo[id].spellLevel
+        if not cur or rank > cur.rank or (rank == cur.rank and rank == 0 and level > cur.level) then
+            top[n] = { rank = rank, level = level, ids = { id } }
+        elseif rank == cur.rank and rank > 0 then
+            cur.ids[#cur.ids + 1] = id
+        end
     end
-    local names = {}
-    for n in pairs(top) do names[#names + 1] = n end
-    table.sort(names)
-    for _, n in ipairs(names) do
-        local id = top[n]
+    local dumpIds = {}
+    for _, entry in pairs(top) do
+        for _, id in ipairs(entry.ids) do dumpIds[#dumpIds + 1] = id end
+    end
+    table.sort(dumpIds, function(a, b)
+        if name(a) ~= name(b) then return name(a) < name(b) end
+        return a < b
+    end)
+    for _, id in ipairs(dumpIds) do
         local status, cs = checkSpell(id)
         emit(("DUMP %s [%d] %s"):format(name(id), id, status == "ok" and "" or status))
         if status == "ok" then
@@ -409,6 +423,163 @@ if __CLASS == "DRUID" then
     if not lines:find(__SPELL_NAMES[25299], 1, true) or not lines:find(__SPELL_NAMES[9858], 1, true) then emit("FAIL Swiftmend's tooltip doesn't name Rejuvenation and Regrowth") end
 
     if A.spellInfo[22845] then emit("FAIL Frenzied Regeneration's empty heal [22845] is in the data") end
+end
+
+-- Mage. Arcane Wrath gains 5% of maximum mana as spell power; Flamestrike burns for 4 more ticks (an area trigger
+-- on Forever, the tick is the spell its tooltip names); Frost Ward and Ice Barrier absorb 10% of spell power more,
+-- and Frost Warding 10% more per rank of all of it; Mana Shield drains 2 mana per point absorbed, less with Arcane
+-- Shielding; Mage Armor keeps 50% of the regeneration while casting. A frozen target (assumed in the settings):
+-- Ice Lance deals 300% more, Shatter adds its critical strike chance. Winter's Chill (assumed, 5 applications):
+-- Cone of Cold takes 20% more damage and 7% of spell power more per application.
+if __CLASS == "MAGE" then
+    -- A copy of the numbers: the addon recalculates a spell in place, so the tables themselves change later.
+    local function fx(id, n)
+        local status, cs = checkSpell(id)
+        if status ~= "ok" then return { } end
+        local e = cs.effects[n or 1] or { }
+        return { avg = e.avg, min = e.min, max = e.max, ticks = e.ticks, spellPower = e.spellPower,
+            crit = cs.critChance, cost = cs.effectiveCost, baseCost = cs.baseCost }
+    end
+    local function near(a, b) return type(a) == "number" and type(b) == "number" and math.abs(a - b) < 1e-4 end
+    local function baseOf(id, n)
+        local info = A.spellInfo[id]
+        local e = info and info.effects[n or 1]
+        if not e then return nil, { } end
+        return e.valueBase + e.valueRange / 2 + (math.min(60, info.maxLevel) - info.spellLevel) * (e.valuePerLevel or 0), e
+    end
+    local function talents(ranks)
+        for i = #__TALENT_TREE, 1, -1 do
+            __TALENT_RANKS[__TALENT_TREE[i].spellId] = nil
+            __TALENT_TREE[i] = nil
+        end
+        for spellId, rank in pairs(ranks) do
+            __TALENT_TREE[#__TALENT_TREE + 1] = { spellId = spellId, maxRanks = rank }
+            __TALENT_RANKS[spellId] = rank
+        end
+        __FireEvent("TRAIT_CONFIG_UPDATED", 4001)
+        settle()
+    end
+    local function assume(spellId, stacks)
+        SpellCalc_settings.assumedTargetAuras[spellId] = stacks
+        A:UpdateAssumedTargetAuras()
+        settle()
+    end
+    local WRATH, FLAMESTRIKE, FROST_WARD, ICE_BARRIER, MANA_SHIELD = 1326082, 10216, 28609, 13033, 10193
+    local ICE_LANCE, FROSTBOLT, CONE_OF_COLD, FROST_NOVA, WINTERS_CHILL = 1240047, 25304, 10161, 10230, 12579
+
+    local maxMana = A.stats.manaMax
+    local wrath = fx(WRATH)
+    local wrathBase, wrathData = baseOf(WRATH)
+    emit(("mage: Arcane Wrath %s with %s spell power (400 + 5%% of %s mana)"):format(tostring(wrath.avg), tostring(wrath.spellPower), tostring(maxMana)))
+    if wrathData.spellPowerPctOfMana ~= 5 or maxMana <= 0 or not near(wrath.spellPower, 400 + 0.05 * maxMana)
+        or not near(wrath.avg, wrathBase + (400 + 0.05 * maxMana) * wrathData.coef) then
+        emit("FAIL Arcane Wrath doesn't gain 5% of maximum mana as spell power")
+    end
+
+    local burn = fx(FLAMESTRIKE, 2)
+    local burnBase, burnData = baseOf(FLAMESTRIKE, 2)
+    emit(("mage: Flamestrike burns for %s x %s"):format(tostring(burn.avg), tostring(burn.ticks)))
+    if burnBase ~= 83 or burn.ticks ~= 4 or not near(burn.avg, 83 + (burnData.coef or 0) * 400) or (burnData.coef or 0) <= 0 then
+        emit("FAIL Flamestrike rank 6 has no burn of 83 plus spell power every 2 s for 8 s")
+    end
+
+    local ward, barrier = fx(FROST_WARD), fx(ICE_BARRIER)
+    local wardBase, barrierBase = baseOf(FROST_WARD), baseOf(ICE_BARRIER)
+    local shield = fx(MANA_SHIELD)
+    emit(("mage: Frost Ward %s, Ice Barrier %s, Mana Shield costs %s for %s absorbed"):format(tostring(ward.avg), tostring(barrier.avg),
+        tostring(shield.cost), tostring(shield.avg)))
+    if not near(ward.avg, wardBase + 0.1 * 400) then emit("FAIL Frost Ward doesn't absorb 10% of spell power on top of its base") end
+    if not near(barrier.avg, barrierBase + 0.1 * 400) then emit("FAIL Ice Barrier doesn't absorb 10% of spell power on top of its base") end
+    if not shield.avg or not near(shield.cost, shield.baseCost + 2 * shield.avg) then
+        emit("FAIL Mana Shield doesn't drain 2 mana per point absorbed")
+    end
+    for _, id in ipairs({ 6117, 22782, 22783 }) do
+        local aura = A.aurasPlayer[id]
+        if not aura or aura[1].value ~= 50 then emit("FAIL Mage Armor [" .. id .. "] doesn't keep 50% of the mana regeneration while casting") end
+    end
+
+    -- Frost Warding 2/2, Arcane Shielding 2/2
+    talents({ [11189] = 2, [11252] = 2 })
+    local wardTalent, barrierTalent = fx(FROST_WARD), fx(ICE_BARRIER)
+    local shieldTalent = fx(MANA_SHIELD)
+    emit(("mage: Frost Warding 2/2: Frost Ward %s, Ice Barrier %s; Arcane Shielding 2/2: Mana Shield costs %s"):format(
+        tostring(wardTalent.avg), tostring(barrierTalent.avg), tostring(shieldTalent.cost)))
+    if not near(wardTalent.avg, (ward.avg or 0) * 1.2) or not near(barrierTalent.avg, (barrier.avg or 0) * 1.2) then
+        emit("FAIL Frost Warding 2/2 doesn't add 20% to all of Frost Ward and Ice Barrier")
+    end
+    if not shieldTalent.avg or not near(shieldTalent.cost, shieldTalent.baseCost + 2 * (1 - 0.33) * shieldTalent.avg) then
+        emit("FAIL Arcane Shielding 2/2 doesn't reduce Mana Shield's drain by 33%")
+    end
+
+    -- Frozen target, without and with Shatter 3/3
+    talents({})
+    local lance, bolt = fx(ICE_LANCE), fx(FROSTBOLT)
+    assume(FROST_NOVA, 1)
+    local lanceFrozen, boltFrozen = fx(ICE_LANCE), fx(FROSTBOLT)
+    talents({ [11170] = 3 })
+    local boltShatter = fx(FROSTBOLT)
+    assume(FROST_NOVA, nil)
+    local boltUnfrozen = fx(FROSTBOLT)
+    talents({})
+    local lanceAfter = fx(ICE_LANCE)
+    emit(("mage: Ice Lance %s, %s on a frozen target; Frostbolt crit %s%%, %s%% frozen with Shatter 3/3"):format(tostring(lance.avg), tostring(lanceFrozen.avg),
+        tostring(bolt.crit), tostring(boltShatter.crit)))
+    if not lance.avg or lance.avg <= 0 or not near(lanceFrozen.avg, lance.avg * 4) then emit("FAIL Ice Lance doesn't deal 300% more damage to a frozen target") end
+    if not near(boltFrozen.crit, bolt.crit) or not near(boltFrozen.avg, bolt.avg) then emit("FAIL a frozen target changes Frostbolt without Shatter") end
+    if not near(boltShatter.crit, (bolt.crit or 0) + 50) then emit("FAIL Shatter 3/3 doesn't add 50% critical strike chance against a frozen target") end
+    if not near(boltUnfrozen.crit, bolt.crit) then emit("FAIL Shatter adds critical strike chance to a target that isn't frozen") end
+    if not near(lanceAfter.crit, lance.crit) or not near(lanceAfter.avg, lance.avg) then
+        emit("FAIL Ice Lance isn't back to normal after the frozen target is deselected")
+    end
+    local frozenOption
+    for _, group in pairs(A.AssumedTargetAuraSettings()) do
+        if type(group) == "table" and group.type == "group" and group.args["aura" .. FROST_NOVA] then frozenOption = group.args["aura" .. FROST_NOVA].name end
+    end
+    if type(frozenOption) ~= "string" or not frozenOption:find("Frozen target", 1, true) or not frozenOption:find(__SPELL_NAMES[FROST_NOVA], 1, true) then
+        emit("FAIL the frozen target option isn't offered as \"Frozen target (Frost Nova ...)\": " .. tostring(frozenOption))
+    end
+
+    -- Fire Power 3/3 with 4 of the mage's Fire effects on the target: 12% more Fire damage, nothing for Frost
+    local FIREBALL, FIRE_POWER, FIRE_WARD = 25306, 11124, 10225
+    local fireball, fireballDot, fireWard = fx(FIREBALL), fx(FIREBALL, 2), fx(FIRE_WARD)
+    assume(FIRE_POWER, 4)
+    local fireballNoTalent = fx(FIREBALL)
+    talents({ [FIRE_POWER] = 3 })
+    local fireballPower, fireballDotPower, boltPower, fireWardPower = fx(FIREBALL), fx(FIREBALL, 2), fx(FROSTBOLT), fx(FIRE_WARD)
+    assume(FIRE_POWER, 2)
+    local fireballTwo = fx(FIREBALL)
+    assume(FIRE_POWER, nil)
+    local fireballNoEffects = fx(FIREBALL)
+    talents({})
+    emit(("mage: Fireball %s, %s with Fire Power 3/3 and 4 Fire effects on the target, %s with 2"):format(tostring(fireball.avg), tostring(fireballPower.avg), tostring(fireballTwo.avg)))
+    if not fireball.avg or not near(fireballPower.avg, fireball.avg * 1.12) or not near(fireballDotPower.avg, (fireballDot.avg or 0) * 1.12)
+        or not near(fireballTwo.avg, fireball.avg * 1.06) then
+        emit("FAIL Fire Power 3/3 doesn't add 3% Fire damage per assumed Fire effect on the target")
+    end
+    if not near(fireballNoTalent.avg, fireball.avg) or not near(fireballNoEffects.avg, fireball.avg) then
+        emit("FAIL Fire Power changes Fireball without the talent or without Fire effects on the target")
+    end
+    if not near(boltPower.avg, bolt.avg) or not near(fireWardPower.avg, fireWard.avg) then emit("FAIL Fire Power changes Frostbolt or Fire Ward") end
+
+    -- Winter's Chill, 5 applications
+    local cone = fx(CONE_OF_COLD)
+    local coneBase, coneData = baseOf(CONE_OF_COLD)
+    assume(WINTERS_CHILL, 5)
+    local coneChilled = fx(CONE_OF_COLD)
+    assume(WINTERS_CHILL, nil)
+    emit(("mage: Cone of Cold %s, %s with 5 applications of Winter's Chill"):format(tostring(cone.avg), tostring(coneChilled.avg)))
+    if not near(cone.avg, coneBase + coneData.coef * 400) or not near(coneChilled.avg, (coneBase + (coneData.coef + 5 * 0.07) * 400) * 2) then
+        emit("FAIL Winter's Chill x5 doesn't double Cone of Cold and add 35% of spell power")
+    end
+
+    local differ, examples = 0, {}
+    for id, v in pairs(runAll("mage checked")) do
+        if base[id] and math.abs(base[id] - v) > 1e-6 then
+            differ = differ + 1
+            if #examples < 4 then examples[#examples + 1] = ("%s %.2f -> %.2f"):format(name(id), base[id], v) end
+        end
+    end
+    if differ > 0 then emit(("FAIL %d spells differ after the mage checks: %s"):format(differ, table.concat(examples, ", "))) end
 end
 
 -- The options table must pass AceConfig validation (it is only validated when the panel opens in game)
@@ -745,6 +916,30 @@ do
     A:UpdateAssumedTargetAuras()
     table.remove(A.assumableTargetAuras)
     A.aurasTarget[GHOST] = nil
+    settle()
+end
+
+-- "From caster" auras of other classes, left selected by another character (the settings are shared by the
+-- account): they only change their own class's spells, so they must not be applied here.
+do
+    local foreign = {}
+    for _, aura in ipairs(A.assumableTargetAuras) do
+        if aura.fromCaster and aura.class ~= __CLASS then
+            foreign[#foreign + 1] = aura.spellId
+            SpellCalc_settings.assumedTargetAuras[aura.spellId] = aura.maxStacks
+        end
+    end
+    local ok, err = pcall(A.UpdateAssumedTargetAuras, A)
+    settle()
+    local changedByForeign = 0
+    for id, v in pairs(runAll("other classes' target auras selected")) do
+        if cleared[id] and math.abs(cleared[id] - v) > 1e-6 then changedByForeign = changedByForeign + 1 end
+    end
+    emit(("other classes' own-damage target auras: %d selected, changed %d spells"):format(#foreign, changedByForeign))
+    if not ok then emit("FAIL applying another class's target auras raised an error: " .. tostring(err)) end
+    if changedByForeign > 0 then emit("FAIL target auras that only change another class's damage are applied") end
+    for _, spellId in ipairs(foreign) do SpellCalc_settings.assumedTargetAuras[spellId] = nil end
+    A:UpdateAssumedTargetAuras()
     settle()
 end
 

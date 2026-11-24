@@ -1,6 +1,6 @@
 SpellCalc Forever data generation report
 Client build: wowf 1.60.1.71037
-Generated: 2026-11-23T16:21:29.058Z
+Generated: 2026-11-24T08:17:19.488Z
 
 Everything listed here was skipped or guessed by the generator and should be reviewed.
 
@@ -142,19 +142,19 @@ Everything listed here was skipped or guessed by the generator and should be rev
 
 == Spell data: mage (0)
 
-== Talents: mage (27)
+== Talents: mage (28)
   Winter's Chill (11180) effect 0 skipped: Triggered spell needs some love: 12579
   Winter's Chill (11180) effect 1 skipped: SPELL_AURA_DUMMY spell not handled! 11180
   Winter's Chill (11180) effect 2 skipped: SPELL_AURA_DUMMY spell not handled! 11180
   Fingers of Frost (400647) effect 0 skipped: SPELL_AURA_DUMMY spell not handled! 400647
   Fingers of Frost (400647) effect 1 skipped: SPELL_AURA_DUMMY spell not handled! 400647
   Cold Snap (12472) is an active ability, not applied as a permanent talent effect
-  Shatter (11170) effect 0 skipped: SPELL_AURA_DUMMY spell not handled! 11170
+  Shatter (11170) uses a hand-written definition: SCRIPT_SET_VALUE={17,33,50}
   Improved Blizzard (11185) effect 0 skipped: SPELL_AURA_DUMMY spell not handled! 11185
   Frostbite (11071) effect 0 skipped: Triggered spell needs some love: 12494
+  Frost Warding (11189) uses a hand-written definition: SPELLMOD_PCT_EFFECT=10/pt, SPELLMOD_PCT_SPELL_SCALE=10/pt
   Combustion (11129) is an active ability, not applied as a permanent talent effect
-  Fire Power (11124) effect 0 skipped: SPELL_AURA_DUMMY spell not handled! 11124
-  Fire Power (11124) effect 1 skipped: SPELL_AURA_DUMMY spell not handled! 11124
+  Fire Power (11124) uses a hand-written definition: SCRIPT_SET_VALUE=1/pt
   Master of Elements (29074) uses a hand-written definition: ILLUMINATION=10/pt
   Heating Up (400624) effect 0 skipped: SPELL_AURA_DUMMY spell not handled! 400624
   Improved Scorch (11095) effect 0 skipped: SPELL_AURA_ADD_TARGET_TRIGGER spell not handled! 22959
@@ -165,6 +165,7 @@ Everything listed here was skipped or guessed by the generator and should be rev
   Presence of Mind (12043) is an active ability, not applied as a permanent talent effect
   Arcane Resilience (28574) effect 0: aura type 268 is not handled, effect skipped
   Improved Counterspell (11255) effect 0 skipped: SPELL_AURA_DUMMY spell not handled! 11255
+  Arcane Shielding (11252) uses a hand-written definition: SCRIPT_SET_VALUE={17,33}
   Missile Barrage (400588) effect 0 skipped: Triggered spell needs some love: 400589
   Missile Barrage (400588) effect 1 skipped: SPELL_AURA_DUMMY spell not handled! 400588
   Arcane Concentration (11213) uses a hand-written definition: CLEARCAST_CHANCE_DMG=2/pt
@@ -913,10 +914,12 @@ The act of shapeshifting frees the caster of Polymorph and Movement Impairing ef
 
 == Target auras (0)
 
-== Assumable target auras (16)
+== Assumable target auras (18)
   DRUID: Faerie Fire (Rank 4) [9907]
   MAGE: Fire Vulnerability [22959], up to 5 stacks, caster's own damage only
   MAGE: Winter's Chill [12579], up to 5 stacks, caster's own damage only
+  MAGE: Frost Nova (Rank 4) [10230] as "Frozen target", caster's own damage only
+  MAGE: Fire Power [11124] as "Your Fire effects on the target", up to 4 stacks, caster's own damage only
   MAGE: Amplify Magic (Rank 4) [10170]
   MAGE: Dampen Magic (Rank 5) [10174]
   PALADIN: Judgement of the Crusader (Rank 6) [20303]

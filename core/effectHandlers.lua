@@ -461,11 +461,12 @@ local function ManaShield(calcedSpell, effNum, spellInfo, spellName, spellId)
 
     calcedEffect.avgAfterMitigation = calcedEffect.avgCombined;
 
-    local drain = 1.5;
+    -- Mana drained per point of damage absorbed ("Drains $e mana per damage absorbed"), less Arcane Shielding.
+    local drain = effectData.manaPerDamage or 2;
     local reduction = _addon.scripting.GetValue("Mage_Arcane_Shielding");
     if reduction > 0 then
         drain = drain * (1 - reduction / 100);
-        calcedSpell:AddToBuffList({"Mage_Arcane_Shielding_"..reduction});
+        calcedSpell:AddToBuffList({"Arcane Shielding"});
     end
     calcedSpell.effectiveCost = calcedSpell.effectiveCost + drain * calcedEffect.avgAfterMitigation;
     calcedSpell.castingData.castsToOom = _addon:GetEffectiveManaPool() / calcedSpell.effectiveCost;

@@ -192,6 +192,7 @@ export class TalentsCreator
                 type: dummy.type,
                 affectSpell: dummy.affectSpell,
                 affectMask: dummy.affectMask,
+                scriptKey: dummy.scriptKey,
             };
             TalentsCreator.applyRankValues(effect, values);
             result.push(effect);

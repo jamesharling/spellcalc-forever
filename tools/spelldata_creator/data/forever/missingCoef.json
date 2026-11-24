@@ -2,6 +2,7 @@
     "names": {
         "Power Word: Shield": {"0": {"sp": 0.1}},
         "Ice Barrier": {"0": {"sp": 0.1}},
+        "Frost Ward": {"0": {"sp": 0.1}},
         "Rip": {"0": {"ap": 0.01}},
         "Ferocious Bite": {"0": {"ap": 0.03}}
     },
