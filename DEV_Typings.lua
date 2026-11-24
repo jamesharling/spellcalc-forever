@@ -31,6 +31,7 @@ local _addon = select(2, ...);
 ---@field schoolMask integer
 ---@field frozenDamagePct number|nil Percent more damage against frozen targets (Ice Lance)
 ---@field stunnedDamagePct number|nil Percent more damage against stunned or incapacitated targets (Judgement of Command)
+---@field immolateDamagePct number|nil Percent more damage against targets afflicted by Immolate (Incinerate)
 ---@field versusCritChance table<integer, number>|nil Critical strike chance added against creature types (Exorcism with Exorcist)
 ---@field isChannel boolean|nil
 ---@field isBinary boolean|nil

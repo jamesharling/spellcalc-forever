@@ -207,9 +207,33 @@ _addon.aurasTarget = {
     },
     [17794] = { -- Shadow Vulnerability
         {
-            type = _addon.CONST.EFFECT_TYPE.TARGET_SCHOOLMOD_DMG_TAKEN_PCT,
-            affectMask = 32,
-            value = 4,
+            type = _addon.CONST.EFFECT_TYPE.SCRIPT_SPELLMOD_DONE_PCT,
+            affectSpell = {4294967295, 4294967295, 4294967295, 4294967295},
+            value = 0,
+            scriptKey = "Warlock_Shadow_Vulnerability",
+        },
+    },
+    [25309] = { -- Immolate (Rank 8)
+        {
+            type = _addon.CONST.EFFECT_TYPE.SCRIPT_SPELLMOD_DONE_PCT,
+            affectSpell = {4294967295, 4294967295, 4294967295, 4294967295},
+            value = 0,
+            scriptKey = "Warlock_Immolate_Target",
+        },
+    },
+    [17804] = { -- Soul Siphon
+        {
+            type = _addon.CONST.EFFECT_TYPE.SCRIPT_SET_VALUE,
+            value = 1,
+            scriptKey = "Warlock_Dots_On_Target",
+            hasStacks = true,
+        },
+    },
+    [440870] = { -- Decimation
+        {
+            type = _addon.CONST.EFFECT_TYPE.SCRIPT_SET_VALUE,
+            value = 1,
+            scriptKey = "Warlock_Target_Low_Health",
         },
     },
     [11597] = { -- Sunder Armor (Rank 5)
@@ -260,6 +284,9 @@ _addon.assumableTargetAuras = {
     { spellId = 1311680, class = "WARLOCK", maxStacks = 1 }, -- Curse of the Elements (Rank 4)
     { spellId = 1225841, class = "WARLOCK", maxStacks = 1 }, -- Curse of Recklessness (Rank 4)
     { spellId = 17794, class = "WARLOCK", maxStacks = 1, fromCaster = true }, -- Shadow Vulnerability
+    { spellId = 25309, class = "WARLOCK", maxStacks = 1, fromCaster = true }, -- Immolate (Rank 8)
+    { spellId = 17804, class = "WARLOCK", maxStacks = 3, fromCaster = true, label = "Your Corruption, Siphon Life and Bane of Agony on the target" }, -- Soul Siphon
+    { spellId = 440870, class = "WARLOCK", maxStacks = 1, fromCaster = true, label = "Target below 35% health" }, -- Decimation
     { spellId = 11597, class = "WARRIOR", maxStacks = 5 }, -- Sunder Armor (Rank 5)
     { spellId = 27580, class = "WARRIOR", maxStacks = 1 }, -- Mortal Strike (Rank 4)
     { spellId = 23605, class = "WARRIOR", maxStacks = 1 }, -- Spell Vulnerability

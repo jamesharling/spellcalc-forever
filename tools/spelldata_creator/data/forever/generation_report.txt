@@ -1,6 +1,6 @@
 SpellCalc Forever data generation report
 Client build: wowf 1.60.1.71037
-Generated: 2026-11-24T17:06:08.463Z
+Generated: 2026-11-24T17:20:49.682Z
 
 Everything listed here was skipped or guessed by the generator and should be reviewed.
 
@@ -112,37 +112,29 @@ Everything listed here was skipped or guessed by the generator and should be rev
 
 == Spell data: warlock (0)
 
-== Talents: warlock (30)
-  Shadow and Flame (426316) effect 0 skipped: SPELL_AURA_DUMMY spell not handled! 426316
-  Shadow and Flame (426316) effect 1 skipped: SPELL_AURA_DUMMY spell not handled! 426316
-  Shadow and Flame (426316) effect 2 skipped: SPELL_AURA_DUMMY spell not handled! 426316
-  Shadow and Flame (426316) effect 3 skipped: SPELL_AURA_DUMMY spell not handled! 426316
+== Talents: warlock (22)
+  Shadow and Flame (426316) uses a hand-written definition: SCRIPT_SET_VALUE=4/pt
   Fire and Brimstone (412751) effect 0 skipped: SPELL_AURA_DUMMY spell not handled! 412751
   Pyroclasm (18073) effect 0 skipped: SPELL_AURA_DUMMY spell not handled! 18073
   Aftermath (18119) effect 0 skipped: Triggered spell needs some love: 18118
-  Improved Shadow Bolt (17793) effect 0 skipped: SPELL_AURA_DUMMY spell not handled! 17793
+  Improved Shadow Bolt (17793) uses a hand-written definition: SCRIPT_SET_VALUE=4/pt
   Demonic Pact (425464) effect 0 skipped: SPELL_AURA_DUMMY spell not handled! 425464
-  Master Demonologist (23785) effect 0 skipped: SPELL_AURA_DUMMY spell not handled! 23785
-  Master Demonologist (23785) effect 1 skipped: SPELL_AURA_DUMMY spell not handled! 23785
-  Master Demonologist (23785) effect 2 skipped: SPELL_AURA_DUMMY spell not handled! 23785
-  Master Demonologist (23785) effect 3 skipped: SPELL_AURA_DUMMY spell not handled! 23785
+  Master Demonologist (23785) uses a hand-written definition: SCRIPT_SET_VALUE=2/pt
   Demonic Knowledge (412732) effect 0 skipped: SPELL_AURA_DUMMY spell not handled! 412732
   Fel Domination (18708) is an active ability, not applied as a permanent talent effect
-  Decimation (440870) effect 0 skipped: SPELL_AURA_DUMMY spell not handled! 440870
-  Decimation (440870) effect 2 skipped: SPELL_AURA_DUMMY spell not handled! 440870
+  Decimation (440870) uses a hand-written definition: SCRIPT_SPELLMOD_DONE_PCT=3/pt
   Demonic Energies (1225214) effect 0 skipped: SPELL_AURA_DUMMY spell not handled! 1225214
   Demonic Energies (1225214) effect 1 skipped: SPELL_AURA_DUMMY spell not handled! 1225214
   Demonic Sacrifice (18788) is an active ability, not applied as a permanent talent effect
   Fel Vitality (18731) effect 1: aura type 178 is not handled, effect skipped
   Improved Health Funnel (18703) effect 3 skipped: Error: SPELL_AURA_ADD_PCT_MODIFIER misc value 32 not handled: 18703 // Increases the amount of health transferred by your Health Funnel spell by $m1%, reduces its health cost by $m2%, and reduces all threat your Health Funnel generates by $m3%. Allows Health Funnel to be used regardless of your demon's health.
   Improved Imp (18694) effect 2 skipped: SPELL_AURA_DUMMY spell not handled! 18694
-  Soul Siphon (17804) effect 0 skipped: SPELL_AURA_DUMMY spell not handled! 17804
+  Soul Siphon (17804) uses a hand-written definition: SCRIPT_SPELLMOD_DONE_PCT=4/pt
   Nightfall (18094) effect 0 skipped: SPELL_AURA_DUMMY spell not handled! 18094
   Amplify Curse (18288) is an active ability, not applied as a permanent talent effect
   Improved Drains (403511) effect 1 skipped: Error: Unhandled SPELLMOD_EFFECT1: 403511: // Increases Health drained, damage done, or Mana drained by your Drain Life, Drain Soul, and Drain Mana spells by $m1%.
-  Improved Life Tap (18182) effect 0 skipped: SPELL_AURA_DUMMY spell not handled! 18182
-  Soul Harvest (437032) effect 0 skipped: SPELL_AURA_DUMMY spell not handled! 437032
-  Soul Harvest (437032) effect 1 skipped: SPELL_AURA_DUMMY spell not handled! 437032
+  Improved Life Tap (18182) uses a hand-written definition: SPELLMOD_PCT_EFFECT=10/pt
+  Soul Harvest (437032) uses a hand-written definition: SCRIPT_SET_VALUE=50/pt
 
 == Spell data: mage (0)
 
@@ -917,7 +909,7 @@ The act of shapeshifting frees the caster of Polymorph and Movement Impairing ef
 
 == Target auras (0)
 
-== Assumable target auras (28)
+== Assumable target auras (31)
   PALADIN Oath of Light [1328548]: Holy Light +6.66666984558 per level (400 at 60)
   PALADIN Oath of Light [1328548]: Flash of Light +1.91666996479 per level (115 at 60)
   PALADIN Oath of Light [1328548]: Holy Shock +3.833329916 per level (230 at 60)
@@ -943,6 +935,9 @@ The act of shapeshifting frees the caster of Polymorph and Movement Impairing ef
   WARLOCK: Curse of the Elements (Rank 4) [1311680]
   WARLOCK: Curse of Recklessness (Rank 4) [1225841]
   WARLOCK: Shadow Vulnerability [17794], caster's own damage only
+  WARLOCK: Immolate (Rank 8) [25309], caster's own damage only
+  WARLOCK: Soul Siphon [17804] as "Your Corruption, Siphon Life and Bane of Agony on the target", up to 3 stacks, caster's own damage only
+  WARLOCK: Decimation [440870] as "Target below 35% health", caster's own damage only
   WARRIOR: Sunder Armor (Rank 5) [11597], up to 5 stacks
   WARRIOR: Mortal Strike (Rank 4) [27580]
   WARRIOR: Spell Vulnerability [23605]

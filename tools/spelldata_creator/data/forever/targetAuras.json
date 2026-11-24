@@ -28,7 +28,10 @@
 
         { "class": "WARLOCK", "name": "Curse of the Elements" },
         { "class": "WARLOCK", "name": "Curse of Recklessness", "note": "armor" },
-        { "class": "WARLOCK", "name": "Shadow Vulnerability", "id": 17794, "note": "Improved Shadow Bolt, from caster" },
+        { "class": "WARLOCK", "name": "Shadow Vulnerability", "id": 17794, "note": "Improved Shadow Bolt, from caster; the value is the talent's rank" },
+        { "class": "WARLOCK", "name": "Immolate", "note": "the warlock's own: Incinerate deals more damage" },
+        { "class": "WARLOCK", "name": "Soul Siphon", "id": 17804, "label": "Your Corruption, Siphon Life and Bane of Agony on the target", "maxStacks": 3, "note": "the talent: Drain Life, Drain Soul and Wrack damage per such effect" },
+        { "class": "WARLOCK", "name": "Decimation", "id": 440870, "label": "Target below 35% health", "note": "the talent: Shadow Bolt and Searing Pain damage" },
 
         { "class": "WARRIOR", "name": "Sunder Armor", "note": "armor" },
         { "class": "WARRIOR", "name": "Mortal Strike", "note": "healing taken" },

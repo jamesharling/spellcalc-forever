@@ -1066,6 +1066,181 @@ if __CLASS == "SHAMAN" then
     if differ > 0 then emit(("FAIL %d spells differ after the shaman checks: %s"):format(differ, table.concat(examples, ", "))) end
 end
 
+-- Warlock. Health Funnel's periodic damage is its health cost, not a second effect; Life Tap shows the mana it
+-- gives (base value plus Spirit, more with Improved Life Tap). Bonuses that depend on the target are assumed in
+-- the settings: Incinerate against a target with Immolate, Decimation below 35% health, Soul Siphon per own
+-- periodic effect, Improved Shadow Bolt's debuff. Buffs and debuffs with one spell for every talent rank take
+-- their value from the talent: Shadow Vulnerability, Master Demonologist, Shadow and Flame, Soul Harvest.
+if __CLASS == "WARLOCK" then
+    -- A copy of the numbers: the addon recalculates a spell in place, so the tables themselves change later.
+    local function fx(id, n)
+        local status, cs = checkSpell(id)
+        if status ~= "ok" then return { } end
+        local e = cs.effects[n or 1] or { }
+        return { avg = e.avg, ticks = e.ticks, crit = cs.critChance, effects = #cs.effects }
+    end
+    local function near(a, b) return type(a) == "number" and type(b) == "number" and math.abs(a - b) < 1e-4 end
+    local function talents(ranks)
+        for i = #__TALENT_TREE, 1, -1 do
+            __TALENT_RANKS[__TALENT_TREE[i].spellId] = nil
+            __TALENT_TREE[i] = nil
+        end
+        for spellId, rank in pairs(ranks) do
+            __TALENT_TREE[#__TALENT_TREE + 1] = { spellId = spellId, maxRanks = rank }
+            __TALENT_RANKS[spellId] = rank
+        end
+        __FireEvent("TRAIT_CONFIG_UPDATED", 4001)
+        settle()
+    end
+    local function assume(spellId, stacks)
+        SpellCalc_settings.assumedTargetAuras[spellId] = stacks
+        A:UpdateAssumedTargetAuras()
+        settle()
+    end
+    local function buff(spellId)
+        __AURAS.player = spellId and { { name = __SPELL_NAMES[spellId], spellId = spellId, applications = 1, sourceUnit = "player",
+            auraInstanceID = 904, duration = 15, expirationTime = 0, isHelpful = true } } or {}
+        __FireEvent("UNIT_AURA", "player", { isFullUpdate = true })
+        settle()
+    end
+    local FUNNEL, LIFE_TAP, INCINERATE, SHADOW_BOLT, SEARING_PAIN, SOUL_FIRE, DRAIN_LIFE, CORRUPTION, IMMOLATE, AGONY = 11695, 11689, 1293813, 25307, 17923, 17924, 11700, 25311, 25309, 11713
+    local IMPROVED_TAP, DECIMATION, SOUL_SIPHON, IMPROVED_BOLT, VULNERABILITY, DEMONOLOGIST, SHADOW_AND_FLAME, SOUL_HARVEST = 18182, 440870, 17804, 17793, 17794, 23785, 426316, 437032
+    local DEMONOLOGIST_SHADOW, DEMONOLOGIST_FIRE, FLAME_SHADOW, HARVEST_BUFF, AMPLIFY = 23761, 23759, 1293816, 1242853, 18288
+
+    local funnel = fx(FUNNEL)
+    emit(("warlock: Health Funnel heals %s x %s, %s effect"):format(tostring(funnel.avg), tostring(funnel.ticks), tostring(funnel.effects)))
+    if funnel.effects ~= 1 or not near(funnel.avg, 153) then emit("FAIL Health Funnel shows its health cost as a second effect") end
+
+    local tap = fx(LIFE_TAP)
+    local spirit = A.stats.spirit or 0
+    talents({ [IMPROVED_TAP] = 2 })
+    local tapImproved = fx(LIFE_TAP)
+    talents({})
+    emit(("warlock: Life Tap gives %s mana with %s Spirit, %s with Improved Life Tap 2/2"):format(tostring(tap.avg), tostring(spirit), tostring(tapImproved.avg)))
+    if spirit <= 0 or not near(tap.avg, 420 + 4 + spirit) then emit("FAIL Life Tap rank 6 doesn't give 424 mana plus Spirit at level 60") end
+    if not near(tapImproved.avg, (tap.avg or 0) * 1.2) then emit("FAIL Improved Life Tap 2/2 doesn't add 20% to Life Tap") end
+
+    -- Incinerate against a target with the warlock's Immolate
+    local incinerate, bolt, pain, soulFire = fx(INCINERATE), fx(SHADOW_BOLT), fx(SEARING_PAIN), fx(SOUL_FIRE)
+    assume(IMMOLATE, 1)
+    local incinerateImmolate, boltImmolate = fx(INCINERATE), fx(SHADOW_BOLT)
+    assume(IMMOLATE, nil)
+    emit(("warlock: Incinerate %s, %s against a target with Immolate"):format(tostring(incinerate.avg), tostring(incinerateImmolate.avg)))
+    if A.spellInfo[INCINERATE].immolateDamagePct ~= 25 or not incinerate.avg or not near(incinerateImmolate.avg, incinerate.avg * 1.25)
+        or not near(boltImmolate.avg, bolt.avg) then
+        emit("FAIL Incinerate doesn't deal 25% more damage to a target with Immolate, or Shadow Bolt does")
+    end
+
+    -- Decimation 2/2: only below 35% health
+    talents({ [DECIMATION] = 2 })
+    local boltTalent = fx(SHADOW_BOLT)
+    assume(DECIMATION, 1)
+    local boltLow, painLow, soulFireLow = fx(SHADOW_BOLT), fx(SEARING_PAIN), fx(SOUL_FIRE)
+    talents({})
+    local boltLowNoTalent = fx(SHADOW_BOLT)
+    assume(DECIMATION, nil)
+    emit(("warlock: Shadow Bolt %s, %s with Decimation 2/2 below 35%% health"):format(tostring(bolt.avg), tostring(boltLow.avg)))
+    if not near(boltTalent.avg, bolt.avg) or not near(boltLowNoTalent.avg, bolt.avg) then emit("FAIL Decimation changes Shadow Bolt without a target at low health, or without the talent") end
+    if not near(boltLow.avg, (bolt.avg or 0) * 1.06) or not near(painLow.avg, (pain.avg or 0) * 1.06) or not near(soulFireLow.avg, soulFire.avg) then
+        emit("FAIL Decimation 2/2 doesn't add 6% to Shadow Bolt and Searing Pain only, below 35% health")
+    end
+
+    -- Soul Siphon 3/3 with the warlock's periodic effects on the target
+    local drain, corruption = fx(DRAIN_LIFE), fx(CORRUPTION)
+    talents({ [SOUL_SIPHON] = 3 })
+    local drainTalent = fx(DRAIN_LIFE)
+    assume(SOUL_SIPHON, 3)
+    local drainThree, corruptionThree = fx(DRAIN_LIFE), fx(CORRUPTION)
+    assume(SOUL_SIPHON, 1)
+    local drainOne = fx(DRAIN_LIFE)
+    assume(SOUL_SIPHON, nil)
+    talents({})
+    emit(("warlock: Drain Life %s, %s with Soul Siphon 3/3 and 3 own effects on the target, %s with 1"):format(tostring(drain.avg), tostring(drainThree.avg), tostring(drainOne.avg)))
+    if not drain.avg or not near(drainThree.avg, drain.avg * 1.36) or not near(drainOne.avg, drain.avg * 1.12) or not near(drainTalent.avg, drain.avg)
+        or not near(corruptionThree.avg, corruption.avg) then
+        emit("FAIL Soul Siphon 3/3 doesn't add 12% per own effect on the target to Drain Life only")
+    end
+
+    -- Improved Shadow Bolt's debuff: the talent's rank is its value
+    local immolate = fx(IMMOLATE)
+    assume(VULNERABILITY, 1)
+    local boltNoTalent = fx(SHADOW_BOLT)
+    talents({ [IMPROVED_BOLT] = 2 })
+    local boltTwo = fx(SHADOW_BOLT)
+    talents({ [IMPROVED_BOLT] = 5 })
+    local boltFive, immolateFive = fx(SHADOW_BOLT), fx(IMMOLATE)
+    assume(VULNERABILITY, nil)
+    local boltFiveOff = fx(SHADOW_BOLT)
+    talents({})
+    emit(("warlock: Shadow Bolt against Shadow Vulnerability: %s with Improved Shadow Bolt 2/5, %s with 5/5"):format(tostring(boltTwo.avg), tostring(boltFive.avg)))
+    if not near(boltTwo.avg, (bolt.avg or 0) * 1.08) or not near(boltFive.avg, (bolt.avg or 0) * 1.20) then
+        emit("FAIL Shadow Vulnerability doesn't add the 4% per rank of Improved Shadow Bolt")
+    end
+    if not near(boltNoTalent.avg, bolt.avg) or not near(boltFiveOff.avg, bolt.avg) or not near(immolateFive.avg, immolate.avg) then
+        emit("FAIL Shadow Vulnerability applies without the talent or the debuff, or to Fire damage")
+    end
+
+    -- Master Demonologist and Shadow and Flame: the buffs' value is the talent's rank
+    talents({ [DEMONOLOGIST] = 3, [SHADOW_AND_FLAME] = 2 })
+    buff(DEMONOLOGIST_SHADOW)
+    local boltDemon, immolateDemon = fx(SHADOW_BOLT), fx(IMMOLATE)
+    buff(DEMONOLOGIST_FIRE)
+    local immolateImp, boltImp = fx(IMMOLATE), fx(SHADOW_BOLT)
+    buff(FLAME_SHADOW)
+    local boltFlame = fx(SHADOW_BOLT)
+    talents({})
+    local boltFlameNoTalent = fx(SHADOW_BOLT)
+    buff(nil)
+    emit(("warlock: Shadow Bolt %s with Master Demonologist 3/5 and a Succubus, %s with Shadow and Flame 2/5 after Conflagrate"):format(
+        tostring(boltDemon.avg), tostring(boltFlame.avg)))
+    if not near(boltDemon.avg, (bolt.avg or 0) * 1.06) or not near(immolateDemon.avg, immolate.avg)
+        or not near(immolateImp.avg, (immolate.avg or 0) * 1.06) or not near(boltImp.avg, bolt.avg) then
+        emit("FAIL Master Demonologist 3/5 doesn't add 6% Shadow damage with a Succubus and 6% Fire damage with an Imp")
+    end
+    if not near(boltFlame.avg, (bolt.avg or 0) * 1.08) or not near(boltFlameNoTalent.avg, (bolt.avg or 0) * 1.10) then
+        emit("FAIL Shadow and Flame 2/5 doesn't add 8% Shadow damage (10% from the aura data when the talent is unknown)")
+    end
+
+    -- Soul Harvest's buff and Amplify Curse
+    local castingBefore = A.stats.manaRegCasting
+    talents({ [SOUL_HARVEST] = 1 })
+    buff(HARVEST_BUFF)
+    local castingHarvest, regen = A.stats.manaRegCasting, A.stats.manaRegBase
+    buff(nil)
+    talents({})
+    local agony = fx(AGONY)
+    buff(AMPLIFY)
+    local agonyAmplified, corruptionAmplified = fx(AGONY), fx(CORRUPTION)
+    buff(nil)
+    emit(("warlock: mana regeneration while casting %s with Soul Harvest 1/2's buff (%s when not casting); Bane of Agony %s, %s with Amplify Curse"):format(
+        tostring(castingHarvest), tostring(regen), tostring(agony.avg), tostring(agonyAmplified.avg)))
+    if regen <= 0 or not near(castingHarvest, castingBefore + regen * 0.5) or not near(A.stats.manaRegCasting, castingBefore) then
+        emit("FAIL Soul Harvest 1/2's buff doesn't let 50% of the mana regeneration continue while casting")
+    end
+    if not agony.avg or not near(agonyAmplified.avg, agony.avg * 1.5) or not near(corruptionAmplified.avg, corruption.avg) then
+        emit("FAIL Amplify Curse doesn't add 50% to Bane of Agony only")
+    end
+
+    for spellId, label in pairs({ [SOUL_SIPHON] = "Your Corruption, Siphon Life and Bane of Agony on the target", [DECIMATION] = "Target below 35% health" }) do
+        local option
+        for _, group in pairs(A.AssumedTargetAuraSettings()) do
+            if type(group) == "table" and group.type == "group" and group.args["aura" .. spellId] then option = group.args["aura" .. spellId].name end
+        end
+        if type(option) ~= "string" or not option:find(label, 1, true) then
+            emit(("FAIL the target state \"%s\" isn't offered under that name: %s"):format(label, tostring(option)))
+        end
+    end
+
+    local differ, examples = 0, {}
+    for id, v in pairs(runAll("warlock checked")) do
+        if base[id] and math.abs(base[id] - v) > 1e-6 then
+            differ = differ + 1
+            if #examples < 4 then examples[#examples + 1] = ("%s %.2f -> %.2f"):format(name(id), base[id], v) end
+        end
+    end
+    if differ > 0 then emit(("FAIL %d spells differ after the warlock checks: %s"):format(differ, table.concat(examples, ", "))) end
+end
+
 -- The options table must pass AceConfig validation (it is only validated when the panel opens in game)
 do
     local registry = LibStub("AceConfigRegistry-3.0")

@@ -639,8 +639,19 @@ function buildRankInfo(spellId: number, effects: SpellEffect[]): RankInfo
         else report(`${nameWithRank} [${spellId}]: critical strike chance against "${versusCrit[2]} and ${versusCrit[3]}" not understood, not applied`);
     }
 
+    // "Deals $s1 Fire damage to your target and an additional $m2% damage if the target is afflicted by Immolate."
+    // (Incinerate): the percentage is a dummy effect.
+    const immolateBonus = description.match(/additional \$m(\d)% damage if the target is afflicted by Immolate/i);
+    if (immolateBonus)
+    {
+        const pct = baseOfToken(parseInt(immolateBonus[1]));
+        if (pct > 0) rankInfo.immolateDamagePct = pct;
+        else report(`${nameWithRank} [${spellId}]: tooltip names effect ${immolateBonus[1]} as the bonus against targets with Immolate, but it has no value`);
+    }
+
     // "to gain ${$o2+$SPI} Mana" (Dark Sacrifice): the periodic mana gain's total, plus the caster's Spirit.
-    const plusSpirit = description.match(/\$\{\$o(\d)\+\$SPI\} Mana/);
+    // "Converts ${($m1+$SPI*1)*(1+$18182m1/100)} Health into ... Mana" (Life Tap): the same on a single gain.
+    const plusSpirit = description.match(/\$\{\$o(\d)\+\$SPI\} Mana/) ?? description.match(/\(\$m(\d)\+\$SPI\*1\)/);
     if (plusSpirit)
     {
         const effect = effectForToken(parseInt(plusSpirit[1]));
@@ -722,6 +733,7 @@ function rankInfoToLua(sid: string | number, ri: RankInfo): string {
     if (ri.useScalingFormula) str += `\t\tuseScalingFormula = { id = ${ri.useScalingFormula.id}, label = "${ri.useScalingFormula.label}" },\n`;
     if (ri.frozenDamagePct) str += `\t\tfrozenDamagePct = ${ri.frozenDamagePct},\n`;
     if (ri.stunnedDamagePct) str += `\t\tstunnedDamagePct = ${ri.stunnedDamagePct},\n`;
+    if (ri.immolateDamagePct) str += `\t\timmolateDamagePct = ${ri.immolateDamagePct},\n`;
     if (ri.versusCritChance)
     {
         str += `\t\tversusCritChance = { ${Object.keys(ri.versusCritChance).map(type => `[${type}] = ${ri.versusCritChance![Number(type)]}`).join(", ")} },\n`;

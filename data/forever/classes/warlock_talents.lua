@@ -15,6 +15,18 @@ _addon.talentDataRaw = {
     -----------------------------
     -- Column group 1
     -----------------------------
+    { -- Improved Life Tap (node 105921, 2 ranks)
+        name = "Improved Life Tap",
+        spellId = 18182,
+        maxRanks = 2,
+        effects = {
+            {
+                type = _addon.CONST.EFFECT_TYPE.SPELLMOD_PCT_EFFECT,
+                affectSpell = {262144, 0, 0, 0},
+                perPoint = 10,
+            },
+        }
+    },
     { -- Suppression (node 105925, 5 ranks)
         name = "Suppression",
         spellId = 18174,
@@ -39,6 +51,18 @@ _addon.talentDataRaw = {
                 type = _addon.CONST.EFFECT_TYPE.SPELLMOD_PCT_OVER_TIME,
                 affectSpell = {2, 0, 0, 0},
                 perPoint = 2,
+            },
+        }
+    },
+    { -- Soul Harvest (node 105922, 2 ranks)
+        name = "Soul Harvest",
+        spellId = 437032,
+        maxRanks = 2,
+        effects = {
+            {
+                type = _addon.CONST.EFFECT_TYPE.SCRIPT_SET_VALUE,
+                scriptKey = "Warlock_Soul_Harvest",
+                perPoint = 50,
             },
         }
     },
@@ -90,6 +114,19 @@ _addon.talentDataRaw = {
             },
         }
     },
+    { -- Soul Siphon (node 105911, 3 ranks)
+        name = "Soul Siphon",
+        spellId = 17804,
+        maxRanks = 3,
+        effects = {
+            {
+                type = _addon.CONST.EFFECT_TYPE.SCRIPT_SPELLMOD_DONE_PCT,
+                affectSpell = {16392, 262144, 0, 0},
+                scriptKey = "Warlock_Soul_Siphon",
+                perPoint = 4,
+            },
+        }
+    },
     { -- Shadow Mastery (node 105910, 5 ranks)
         name = "Shadow Mastery",
         spellId = 18271,
@@ -128,8 +165,9 @@ _addon.talentDataRaw = {
         maxRanks = 2,
         effects = {
             {
-                type = _addon.CONST.EFFECT_TYPE.SPELLMOD_PCT_DAMAGE_HEALING,
+                type = _addon.CONST.EFFECT_TYPE.SCRIPT_SPELLMOD_DONE_PCT,
                 affectSpell = {257, 0, 0, 0},
+                scriptKey = "Warlock_Decimation",
                 perPoint = 3,
             },
         }
@@ -146,9 +184,33 @@ _addon.talentDataRaw = {
             },
         }
     },
+    { -- Master Demonologist (node 105891, 5 ranks)
+        name = "Master Demonologist",
+        spellId = 23785,
+        maxRanks = 5,
+        effects = {
+            {
+                type = _addon.CONST.EFFECT_TYPE.SCRIPT_SET_VALUE,
+                scriptKey = "Warlock_Master_Demonologist",
+                perPoint = 2,
+            },
+        }
+    },
     -----------------------------
     -- Column group 3
     -----------------------------
+    { -- Improved Shadow Bolt (node 105889, 5 ranks)
+        name = "Improved Shadow Bolt",
+        spellId = 17793,
+        maxRanks = 5,
+        effects = {
+            {
+                type = _addon.CONST.EFFECT_TYPE.SCRIPT_SET_VALUE,
+                scriptKey = "Warlock_Improved_Shadow_Bolt",
+                perPoint = 4,
+            },
+        }
+    },
     { -- Aftermath (node 105886, 5 ranks)
         name = "Aftermath",
         spellId = 18119,
@@ -204,6 +266,18 @@ _addon.talentDataRaw = {
                 type = _addon.CONST.EFFECT_TYPE.SPELLMOD_FLAT_CRIT_CHANCE,
                 affectSpell = {0, 8388608, 0, 0},
                 values = {8, 17, 25},
+            },
+        }
+    },
+    { -- Shadow and Flame (node 105875, 5 ranks)
+        name = "Shadow and Flame",
+        spellId = 426316,
+        maxRanks = 5,
+        effects = {
+            {
+                type = _addon.CONST.EFFECT_TYPE.SCRIPT_SET_VALUE,
+                scriptKey = "Warlock_Shadow_and_Flame",
+                perPoint = 4,
             },
         }
     },

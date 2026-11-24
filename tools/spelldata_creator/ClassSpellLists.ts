@@ -21,6 +21,7 @@ const DO_EFFECTS = [
     EFFECT_TYPE.SPELL_EFFECT_APPLY_AREA_AURA_PARTY,
     EFFECT_TYPE.SPELL_EFFECT_TRIGGER_SPELL,
     EFFECT_TYPE.SPELL_EFFECT_DUMMY,
+    EFFECT_TYPE.SPELL_EFFECT_ENERGIZE,
     EFFECT_TYPE.SPELL_EFFECT_ENERGIZE_PCT,
     EFFECT_TYPE.SPELL_EFFECT_HEALTH_FUNNEL,
     EFFECT_TYPE.SPELL_EFFECT_NORMALIZED_WEAPON_DMG,
@@ -69,11 +70,12 @@ const PTSA_IGNORES = [
  * effects only through per-spell dummy handlers (core/effectHandlers.lua). Forever uses these on many more spells
  * (Blessing of Wisdom, Enrage, Water Shield's mana proc); what the addon shows for such an effect is the
  * mana of a tick and the total, which only makes sense for a spell cast to gain mana. Those are listed here:
- * Dark Sacrifice (health for mana over 15 seconds). Innervate and Evocation are mana regen percent auras on
- * Forever.
+ * Dark Sacrifice (health for mana over 15 seconds) and Life Tap (a dummy that spellDataFixes.ts turns into a
+ * mana gain). Innervate and Evocation are mana regen percent auras on Forever.
  */
 const MANA_GAIN_AURAS_WITH_HANDLER: { [spellName: string]: boolean } = {
     "Dark Sacrifice": true,
+    "Life Tap": true,
 };
 
 export class ClassSpellLists
@@ -132,8 +134,9 @@ export class ClassSpellLists
 
             if (DO_EFFECTS.indexOf(effect.Effect) == -1) continue;
 
-            // Energize percent effects are dispatched to the same per-spell dummy handlers as mana gain auras.
-            if (effect.Effect == EFFECT_TYPE.SPELL_EFFECT_ENERGIZE_PCT && !MANA_GAIN_AURAS_WITH_HANDLER[spellName]) continue;
+            // Mana gains are only shown for spells cast to gain mana (see MANA_GAIN_AURAS_WITH_HANDLER).
+            if ((effect.Effect == EFFECT_TYPE.SPELL_EFFECT_ENERGIZE_PCT || effect.Effect == EFFECT_TYPE.SPELL_EFFECT_ENERGIZE)
+                && !MANA_GAIN_AURAS_WITH_HANDLER[spellName]) continue;
 
             if (effect.Effect == EFFECT_TYPE.SPELL_EFFECT_APPLY_AURA
                 || effect.Effect == EFFECT_TYPE.SPELL_EFFECT_PERSISTENT_AREA_AURA

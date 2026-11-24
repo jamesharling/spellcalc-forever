@@ -569,6 +569,39 @@ local function FillManaValues(calcedSpell, effNum, spellInfo, spellName, spellId
     calcedEffect.perResource = 0;
 end
 
+--- What a class spell cast to gain mana adds to its base value: the caster's Spirit on top of the total
+--- ("to gain ${$o2+$SPI} Mana", Dark Sacrifice, spread over its ticks; "($m1+$SPI*1)", Life Tap), then talents that
+--- increase the effect (Improved Life Tap).
+---@param calcedSpell CalcedSpell
+---@param effNum integer
+---@param spellInfo SpellInfo
+---@param spellId integer
+local function AddManaExtras(calcedSpell, effNum, spellInfo, spellId)
+    local calcedEffect = calcedSpell.effects[effNum];
+    local ticks = calcedEffect.ticks and calcedEffect.ticks > 0 and calcedEffect.ticks or 1;
+    local add, mult = 0, 1;
+
+    if spellInfo.effects[effNum].totalPlusSpirit then
+        add = stats.spirit / ticks;
+    end
+
+    local effectMod = stats.spellModPctEffect[spellId];
+    if effectMod and effectMod.val ~= 0 then
+        mult = math.max(0, 1 + effectMod.val / 100);
+        calcedSpell:AddToBuffList(effectMod.buffs);
+    end
+
+    if add == 0 and mult == 1 then
+        return;
+    end
+
+    calcedEffect.min = (calcedEffect.min + add) * mult;
+    calcedEffect.max = (calcedEffect.max + add) * mult;
+    calcedEffect.avg = (calcedEffect.avg + add) * mult;
+    calcedEffect.avgCombined = calcedEffect.avg;
+    calcedEffect.avgAfterMitigation = calcedEffect.avgCombined * ticks;
+end
+
 --- Mana per tick over the duration: periodic energize auras, and drinks (mana regen auras, per 2 s tick).
 ---@param calcedSpell CalcedSpell
 ---@param effNum integer
@@ -577,18 +610,7 @@ end
 ---@param spellId integer
 local function PeriodicEnergize(calcedSpell, effNum, spellInfo, spellName, spellId)
     FillManaValues(calcedSpell, effNum, spellInfo, spellName, spellId, false);
-
-    -- "to gain ${$o2+$SPI} Mana" (Dark Sacrifice): the caster's Spirit on top of the total, spread over the ticks.
-    if spellInfo.effects[effNum].totalPlusSpirit then
-        local calcedEffect = calcedSpell.effects[effNum];
-        local ticks = calcedEffect.ticks and calcedEffect.ticks > 0 and calcedEffect.ticks or 1;
-        local perTick = stats.spirit / ticks;
-        calcedEffect.min = calcedEffect.min + perTick;
-        calcedEffect.max = calcedEffect.max + perTick;
-        calcedEffect.avg = calcedEffect.avg + perTick;
-        calcedEffect.avgCombined = calcedEffect.avg;
-        calcedEffect.avgAfterMitigation = calcedEffect.avgCombined * ticks;
-    end
+    AddManaExtras(calcedSpell, effNum, spellInfo, spellId);
 end
 
 --- A percentage of maximum mana per tick.
@@ -908,6 +930,7 @@ end
 ---@param spellId integer
 local function Energize(_, calcedSpell, effNum, spellInfo, spellName, spellId)
     FillManaValues(calcedSpell, effNum, spellInfo, spellName, spellId, false);
+    AddManaExtras(calcedSpell, effNum, spellInfo, spellId);
 end
 
 --- Handle SPELL_EFFECT_ENERGIZE_PCT: a percentage of maximum mana.

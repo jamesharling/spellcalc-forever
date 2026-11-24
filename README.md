@@ -48,7 +48,8 @@ from upstream SpellCalc in more than the TOC:
   such a debuff left selected by another class is not applied either. Some entries stand for a state of the
   target instead of one debuff: "Frozen target" and "Your Fire effects on the target" (see *Mage* below),
   "Stunned or incapacitated target" and "One of the first enemies in your Consecration" (see *Paladin*),
-  "Your Holy Fire or Shadow Word: Pain on the target" and "Target at or below 20% health" (see *Priest*).
+  "Your Holy Fire or Shadow Word: Pain on the target" and "Target at or below 20% health" (see *Priest*),
+  "Your Corruption, Siphon Life and Bane of Agony on the target" and "Target below 35% health" (see *Warlock*).
 - **Fixed assumptions instead of live state** where the live value is only readable when it doesn't matter:
   the mana pool always starts full (current mana is secret in combat), finishing moves use an assumed
   combo point count (Settings > Target), and the table of raid boss resistances by NPC ID is gone (unit
@@ -144,6 +145,17 @@ from upstream SpellCalc in more than the TOC:
   Stormstrike buff lets half the mana regeneration continue while casting. Not calculated: the weapon imbues
   (Rockbiter, Flametongue, Frostbrand, Windfury) and Elemental Weapons, and Mana Spring and Mana Tide Totem
   (their tooltips give the amounts). Water Shield's mana is an estimate of one globe every 50 seconds.
+- **Warlock.** Life Tap shows the mana it gives: its base value plus your Spirit, more with Improved Life Tap.
+  Health Funnel no longer lists its health cost as a second damage effect. Several talents put a buff or debuff
+  with one spell for every rank, so the aura data only knows one value; these now use the rank's own value:
+  Improved Shadow Bolt's Shadow Vulnerability (4% per rank; it was 4% at every rank), Master Demonologist (2%
+  per rank; it was always 10%), Shadow and Flame (4% per rank; it was always 10%) and Soul Harvest's
+  regeneration while casting. Amplify Curse adds its 50% to Bane of Agony. Assumed in Settings > Target Auras:
+  "Immolate" gives Incinerate its 25%; "Target below 35% health" gives Shadow Bolt and Searing Pain the
+  Decimation bonus, which was applied all the time before; "Your Corruption, Siphon Life and Bane of Agony on
+  the target" (0–3) gives Drain Life, Drain Soul and Wrack the Soul Siphon bonus per effect; "Shadow
+  Vulnerability" does nothing without Improved Shadow Bolt. Not calculated: Drain Mana, Wrack's faster ticking
+  of your other periodic effects, pet abilities and the talents that improve them, and Bane of Havoc.
 - **Area spells that tick through an area trigger** (Hurricane, Blizzard, Rain of Fire, the burn of
   Flamestrike, Consecration) only create the trigger on Forever. The generator takes the damage of a tick from
   the spell the tooltip names, one tick per period.
@@ -213,6 +225,11 @@ Nothing here has run on a live Forever client (the beta closed before this port 
     Totems (the data gives 10% per rank for Healing Stream, 5% for Mana Spring). Fire Nova against the combat
     log. Whether Riptide's bonus applies to every jump of a Chain Heal cast on its target, as assumed, or only
     to the first heal. Searing Totem's attack: the data gives it 1.7% of spell power.
+17. Warlock: Life Tap's mana against the addon (base value plus Spirit, times Improved Life Tap). The Shadow
+    Vulnerability debuff's tooltip on the target at a talent rank below 5, and the "Shadow" and "Flame" buffs
+    of Shadow and Flame and the Master Demonologist buff at partial ranks: the addon takes the percentage from
+    the talent, the buffs' tooltips show what the game uses. Whether Decimation's damage bonus really only
+    applies below 35% health. Bane of Doom: the data gives it 400% of spell power.
 
 ## Regenerating data
 
@@ -319,7 +336,9 @@ npm test
   Power Word: Shield's healing power, Divine Aegis, Improved Mind Flay, Spirit Tap, and Renewed Hope, Power in
   Light and Early Demise with and without their target state. For a shaman it checks Healing Stream Totem with
   Restorative Totems, Fire Nova with Trial by Fire, Lightning Overload, Riptide's Chain Heal bonus and the
-  Improved Stormstrike buff. For every class it selects the
+  Improved Stormstrike buff. For a warlock it checks Health Funnel, Life Tap with Improved Life Tap,
+  Incinerate against Immolate, Decimation, Soul Siphon, and that Shadow Vulnerability, Master Demonologist,
+  Shadow and Flame and Soul Harvest follow the talent's rank. For every class it selects the
   own-damage target auras of the other classes and checks nothing changes. It validates the settings table
   with AceConfig,
   and checks old saved

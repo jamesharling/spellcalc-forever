@@ -271,6 +271,72 @@ function addPriestTalents(list: TalentDummyList, spellData: SpellData)
     }
 }
 
+/**
+ * The scripts are in data/forever/classes/warlock.lua; the target states are assumed in the settings
+ * (modules/TargetAuras.ts).
+ */
+function addWarlockTalents(list: TalentDummyList, spellData: SpellData)
+{
+    const set = SpellClassSetId.WARLOCK;
+    const any = (mask: number[]) => mask.some(bits => bits !== 0);
+    const isPeriodicDamage = (spellId: number) => spellData.getSpellEffects(spellId, true)?.some(e =>
+        e.EffectAura === AURA_TYPE.SPELL_AURA_PERIODIC_DAMAGE || e.EffectAura === AURA_TYPE.SPELL_AURA_PERIODIC_LEECH) ?? false;
+
+    // "When you cast Shadow Bolt or Searing Pain on an enemy below $m3% health, they deal $m4% increased damage".
+    // The fourth effect is a damage modifier on the two spells; converted as is it would always apply. A script
+    // applies it while the target is assumed to be below that health. (The Soul Fire parts change its cooldown,
+    // cast time and shard cost, nothing the addon calculates.)
+    const decimation = (spellData.getSpellsByName("Decimation", true) ?? [])
+        .map(id => spellData.getSpellEffects(id, true)?.find(e => e.EffectIndex === 3 && e.EffectAura === AURA_TYPE.SPELL_AURA_ADD_PCT_MODIFIER))
+        .find(e => e && e.EffectSpellClassMask_0);
+    if (decimation)
+    {
+        list["Decimation"] = [{
+            type: ADDON_EFFECT_TYPE.SCRIPT_SPELLMOD_DONE_PCT,
+            affectSpell: [decimation.EffectSpellClassMask_0, decimation.EffectSpellClassMask_1,
+                decimation.EffectSpellClassMask_2, decimation.EffectSpellClassMask_3],
+            scriptKey: "Warlock_Decimation",
+            valueForRank: v => v[3],
+        }];
+    }
+
+    // "Increases the damage done or health drained by your Drain Life, Drain Soul, and Wrack spells by $s1% per
+    // each of your Corruption, Siphon Life, and Bane of Agony effects active on the target". A script on the
+    // three spells; the number of effects is assumed in the settings.
+    const siphonMask = classMaskOf(spellData, set, ["Drain Life", "Drain Soul", "Wrack"], isPeriodicDamage);
+    if (any(siphonMask))
+    {
+        list["Soul Siphon"] = [{
+            type: ADDON_EFFECT_TYPE.SCRIPT_SPELLMOD_DONE_PCT,
+            affectSpell: siphonMask,
+            scriptKey: "Warlock_Soul_Siphon",
+            valueForRank: v => v[0],
+        }];
+    }
+
+    // "Increases the amount of Mana awarded by your Life Tap spell by $s1%."
+    const lifeTapMask = classMaskOf(spellData, set, ["Life Tap"]);
+    if (any(lifeTapMask))
+    {
+        list["Improved Life Tap"] = [{
+            type: ADDON_EFFECT_TYPE.SPELLMOD_PCT_EFFECT,
+            affectSpell: lifeTapMask,
+            valueForRank: v => v[0],
+        }];
+    }
+
+    // Talents whose buff or debuff has one spell for every rank: the aura data only has a single value, so the
+    // rank's own value is stored and the aura's script uses it.
+    // "Your Shadow Bolt critical strikes increase Shadow damage taken by the target from your attacks by $m1%"
+    list["Improved Shadow Bolt"] = [{ type: ADDON_EFFECT_TYPE.SCRIPT_SET_VALUE, scriptKey: "Warlock_Improved_Shadow_Bolt", valueForRank: v => v[0] }];
+    // "Imp - Increases Fire damage done by $m1%. ... Succubus/Incubus - Increases Shadow damage done by $m3%."
+    list["Master Demonologist"] = [{ type: ADDON_EFFECT_TYPE.SCRIPT_SET_VALUE, scriptKey: "Warlock_Master_Demonologist", valueForRank: v => v[0] }];
+    // "Conflagrate increases all Shadow damage you deal by $m3% ..., Shadowburn increases all Fire damage you deal by $m4%"
+    list["Shadow and Flame"] = [{ type: ADDON_EFFECT_TYPE.SCRIPT_SET_VALUE, scriptKey: "Warlock_Shadow_and_Flame", valueForRank: v => v[2] }];
+    // "... and allows $m2% of normal Mana regeneration to continue while casting."
+    list["Soul Harvest"] = [{ type: ADDON_EFFECT_TYPE.SCRIPT_SET_VALUE, scriptKey: "Warlock_Soul_Harvest", valueForRank: v => v[1] }];
+}
+
 function addShamanTalents(list: TalentDummyList, spellData: SpellData)
 {
     // "Gives you a $h% chance to enter a Clearcasting state after casting any Fire, Frost, or Nature damage spell"
@@ -304,6 +370,7 @@ export function getTalentDummies(spellData: SpellData, classSpellSets: ClassSpel
     addMageTalents(list, spellData, classSpellSets);
     addPaladinTalents(list, spellData);
     addPriestTalents(list, spellData);
+    addWarlockTalents(list, spellData);
     addShamanTalents(list, spellData);
 
     return list;

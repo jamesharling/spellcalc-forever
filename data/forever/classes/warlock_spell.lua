@@ -241,15 +241,6 @@ _addon.spellInfo = {
                 coef = 0,
                 coefAP = 0,
             },
-            [2] = {
-                effectType = 6,
-                auraType = 3,
-                tickPeriod = 1,
-                valueBase = 5.44999980927,
-                valueRange = 0,
-                coef = 0,
-                coefAP = 0,
-            },
         }
     },
     [980] = { -- Bane of Agony (Rank 1)
@@ -378,6 +369,60 @@ _addon.spellInfo = {
             },
         }
     },
+    [1454] = { -- Life Tap (Rank 1)
+        spellLevel = 6,
+        maxLevel = 16,
+        school = 6,
+        schoolMask = 32,
+        defType = 1,
+        effects = {
+            [1] = {
+                effectType = 30,
+                valueBase = 20,
+                valueRange = 0,
+                valuePerLevel = 1,
+                coef = 0,
+                coefAP = 0,
+                totalPlusSpirit = true,
+            },
+        }
+    },
+    [1455] = { -- Life Tap (Rank 2)
+        spellLevel = 16,
+        maxLevel = 26,
+        school = 6,
+        schoolMask = 32,
+        defType = 1,
+        effects = {
+            [1] = {
+                effectType = 30,
+                valueBase = 65,
+                valueRange = 0,
+                valuePerLevel = 1,
+                coef = 0,
+                coefAP = 0,
+                totalPlusSpirit = true,
+            },
+        }
+    },
+    [1456] = { -- Life Tap (Rank 3)
+        spellLevel = 26,
+        maxLevel = 36,
+        school = 6,
+        schoolMask = 32,
+        defType = 1,
+        effects = {
+            [1] = {
+                effectType = 30,
+                valueBase = 130,
+                valueRange = 0,
+                valuePerLevel = 1,
+                coef = 0,
+                coefAP = 0,
+                totalPlusSpirit = true,
+            },
+        }
+    },
     [1949] = { -- Hellfire (Rank 1)
         spellLevel = 30,
         maxLevel = 40,
@@ -447,15 +492,6 @@ _addon.spellInfo = {
                 coef = 0,
                 coefAP = 0,
             },
-            [2] = {
-                effectType = 6,
-                auraType = 3,
-                tickPeriod = 1,
-                valueBase = 10.48999977112,
-                valueRange = 0,
-                coef = 0,
-                coefAP = 0,
-            },
         }
     },
     [3699] = { -- Health Funnel (Rank 3)
@@ -477,15 +513,6 @@ _addon.spellInfo = {
                 coef = 0,
                 coefAP = 0,
             },
-            [2] = {
-                effectType = 6,
-                auraType = 3,
-                tickPeriod = 1,
-                valueBase = 17,
-                valueRange = 0,
-                coef = 0,
-                coefAP = 0,
-            },
         }
     },
     [3700] = { -- Health Funnel (Rank 4)
@@ -503,15 +530,6 @@ _addon.spellInfo = {
                 auraType = 8,
                 tickPeriod = 1,
                 valueBase = 64,
-                valueRange = 0,
-                coef = 0,
-                coefAP = 0,
-            },
-            [2] = {
-                effectType = 6,
-                auraType = 3,
-                tickPeriod = 1,
-                valueBase = 25.39999961853,
                 valueRange = 0,
                 coef = 0,
                 coefAP = 0,
@@ -1104,6 +1122,60 @@ _addon.spellInfo = {
             },
         }
     },
+    [11687] = { -- Life Tap (Rank 4)
+        spellLevel = 36,
+        maxLevel = 46,
+        school = 6,
+        schoolMask = 32,
+        defType = 1,
+        effects = {
+            [1] = {
+                effectType = 30,
+                valueBase = 210,
+                valueRange = 0,
+                valuePerLevel = 1,
+                coef = 0,
+                coefAP = 0,
+                totalPlusSpirit = true,
+            },
+        }
+    },
+    [11688] = { -- Life Tap (Rank 5)
+        spellLevel = 46,
+        maxLevel = 56,
+        school = 6,
+        schoolMask = 32,
+        defType = 1,
+        effects = {
+            [1] = {
+                effectType = 30,
+                valueBase = 300,
+                valueRange = 0,
+                valuePerLevel = 1,
+                coef = 0,
+                coefAP = 0,
+                totalPlusSpirit = true,
+            },
+        }
+    },
+    [11689] = { -- Life Tap (Rank 6)
+        spellLevel = 56,
+        maxLevel = 66,
+        school = 6,
+        schoolMask = 32,
+        defType = 1,
+        effects = {
+            [1] = {
+                effectType = 30,
+                valueBase = 420,
+                valueRange = 0,
+                valuePerLevel = 1,
+                coef = 0,
+                coefAP = 0,
+                totalPlusSpirit = true,
+            },
+        }
+    },
     [11693] = { -- Health Funnel (Rank 5)
         spellLevel = 44,
         maxLevel = 0,
@@ -1119,15 +1191,6 @@ _addon.spellInfo = {
                 auraType = 8,
                 tickPeriod = 1,
                 valueBase = 89,
-                valueRange = 0,
-                coef = 0,
-                coefAP = 0,
-            },
-            [2] = {
-                effectType = 6,
-                auraType = 3,
-                tickPeriod = 1,
-                valueBase = 35,
                 valueRange = 0,
                 coef = 0,
                 coefAP = 0,
@@ -1153,15 +1216,6 @@ _addon.spellInfo = {
                 coef = 0,
                 coefAP = 0,
             },
-            [2] = {
-                effectType = 6,
-                auraType = 3,
-                tickPeriod = 1,
-                valueBase = 47,
-                valueRange = 0,
-                coef = 0,
-                coefAP = 0,
-            },
         }
     },
     [11695] = { -- Health Funnel (Rank 7)
@@ -1179,15 +1233,6 @@ _addon.spellInfo = {
                 auraType = 8,
                 tickPeriod = 1,
                 valueBase = 153,
-                valueRange = 0,
-                coef = 0,
-                coefAP = 0,
-            },
-            [2] = {
-                effectType = 6,
-                auraType = 3,
-                tickPeriod = 1,
-                valueBase = 61.20000076294,
                 valueRange = 0,
                 coef = 0,
                 coefAP = 0,
@@ -1840,6 +1885,7 @@ _addon.spellInfo = {
         school = 3,
         schoolMask = 4,
         defType = 1,
+        immolateDamagePct = 25,
         effects = {
             [1] = {
                 effectType = 2,
@@ -1858,6 +1904,7 @@ _addon.spellInfo = {
         school = 3,
         schoolMask = 4,
         defType = 1,
+        immolateDamagePct = 25,
         effects = {
             [1] = {
                 effectType = 2,
@@ -1876,6 +1923,7 @@ _addon.spellInfo = {
         school = 3,
         schoolMask = 4,
         defType = 1,
+        immolateDamagePct = 25,
         effects = {
             [1] = {
                 effectType = 2,

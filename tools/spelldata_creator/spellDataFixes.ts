@@ -436,6 +436,31 @@ function warlockFixes(sd: SpellData)
             if (effect.Effect === EFFECT_TYPE.SPELL_EFFECT_TRIGGER_SPELL) effect.Effect = 0;
         }
     }
+
+    // Health Funnel: its periodic damage is the health the warlock pays each second, not damage to anything.
+    const SPELL_TARGET_CASTER = 1;
+    for (const spellId of sd.getSpellsByName("Health Funnel", true) ?? [])
+    {
+        if (sd.getSpellClassOption(spellId, true)?.SpellClassSet !== 5) continue;
+        for (const effect of sd.getSpellEffects(spellId, true) ?? [])
+        {
+            if (effect.EffectAura === AURA_TYPE.SPELL_AURA_PERIODIC_DAMAGE && effect.ImplicitTarget_0 === SPELL_TARGET_CASTER) effect.Effect = 0;
+        }
+    }
+
+    // Life Tap: a dummy that converts health into mana ("Converts ${($m1+$SPI*1)*(1+$18182m1/100)} Health into
+    // ... Mana"). Shown as the mana gained: its base points as a mana restore; the Spirit part is flagged in
+    // app.ts, and Improved Life Tap is a talent effect on it.
+    for (const spellId of sd.getSpellsByName("Life Tap", true) ?? [])
+    {
+        if (sd.getSpellClassOption(spellId, true)?.SpellClassSet !== 5) continue;
+        const effects = sd.getSpellEffects(spellId, true);
+        const spell = sd.getSpell(spellId, true);
+        if (!effects || !spell || effects.length !== 1 || effects[0].Effect !== EFFECT_TYPE.SPELL_EFFECT_DUMMY) continue;
+        if (!/Health into .* Mana/.test(spell.Description_lang)) continue;
+        effects[0].Effect = EFFECT_TYPE.SPELL_EFFECT_ENERGIZE;
+        effects[0].EffectMiscValue_0 = 0;
+    }
 }
 
 function shamanFix(sd: SpellData)

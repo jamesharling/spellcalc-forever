@@ -278,6 +278,8 @@ interface RankInfo {
     frozenDamagePct?: number,
     /** Percent more damage against stunned or incapacitated targets (Judgement of Command). */
     stunnedDamagePct?: number,
+    /** Percent more damage against targets afflicted by Immolate (Incinerate). */
+    immolateDamagePct?: number,
     /** Critical strike chance added against creature types (Exorcism with Exorcist): creature type ID -> percent. */
     versusCritChance?: { [creatureType: number]: number },
     effects: EffectInfo[]

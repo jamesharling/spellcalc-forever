@@ -197,6 +197,28 @@ export class TargetAuras
             return [{ type: ADDON_EFFECT_TYPE.SPELLMOD_PCT_DAMAGE_HEALING, affectSpell: chainHeal, value: getEffectBase(bonus) }];
         }
 
+        // Warlock (scripts in data/forever/classes/warlock.lua, talents in modules/talentDummies.ts).
+        if (entry.class === "WARLOCK")
+        {
+            switch (entry.name)
+            {
+                // The warlock's Immolate on the target: a spell's own bonus against such a target (Incinerate,
+                // immolateDamagePct in its spell data).
+                case "Immolate":
+                    return [{ type: ADDON_EFFECT_TYPE.SCRIPT_SPELLMOD_DONE_PCT, affectSpell: ALL_SPELLS, scriptKey: "Warlock_Immolate_Target", value: 0 }];
+                // Improved Shadow Bolt's debuff: one spell whose value is the talent's rank (4% to 20%); the script
+                // takes it from the talent. Replaces the generated effect (see getAssumableAuras).
+                case "Shadow Vulnerability":
+                    return [{ type: ADDON_EFFECT_TYPE.SCRIPT_SPELLMOD_DONE_PCT, affectSpell: ALL_SPELLS, scriptKey: "Warlock_Shadow_Vulnerability", value: 0 }];
+                // Soul Siphon: the number of the warlock's Corruption, Siphon Life and Bane of Agony effects on the target.
+                case "Soul Siphon":
+                    return [{ type: ADDON_EFFECT_TYPE.SCRIPT_SET_VALUE, scriptKey: "Warlock_Dots_On_Target", value: 1, hasStacks: true }];
+                // Decimation: a target below the health its tooltip names.
+                case "Decimation":
+                    return [{ type: ADDON_EFFECT_TYPE.SCRIPT_SET_VALUE, scriptKey: "Warlock_Target_Low_Health", value: 1 }];
+            }
+        }
+
         if (entry.class === "PALADIN") return this.getPaladinExtraEffects(entry, spellId, effects);
 
         // Priest: states of the target that a talent's script asks for (data/forever/classes/priest.lua; the
@@ -315,8 +337,10 @@ export class TargetAuras
             const extra = this.getExtraEffects(entry, spellId);
             if (extra.length > 0)
             {
-                // Hand-written effects change the player's own spells only.
-                effects = effects.concat(extra);
+                // Hand-written effects change the player's own spells only. The warlock's Shadow Vulnerability
+                // is one spell for every rank of Improved Shadow Bolt: its own value (rank 1) is not used.
+                const replaces = entry.class === "WARLOCK" && entry.name === "Shadow Vulnerability";
+                effects = replaces ? extra : effects.concat(extra);
                 fromCaster = true;
             }
             if (effects.length === 0)
