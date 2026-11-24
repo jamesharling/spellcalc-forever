@@ -774,6 +774,186 @@ if __CLASS == "PALADIN" then
     if differ > 0 then emit(("FAIL %d spells differ after the paladin checks: %s"):format(differ, table.concat(examples, ", "))) end
 end
 
+-- Priest. Every rank of Penance is a dummy whose volleys are fired by other spells (the generator finds them
+-- through the tooltip); Contingency Plan shows the heal and the absorb its tooltip names; Dark Sacrifice gives its
+-- mana plus the priest's Spirit; Power Word: Shield scales with healing power. Talents: Divine Aegis (extra on a
+-- critical heal), Improved Mind Flay (rising ticks, shown as their average), and three that depend on a state of
+-- the target assumed in the settings: Renewed Hope (Weakened Soul), Power in Light (the priest's Holy Fire or
+-- Shadow Word: Pain), Early Demise (low health). Spirit Tap lets half the mana regeneration continue while casting.
+if __CLASS == "PRIEST" then
+    -- A copy of the numbers: the addon recalculates a spell in place, so the tables themselves change later.
+    local function fx(id, n)
+        local status, cs = checkSpell(id)
+        if status ~= "ok" then return { } end
+        local e = cs.effects[n or 1] or { }
+        return { avg = e.avg, avgCrit = e.avgCrit, critExtra = e.critExtraAvg, ticks = e.ticks, crit = cs.critChance, spellPower = e.spellPower }
+    end
+    local function near(a, b) return type(a) == "number" and type(b) == "number" and math.abs(a - b) < 1e-4 end
+    local function baseOf(id, n)
+        local info = A.spellInfo[id]
+        local e = info and info.effects[n or 1]
+        if not e then return nil, { } end
+        return e.valueBase + e.valueRange / 2 + (math.min(60, info.maxLevel) - info.spellLevel) * (e.valuePerLevel or 0), e
+    end
+    local function talents(ranks)
+        for i = #__TALENT_TREE, 1, -1 do
+            __TALENT_RANKS[__TALENT_TREE[i].spellId] = nil
+            __TALENT_TREE[i] = nil
+        end
+        for spellId, rank in pairs(ranks) do
+            __TALENT_TREE[#__TALENT_TREE + 1] = { spellId = spellId, maxRanks = rank }
+            __TALENT_RANKS[spellId] = rank
+        end
+        __FireEvent("TRAIT_CONFIG_UPDATED", 4001)
+        settle()
+    end
+    local function assume(spellId, stacks)
+        SpellCalc_settings.assumedTargetAuras[spellId] = stacks
+        A:UpdateAssumedTargetAuras()
+        settle()
+    end
+    local PENANCE, PENANCE_HEAL, PENANCE_DAMAGE, PLAN, SACRIFICE, SHIELD = 1316995, 1316991, 1316993, 1277640, 1277328, 10901
+    local FLASH, SMITE, HOLY_FIRE, DEATH, MIND_BLAST, MIND_FLAY, SHADOWGUARD = 10917, 10934, 15261, 1309636, 10947, 18807, 28382
+    local AEGIS, HOPE, LIGHT, DEMISE, IMPROVED_FLAY, WEAKENED_SOUL, SPIRIT_TAP = 431622, 425280, 1309969, 1310076, 1225139, 6788, 15271
+
+    local penanceHeal, penanceDamage = fx(PENANCE, 1), fx(PENANCE, 2)
+    local volleyHeal, volleyHealData = baseOf(PENANCE_HEAL)
+    local volleyDamage, volleyDamageData = baseOf(PENANCE_DAMAGE)
+    emit(("priest: Penance rank 4 heals %s x %s or deals %s x %s"):format(tostring(penanceHeal.avg), tostring(penanceHeal.ticks),
+        tostring(penanceDamage.avg), tostring(penanceDamage.ticks)))
+    if volleyHeal ~= 425 or volleyDamage ~= 92 or penanceHeal.ticks ~= 3 or penanceDamage.ticks ~= 3
+        or not near(penanceHeal.avg, 425 + (volleyHealData.coef or 0) * 700) or not near(penanceDamage.avg, 92 + (volleyDamageData.coef or 0) * 400) then
+        emit("FAIL Penance rank 4 isn't 3 volleys of 425 healing or 92 damage plus spell power")
+    end
+    for _, id in ipairs({ 402174, 1240720, 1240721 }) do
+        if not A.spellInfo[id] or #A.spellInfo[id].effects ~= 2 then emit("FAIL Penance [" .. id .. "] has no heal and damage volleys") end
+    end
+
+    local planHeal, planAbsorb = fx(PLAN, 1), fx(PLAN, 2)
+    local planHealBase, planHealData = baseOf(PLAN, 1)
+    emit(("priest: Contingency Plan heals %s x %s and absorbs %s"):format(tostring(planHeal.avg), tostring(planHeal.ticks), tostring(planAbsorb.avg)))
+    if planHealBase ~= 134 or planHeal.ticks ~= 5 or not near(planHeal.avg, 134 + (planHealData.coef or 0) * 700) or (planHealData.coef or 0) <= 0
+        or not near(planAbsorb.avg, 926) then
+        emit("FAIL Contingency Plan rank 5 isn't a heal of 134 plus spell power every 3 s for 15 s and an absorb of 926")
+    end
+
+    local sacrifice = fx(SACRIFICE)
+    local spirit = A.stats.spirit or 0
+    emit(("priest: Dark Sacrifice restores %s x %s with %s Spirit"):format(tostring(sacrifice.avg), tostring(sacrifice.ticks), tostring(spirit)))
+    if spirit <= 0 or sacrifice.ticks ~= 5 or not near(sacrifice.avg, 320 + spirit / 5) then
+        emit("FAIL Dark Sacrifice rank 5 doesn't restore 5 x 320 mana plus the priest's Spirit")
+    end
+
+    local shield = fx(SHIELD)
+    local shieldBase, shieldData = baseOf(SHIELD)
+    emit(("priest: Power Word: Shield absorbs %s with %s healing power"):format(tostring(shield.avg), tostring(A.stats.spellHealing)))
+    if A.stats.spellHealing == A.stats.spellPower[2] or not near(shield.spellPower, A.stats.spellHealing)
+        or not near(shield.avg, shieldBase + shieldData.coef * A.stats.spellHealing) then
+        emit("FAIL Power Word: Shield doesn't scale with healing power")
+    end
+
+    -- Divine Aegis 3/3: 15% of a critical heal on top
+    local flash, smite = fx(FLASH), fx(SMITE)
+    talents({ [AEGIS] = 3 })
+    local flashAegis, smiteAegis = fx(FLASH), fx(SMITE)
+    talents({})
+    emit(("priest: Flash Heal crits for %s, Divine Aegis 3/3 absorbs %s more"):format(tostring(flash.avgCrit), tostring(flashAegis.critExtra)))
+    if flash.critExtra or not flash.avgCrit or not near(flashAegis.critExtra, flash.avgCrit * 0.15) or smiteAegis.critExtra then
+        emit("FAIL Divine Aegis 3/3 doesn't add 15% of a critical heal, or adds it to damage")
+    end
+
+    -- Renewed Hope 5/5 on a target with Weakened Soul
+    local volley, guard = fx(PENANCE_HEAL), fx(SHADOWGUARD)
+    talents({ [HOPE] = 5 })
+    local flashHopeOff = fx(FLASH)
+    assume(WEAKENED_SOUL, 1)
+    local flashHope, volleyHope, smiteHope, guardHope = fx(FLASH), fx(PENANCE_HEAL), fx(SMITE), fx(SHADOWGUARD)
+    talents({})
+    local flashSoulOnly = fx(FLASH)
+    assume(WEAKENED_SOUL, nil)
+    emit(("priest: Flash Heal crit %s%%, %s%% with Renewed Hope 5/5 on a Weakened Soul target"):format(tostring(flash.crit), tostring(flashHope.crit)))
+    if not near(flashHope.crit, (flash.crit or 0) + 10) or not near(volleyHope.crit, (volley.crit or 0) + 10) then
+        emit("FAIL Renewed Hope 5/5 doesn't add 10% critical strike chance to Flash Heal and Penance's heal on a Weakened Soul target")
+    end
+    if not near(flashHopeOff.crit, flash.crit) or not near(flashSoulOnly.crit, flash.crit) or not near(smiteHope.crit, smite.crit)
+        or not near(guardHope.crit, guard.crit) then
+        emit("FAIL Renewed Hope changes heals without Weakened Soul or without the talent, or changes damage spells")
+    end
+
+    -- Power in Light 5/5 against a target with the priest's Holy Fire or Shadow Word: Pain
+    local fire, volleyDmg = fx(HOLY_FIRE), fx(PENANCE_DAMAGE)
+    talents({ [LIGHT] = 5 })
+    local smiteLightOff = fx(SMITE)
+    assume(LIGHT, 1)
+    local smiteLight, volleyLight, fireLight, flashLight = fx(SMITE), fx(PENANCE_DAMAGE), fx(HOLY_FIRE), fx(FLASH)
+    talents({})
+    assume(LIGHT, nil)
+    emit(("priest: Smite %s, %s with Power in Light 5/5 against a target with Holy Fire or Shadow Word: Pain"):format(tostring(smite.avg), tostring(smiteLight.avg)))
+    if not smite.avg or not near(smiteLight.avg, smite.avg * 1.1) or not near(volleyLight.avg, (volleyDmg.avg or 0) * 1.1) then
+        emit("FAIL Power in Light 5/5 doesn't add 10% to Smite and Penance's damage against an afflicted target")
+    end
+    if not near(smiteLightOff.avg, smite.avg) or not near(fireLight.avg, fire.avg) or not near(flashLight.avg, flash.avg) then
+        emit("FAIL Power in Light changes Smite without the target state, or changes Holy Fire or Flash Heal")
+    end
+
+    -- Early Demise 2/2 against a target at low health
+    local death, blast = fx(DEATH), fx(MIND_BLAST)
+    talents({ [DEMISE] = 2 })
+    local deathOff = fx(DEATH)
+    assume(DEMISE, 1)
+    local deathLow, blastLow = fx(DEATH), fx(MIND_BLAST)
+    talents({})
+    assume(DEMISE, nil)
+    emit(("priest: Shadow Word: Death crit %s%%, %s%% with Early Demise 2/2 at low health"):format(tostring(death.crit), tostring(deathLow.crit)))
+    if not near(deathLow.crit, (death.crit or 0) + 30) or not near(deathOff.crit, death.crit) or not near(blastLow.crit, blast.crit) then
+        emit("FAIL Early Demise 2/2 doesn't add 30% critical strike chance to Shadow Word: Death at low health only")
+    end
+
+    -- Improved Mind Flay 2/2: 3 ticks of 1, 1.2 and 1.44 times the tick
+    local flay = fx(MIND_FLAY)
+    talents({ [IMPROVED_FLAY] = 2 })
+    local flayImproved, blastImproved = fx(MIND_FLAY), fx(MIND_BLAST)
+    talents({})
+    emit(("priest: Mind Flay %s x %s, %s on average with Improved Mind Flay 2/2"):format(tostring(flay.avg), tostring(flay.ticks), tostring(flayImproved.avg)))
+    if flay.ticks ~= 3 or not near(flayImproved.avg, (flay.avg or 0) * (1 + 1.2 + 1.44) / 3) or not near(blastImproved.avg, blast.avg) then
+        emit("FAIL Improved Mind Flay 2/2 doesn't make each of the 3 ticks 20% larger than the one before")
+    end
+
+    -- Spirit Tap: half the mana regeneration while casting
+    local castingBefore = A.stats.manaRegCasting
+    __AURAS.player = { { name = __SPELL_NAMES[SPIRIT_TAP], spellId = SPIRIT_TAP, applications = 1, sourceUnit = "player",
+        auraInstanceID = 902, duration = 15, expirationTime = 0, isHelpful = true } }
+    __FireEvent("UNIT_AURA", "player", { isFullUpdate = true })
+    settle()
+    local castingTap, regen = A.stats.manaRegCasting, A.stats.manaRegBase
+    __AURAS.player = {}
+    __FireEvent("UNIT_AURA", "player", { isFullUpdate = true })
+    settle()
+    emit(("priest: mana regeneration while casting %s, %s with Spirit Tap (%s when not casting)"):format(tostring(castingBefore), tostring(castingTap), tostring(regen)))
+    if regen <= 0 or not near(castingTap, castingBefore + regen * 0.5) or not near(A.stats.manaRegCasting, castingBefore) then
+        emit("FAIL Spirit Tap doesn't let 50% of the mana regeneration continue while casting")
+    end
+
+    for spellId, label in pairs({ [LIGHT] = "Your Holy Fire or Shadow Word: Pain on the target", [DEMISE] = "Target at or below 20% health" }) do
+        local option
+        for _, group in pairs(A.AssumedTargetAuraSettings()) do
+            if type(group) == "table" and group.type == "group" and group.args["aura" .. spellId] then option = group.args["aura" .. spellId].name end
+        end
+        if type(option) ~= "string" or not option:find(label, 1, true) then
+            emit(("FAIL the target state \"%s\" isn't offered under that name: %s"):format(label, tostring(option)))
+        end
+    end
+
+    local differ, examples = 0, {}
+    for id, v in pairs(runAll("priest checked")) do
+        if base[id] and math.abs(base[id] - v) > 1e-6 then
+            differ = differ + 1
+            if #examples < 4 then examples[#examples + 1] = ("%s %.2f -> %.2f"):format(name(id), base[id], v) end
+        end
+    end
+    if differ > 0 then emit(("FAIL %d spells differ after the priest checks: %s"):format(differ, table.concat(examples, ", "))) end
+end
+
 -- The options table must pass AceConfig validation (it is only validated when the panel opens in game)
 do
     local registry = LibStub("AceConfigRegistry-3.0")

@@ -577,6 +577,18 @@ end
 ---@param spellId integer
 local function PeriodicEnergize(calcedSpell, effNum, spellInfo, spellName, spellId)
     FillManaValues(calcedSpell, effNum, spellInfo, spellName, spellId, false);
+
+    -- "to gain ${$o2+$SPI} Mana" (Dark Sacrifice): the caster's Spirit on top of the total, spread over the ticks.
+    if spellInfo.effects[effNum].totalPlusSpirit then
+        local calcedEffect = calcedSpell.effects[effNum];
+        local ticks = calcedEffect.ticks and calcedEffect.ticks > 0 and calcedEffect.ticks or 1;
+        local perTick = stats.spirit / ticks;
+        calcedEffect.min = calcedEffect.min + perTick;
+        calcedEffect.max = calcedEffect.max + perTick;
+        calcedEffect.avg = calcedEffect.avg + perTick;
+        calcedEffect.avgCombined = calcedEffect.avg;
+        calcedEffect.avgAfterMitigation = calcedEffect.avgCombined * ticks;
+    end
 end
 
 --- A percentage of maximum mana per tick.

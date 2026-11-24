@@ -639,6 +639,15 @@ function buildRankInfo(spellId: number, effects: SpellEffect[]): RankInfo
         else report(`${nameWithRank} [${spellId}]: critical strike chance against "${versusCrit[2]} and ${versusCrit[3]}" not understood, not applied`);
     }
 
+    // "to gain ${$o2+$SPI} Mana" (Dark Sacrifice): the periodic mana gain's total, plus the caster's Spirit.
+    const plusSpirit = description.match(/\$\{\$o(\d)\+\$SPI\} Mana/);
+    if (plusSpirit)
+    {
+        const effect = effectForToken(parseInt(plusSpirit[1]));
+        if (effect) effect.totalPlusSpirit = true;
+        else report(`${nameWithRank} [${spellId}]: tooltip adds Spirit to effect ${plusSpirit[1]}, but it is not generated`);
+    }
+
     // Judgement of Command: stored with the damage against a target that is not stunned (spellDataFixes.ts).
     if (stunnedDamagePct.has(spellId)) rankInfo.stunnedDamagePct = stunnedDamagePct.get(spellId);
 
@@ -745,6 +754,7 @@ function rankInfoToLua(sid: string | number, ri: RankInfo): string {
         if (eff.manaPerDamage) str += `\t\t\t\tmanaPerDamage = ${eff.manaPerDamage},\n`;
         if (eff.pctOfMaxHealth) str += `\t\t\t\tpctOfMaxHealth = true,\n`;
         if (eff.weaponDpsMult) str += `\t\t\t\tweaponDpsMult = ${eff.weaponDpsMult},\n`;
+        if (eff.totalPlusSpirit) str += `\t\t\t\ttotalPlusSpirit = true,\n`;
         if (eff.auraStacks) str += `\t\t\t\tauraStacks = ${eff.auraStacks},\n`;
         if (USEFUL_SPELL_MECHANICS[eff.mechanic]) str += `\t\t\t\tmechanic = ${eff.mechanic},\n`;
         str += `\t\t\t},\n`;

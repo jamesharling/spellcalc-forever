@@ -24,6 +24,7 @@ local _addon = select(2, ...);
 ---@field manaPerDamage number|nil Mana Shield: mana drained per point of damage absorbed
 ---@field pctOfMaxHealth boolean|nil The value is a percentage of the caster's maximum health (Templar's Bulwark)
 ---@field weaponDpsMult number|nil Adds this many times the main hand weapon's damage per second (Hammer of the Righteous)
+---@field totalPlusSpirit boolean|nil A periodic mana gain whose total also includes the caster's Spirit (Dark Sacrifice)
 
 ---@class SpellInfo
 ---@field school SpellSchool

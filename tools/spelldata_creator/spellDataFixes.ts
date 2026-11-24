@@ -66,11 +66,6 @@ function priestFix(sd: SpellData)
         19312: 28382,
     };
 
-    // Penance channel -> periodic trigger spells
-    const PENANCE_TRIGGERS: { [spellId: number]: { dmg: number, heal: number } } = {
-        402174: { dmg: 402261, heal: 402277 },
-    };
-
     // Fix Holy Nova trigger
     for (const hnId in HOLY_NOVA_TRIGGER)
     {
@@ -128,61 +123,78 @@ function priestFix(sd: SpellData)
         }
     }
 
-    // Penance
-    for (const penanceId in PENANCE_TRIGGERS)
+    // Penance: every rank that is cast is a dummy whose tooltip names the damage and the heal of one volley
+    // ("causing $402284s1 Holy damage to an enemy, or $402289s1 healing to an ally, instantly and every $402261t2
+    // sec for $402261d"). Each of the two is fired by the periodic trigger aura of another spell with the same
+    // name; the cast spell gets those two auras (heal first) and their duration.
+    const penances = sd.getSpellsByName("Penance", true) ?? [];
+    const penanceVolley = (tickSpellId: number) =>
     {
-        const effects = effectsOf(sd, parseInt(penanceId), "Penance");
-        if (!effects) continue;
-        const heal = effectsOf(sd, PENANCE_TRIGGERS[penanceId].heal, "Penance heal");
-        const dmg = effectsOf(sd, PENANCE_TRIGGERS[penanceId].dmg, "Penance damage");
-        if (!heal || !dmg) continue;
-
-        for (const eff of effects)
+        for (const spellId of penances)
         {
-            if (eff.EffectIndex === 0)
-            {
-                // Heal effect
-                let done = false;
-                for (const heff of heal)
-                {
-                    if (heff.EffectAura == AURA_TYPE.SPELL_AURA_PERIODIC_TRIGGER_SPELL)
-                    {
-                        const origId = eff.SpellID;
-                        Object.assign(eff, heff);
-                        eff.SpellID = origId;
-                        eff.EffectIndex = 0;
-                        done = true;
-                        break;
-                    }
-                }
-                if (!done)
-                {
-                    report(`Penance ${eff.SpellID}: couldn't find the heal trigger effect`);
-                    break;
-                }
-
-                // damage
-                done = false;
-                for (const deff of dmg)
-                {
-                    if (deff.EffectAura == AURA_TYPE.SPELL_AURA_PERIODIC_TRIGGER_SPELL)
-                    {
-                        deff.EffectIndex = 1;
-                        deff.SpellID = eff.SpellID;
-                        effects.push(deff);
-                        done = true;
-                        break;
-                    }
-                }
-                if (!done)
-                {
-                    report(`Penance ${eff.SpellID}: couldn't find the damage trigger effect`);
-                    break;
-                }
-
-                sd.getSpellMisc(eff.SpellID).DurationIndex = 39;
-            }
+            const effect = sd.getSpellEffects(spellId, true)?.find(e => e.EffectAura === AURA_TYPE.SPELL_AURA_PERIODIC_TRIGGER_SPELL
+                && e.EffectTriggerSpell === tickSpellId);
+            if (effect) return { spellId, effect };
         }
+        return undefined;
+    };
+    for (const penanceId of penances)
+    {
+        const spell = sd.getSpell(penanceId, true);
+        const effects = sd.getSpellEffects(penanceId, true);
+        if (!spell || !effects || effects.length !== 1 || effects[0].Effect !== EFFECT_TYPE.SPELL_EFFECT_DUMMY) continue;
+        const match = spell.Description_lang.match(/\$(\d+)s1 Holy damage.*?\$(\d+)s1 healing/);
+        if (!match) continue;
+
+        const dmg = penanceVolley(parseInt(match[1]));
+        const heal = penanceVolley(parseInt(match[2]));
+        if (!dmg || !heal)
+        {
+            report(`${sd.getSpellNameWithRank(penanceId)} [${penanceId}]: couldn't find the ${heal ? "damage" : "heal"} trigger aura, not generated`);
+            continue;
+        }
+
+        const eff = effects[0];
+        Object.assign(eff, heal.effect);
+        eff.SpellID = penanceId;
+        eff.EffectIndex = 0;
+
+        const dmgEffect = cloneEntry(dmg.effect);
+        dmgEffect.SpellID = penanceId;
+        dmgEffect.EffectIndex = 1;
+        effects.push(dmgEffect);
+
+        sd.getSpellMisc(penanceId).DurationIndex = sd.getSpellMisc(heal.spellId).DurationIndex;
+    }
+
+    // Contingency Plan: two dummy auras; what the ward does when it goes off is only named in the description
+    // ("they will gain a shield absorbing $1277466s2 damage and begin healing for $1277460o2 Health over
+    // $1277460d"). Shown as the periodic heal and the absorb of those two spells.
+    for (const planId of sd.getSpellsByName("Contingency Plan", true) ?? [])
+    {
+        const spell = sd.getSpell(planId, true);
+        const effects = sd.getSpellEffects(planId, true);
+        if (!spell || !effects) continue;
+        const match = spell.Description_lang.match(/absorbing \$(\d+)s\d damage and begin healing for \$(\d+)o\d/);
+        if (!match) continue;
+        const absorbId = parseInt(match[1]);
+        const healId = parseInt(match[2]);
+        const absorb = sd.getSpellEffects(absorbId, true)?.find(e => e.EffectAura === AURA_TYPE.SPELL_AURA_SCHOOL_ABSORB);
+        const heal = sd.getSpellEffects(healId, true)?.find(e => e.EffectAura === AURA_TYPE.SPELL_AURA_PERIODIC_HEAL);
+        const first = effects.find(e => e.EffectIndex === 0);
+        const second = effects.find(e => e.EffectIndex === 1);
+        if (!absorb || !heal || !first || !second)
+        {
+            report(`${sd.getSpellNameWithRank(planId)} [${planId}]: absorb ${absorbId} or heal ${healId} not found, not generated`);
+            continue;
+        }
+        Object.assign(first, heal);
+        first.SpellID = planId;
+        first.EffectIndex = 0;
+        Object.assign(second, absorb);
+        second.SpellID = planId;
+        second.EffectIndex = 1;
+        sd.getSpellMisc(planId).DurationIndex = sd.getSpellMisc(healId).DurationIndex;
     }
 }
 

@@ -167,6 +167,110 @@ function addPaladinTalents(list: TalentDummyList, spellData: SpellData)
     }
 }
 
+/**
+ * Class mask bits of the spells of a class set with one of the given names (all ranks).
+ */
+function classMaskOf(spellData: SpellData, set: number, names: string[], filter?: (spellId: number) => boolean)
+{
+    const mask = [0, 0, 0, 0];
+    for (const name of names)
+    {
+        for (const spellId of spellData.getSpellsByName(name, true) ?? [])
+        {
+            const options = spellData.getSpellClassOption(spellId, true);
+            if (!options || options.SpellClassSet !== set) continue;
+            if (filter && !filter(spellId)) continue;
+            mask[0] |= options.SpellClassMask_0;
+            mask[1] |= options.SpellClassMask_1;
+            mask[2] |= options.SpellClassMask_2;
+            mask[3] |= options.SpellClassMask_3;
+        }
+    }
+    return mask.map(bits => bits >>> 0);
+}
+
+/**
+ * The scripts are in data/forever/classes/priest.lua; the target states they depend on are assumed in the
+ * settings (modules/TargetAuras.ts).
+ */
+function addPriestTalents(list: TalentDummyList, spellData: SpellData)
+{
+    const set = SpellClassSetId.PRIEST;
+    const firstEffectIs = (type: number) => (spellId: number) =>
+        spellData.getSpellEffects(spellId, true)?.some(e => e.EffectIndex === 0 && e.Effect === type) ?? false;
+    const isHeal = firstEffectIs(EFFECT_TYPE.SPELL_EFFECT_HEAL);
+    const isDamage = firstEffectIs(EFFECT_TYPE.SPELL_EFFECT_SCHOOL_DAMAGE);
+    const any = (mask: number[]) => mask.some(bits => bits !== 0);
+
+    // "Your non-periodic critical heals create a protective shield on the target, absorbing $s1% of the amount
+    // healed." Extra value on a critical heal, like Ignite on damage, for the spells Spiritual Healing lists as
+    // heals (its first effect; periodic heals do not crit). The cap ($s2 per level) is not modelled.
+    const spiritualHealing = (spellData.getSpellsByName("Spiritual Healing", true) ?? [])
+        .map(id => spellData.getSpellEffects(id, true)?.find(e => e.EffectIndex === 0 && e.EffectAura === AURA_TYPE.SPELL_AURA_ADD_PCT_MODIFIER))
+        .find(e => e && (e.EffectSpellClassMask_0 || e.EffectSpellClassMask_1));
+    if (spiritualHealing)
+    {
+        list["Divine Aegis"] = [{
+            type: ADDON_EFFECT_TYPE.SPELLMOD_EXTRA_ON_CRIT,
+            affectSpell: [spiritualHealing.EffectSpellClassMask_0, spiritualHealing.EffectSpellClassMask_1,
+                spiritualHealing.EffectSpellClassMask_2, spiritualHealing.EffectSpellClassMask_3],
+            valueForRank: v => v[0],
+        }];
+    }
+
+    // "Your heals from Flash Heal, Lesser Heal, Heal, Greater Heal, and Penance gain $m1% increased critical strike
+    // chance when cast on targets with Weakened Soul". A script on those heals (for Penance the heal of a volley).
+    const hopeMask = classMaskOf(spellData, set, ["Flash Heal", "Lesser Heal", "Heal", "Greater Heal", "Penance"], isHeal);
+    if (any(hopeMask))
+    {
+        list["Renewed Hope"] = [{
+            type: ADDON_EFFECT_TYPE.SCRIPT_SPELLMOD_CRIT_CHANCE,
+            affectSpell: hopeMask,
+            scriptKey: "Priest_Renewed_Hope",
+            valueForRank: v => v[0],
+        }];
+    }
+
+    // "Your Smite and Penance spells deal $m1% increased damage to targets afflicted with your Holy Fire or Shadow
+    // Word: Pain." A script on Smite and the damage of a Penance volley.
+    const lightMask = classMaskOf(spellData, set, ["Smite", "Penance"], isDamage);
+    if (any(lightMask))
+    {
+        list["Power in Light"] = [{
+            type: ADDON_EFFECT_TYPE.SCRIPT_SPELLMOD_DONE_PCT,
+            affectSpell: lightMask,
+            scriptKey: "Priest_Power_in_Light",
+            valueForRank: v => v[0],
+        }];
+    }
+
+    // "Increases Shadow Word: Death's critical strike chance on targets at or below $s2% health by $s1%."
+    const deathMask = classMaskOf(spellData, set, ["Shadow Word: Death"], isDamage);
+    if (any(deathMask))
+    {
+        list["Early Demise"] = [{
+            type: ADDON_EFFECT_TYPE.SCRIPT_SPELLMOD_CRIT_CHANCE,
+            affectSpell: deathMask,
+            scriptKey: "Priest_Early_Demise",
+            valueForRank: v => v[0],
+        }];
+    }
+
+    // "Each instance of damage of Mind Flay deals $s1% more damage than its previous instance of damage." The
+    // script turns that into the average over the channel's ticks.
+    const flayMask = classMaskOf(spellData, set, ["Mind Flay"],
+        id => spellData.getSpellEffects(id, true)?.some(e => e.EffectAura === AURA_TYPE.SPELL_AURA_PERIODIC_DAMAGE) ?? false);
+    if (any(flayMask))
+    {
+        list["Improved Mind Flay"] = [{
+            type: ADDON_EFFECT_TYPE.SCRIPT_SPELLMOD_DONE_PCT,
+            affectSpell: flayMask,
+            scriptKey: "Priest_Improved_Mind_Flay",
+            valueForRank: v => v[0],
+        }];
+    }
+}
+
 function addShamanTalents(list: TalentDummyList, spellData: SpellData)
 {
     // "Gives you a $h% chance to enter a Clearcasting state after casting any Fire, Frost, or Nature damage spell"
@@ -183,6 +287,7 @@ export function getTalentDummies(spellData: SpellData, classSpellSets: ClassSpel
 
     addMageTalents(list, spellData, classSpellSets);
     addPaladinTalents(list, spellData);
+    addPriestTalents(list, spellData);
     addShamanTalents(list, spellData);
 
     return list;

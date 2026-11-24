@@ -67,11 +67,14 @@ const PTSA_IGNORES = [
 /**
  * The addon calculates SPELL_AURA_PERIODIC_ENERGIZE, SPELL_AURA_OBS_MOD_MANA and SPELL_EFFECT_ENERGIZE_PCT
  * effects only through per-spell dummy handlers (core/effectHandlers.lua). Forever uses these on many more spells
- * (Blessing of Wisdom, Dark Sacrifice, Enrage, Water Shield's mana proc); without a handler the addon
- * errors, so only spells with a handler keep these effects. None has one at the moment: Innervate and
- * Evocation are mana regen percent auras on Forever.
+ * (Blessing of Wisdom, Enrage, Water Shield's mana proc); what the addon shows for such an effect is the
+ * mana of a tick and the total, which only makes sense for a spell cast to gain mana. Those are listed here:
+ * Dark Sacrifice (health for mana over 15 seconds). Innervate and Evocation are mana regen percent auras on
+ * Forever.
  */
-const MANA_GAIN_AURAS_WITH_HANDLER: { [spellName: string]: boolean } = {};
+const MANA_GAIN_AURAS_WITH_HANDLER: { [spellName: string]: boolean } = {
+    "Dark Sacrifice": true,
+};
 
 export class ClassSpellLists
 {

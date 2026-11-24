@@ -183,6 +183,21 @@ export class TargetAuras
 
         if (entry.class === "PALADIN") return this.getPaladinExtraEffects(entry, spellId, effects);
 
+        // Priest: states of the target that a talent's script asks for (data/forever/classes/priest.lua; the
+        // talents are in modules/talentDummies.ts). Each sets a value the script reads.
+        if (entry.class === "PRIEST")
+        {
+            const states: { [name: string]: string } = {
+                // Renewed Hope: critical strike chance of heals on targets with Weakened Soul
+                "Weakened Soul": "Priest_Weakened_Soul",
+                // Power in Light: Smite and Penance damage against targets with the priest's Holy Fire or Shadow Word: Pain
+                "Power in Light": "Priest_Dot_On_Target",
+                // Early Demise: Shadow Word: Death's critical strike chance against targets at low health
+                "Early Demise": "Priest_Target_Low_Health",
+            };
+            if (states[entry.name]) return [{ type: ADDON_EFFECT_TYPE.SCRIPT_SET_VALUE, scriptKey: states[entry.name], value: 1 }];
+        }
+
         return [];
     }
 

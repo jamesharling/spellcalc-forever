@@ -2946,6 +2946,140 @@ _addon.spellInfo = {
             },
         }
     },
+    [1240720] = { -- Penance (Rank 2)
+        spellLevel = 40,
+        maxLevel = 0,
+        duration = 2,
+        baseCost = 220,
+        school = 2,
+        schoolMask = 2,
+        isChannel = true,
+        defType = 0,
+        extraTickAtApplication = true,
+        effects = {
+            [1] = {
+                effectType = 6,
+                auraType = 23,
+                tickPeriod = 1,
+                valueBase = 0,
+                valueRange = 0,
+                triggeredSpell = 1240723,
+                coef = 0,
+                coefAP = 0,
+            },
+            [2] = {
+                effectType = 6,
+                auraType = 23,
+                tickPeriod = 1,
+                valueBase = 0,
+                valueRange = 0,
+                triggeredSpell = 1240727,
+                coef = 0,
+                coefAP = 0,
+            },
+        }
+    },
+    [1240721] = { -- Penance (Rank 3)
+        spellLevel = 50,
+        maxLevel = 0,
+        duration = 2,
+        baseCost = 270,
+        school = 2,
+        schoolMask = 2,
+        isChannel = true,
+        defType = 0,
+        extraTickAtApplication = true,
+        effects = {
+            [1] = {
+                effectType = 6,
+                auraType = 23,
+                tickPeriod = 1,
+                valueBase = 0,
+                valueRange = 0,
+                triggeredSpell = 1240724,
+                coef = 0,
+                coefAP = 0,
+            },
+            [2] = {
+                effectType = 6,
+                auraType = 23,
+                tickPeriod = 1,
+                valueBase = 0,
+                valueRange = 0,
+                triggeredSpell = 1240730,
+                coef = 0,
+                coefAP = 0,
+            },
+        }
+    },
+    [1240723] = { -- Penance (Rank 2)
+        spellLevel = 40,
+        maxLevel = 49,
+        school = 2,
+        schoolMask = 2,
+        defType = 1,
+        effects = {
+            [1] = {
+                effectType = 10,
+                valueBase = 200,
+                valueRange = 0,
+                valuePerLevel = 0.98000001907,
+                coef = 0.18999999762,
+                coefAP = 0,
+            },
+        }
+    },
+    [1240724] = { -- Penance (Rank 3)
+        spellLevel = 50,
+        maxLevel = 59,
+        school = 2,
+        schoolMask = 2,
+        defType = 1,
+        effects = {
+            [1] = {
+                effectType = 10,
+                valueBase = 268,
+                valueRange = 0,
+                valuePerLevel = 1.26999998093,
+                coef = 0.18999999762,
+                coefAP = 0,
+            },
+        }
+    },
+    [1240727] = { -- Penance (Rank 2)
+        spellLevel = 40,
+        maxLevel = 49,
+        school = 2,
+        schoolMask = 2,
+        defType = 1,
+        effects = {
+            [1] = {
+                effectType = 2,
+                valueBase = 50,
+                valueRange = 0,
+                valuePerLevel = 0.33000001311,
+                coef = 0.18999999762,
+                coefAP = 0,
+            },
+        }
+    },
+    [1240730] = { -- Penance (Rank 3)
+        spellLevel = 50,
+        maxLevel = 59,
+        school = 2,
+        schoolMask = 2,
+        defType = 1,
+        effects = {
+            [1] = {
+                effectType = 2,
+                valueBase = 68,
+                valueRange = 0,
+                valuePerLevel = 0.43000000715,
+                coef = 0.18999999762,
+                coefAP = 0,
+            },
+        }
+    },
     [1240826] = { -- Prayer of Mending (Rank 2)
         spellLevel = 50,
         maxLevel = 0,
@@ -2983,6 +3117,116 @@ _addon.spellInfo = {
                 valueRange = 0,
                 coef = 0.42899999022,
                 coefAP = 0,
+            },
+        }
+    },
+    [1277324] = { -- Dark Sacrifice (Rank 1)
+        spellLevel = 20,
+        maxLevel = 28,
+        duration = 15,
+        school = 6,
+        schoolMask = 32,
+        defType = 1,
+        noCrit = true,
+        effects = {
+            [1] = {
+                effectType = 6,
+                auraType = 24,
+                tickPeriod = 3,
+                valueBase = 80,
+                valueRange = 0,
+                valuePerLevel = 1,
+                coef = 0,
+                coefAP = 0,
+                totalPlusSpirit = true,
+            },
+        }
+    },
+    [1277325] = { -- Dark Sacrifice (Rank 2)
+        spellLevel = 30,
+        maxLevel = 38,
+        duration = 15,
+        school = 6,
+        schoolMask = 32,
+        defType = 1,
+        noCrit = true,
+        effects = {
+            [1] = {
+                effectType = 6,
+                auraType = 24,
+                tickPeriod = 3,
+                valueBase = 136,
+                valueRange = 0,
+                valuePerLevel = 1,
+                coef = 0,
+                coefAP = 0,
+                totalPlusSpirit = true,
+            },
+        }
+    },
+    [1277326] = { -- Dark Sacrifice (Rank 3)
+        spellLevel = 40,
+        maxLevel = 48,
+        duration = 15,
+        school = 6,
+        schoolMask = 32,
+        defType = 1,
+        noCrit = true,
+        effects = {
+            [1] = {
+                effectType = 6,
+                auraType = 24,
+                tickPeriod = 3,
+                valueBase = 196,
+                valueRange = 0,
+                valuePerLevel = 1,
+                coef = 0,
+                coefAP = 0,
+                totalPlusSpirit = true,
+            },
+        }
+    },
+    [1277327] = { -- Dark Sacrifice (Rank 4)
+        spellLevel = 50,
+        maxLevel = 58,
+        duration = 15,
+        school = 6,
+        schoolMask = 32,
+        defType = 1,
+        noCrit = true,
+        effects = {
+            [1] = {
+                effectType = 6,
+                auraType = 24,
+                tickPeriod = 3,
+                valueBase = 258,
+                valueRange = 0,
+                valuePerLevel = 1,
+                coef = 0,
+                coefAP = 0,
+                totalPlusSpirit = true,
+            },
+        }
+    },
+    [1277328] = { -- Dark Sacrifice (Rank 5)
+        spellLevel = 60,
+        maxLevel = 68,
+        duration = 15,
+        school = 6,
+        schoolMask = 32,
+        defType = 1,
+        noCrit = true,
+        effects = {
+            [1] = {
+                effectType = 6,
+                auraType = 24,
+                tickPeriod = 3,
+                valueBase = 320,
+                valueRange = 0,
+                valuePerLevel = 1,
+                coef = 0,
+                coefAP = 0,
+                totalPlusSpirit = true,
             },
         }
     },
@@ -3200,6 +3444,141 @@ _addon.spellInfo = {
             },
         }
     },
+    [1277462] = { -- Contingency Plan (Rank 1)
+        spellLevel = 20,
+        maxLevel = 30,
+        duration = 15,
+        school = 2,
+        schoolMask = 2,
+        defType = 1,
+        effects = {
+            [1] = {
+                effectType = 6,
+                auraType = 8,
+                tickPeriod = 3,
+                valueBase = 25,
+                valueRange = 0,
+                coef = 0.20000000298,
+                coefAP = 0,
+            },
+            [2] = {
+                effectType = 6,
+                auraType = 69,
+                valueBase = 155,
+                valueRange = 0,
+                coef = 0,
+                coefAP = 0,
+            },
+        }
+    },
+    [1277634] = { -- Contingency Plan (Rank 2)
+        spellLevel = 30,
+        maxLevel = 40,
+        duration = 15,
+        school = 2,
+        schoolMask = 2,
+        defType = 1,
+        effects = {
+            [1] = {
+                effectType = 6,
+                auraType = 8,
+                tickPeriod = 3,
+                valueBase = 40,
+                valueRange = 0,
+                coef = 0.20000000298,
+                coefAP = 0,
+            },
+            [2] = {
+                effectType = 6,
+                auraType = 69,
+                valueBase = 290,
+                valueRange = 0,
+                coef = 0,
+                coefAP = 0,
+            },
+        }
+    },
+    [1277638] = { -- Contingency Plan (Rank 3)
+        spellLevel = 40,
+        maxLevel = 50,
+        duration = 15,
+        school = 2,
+        schoolMask = 2,
+        defType = 1,
+        effects = {
+            [1] = {
+                effectType = 6,
+                auraType = 8,
+                tickPeriod = 3,
+                valueBase = 56,
+                valueRange = 0,
+                coef = 0.20000000298,
+                coefAP = 0,
+            },
+            [2] = {
+                effectType = 6,
+                auraType = 69,
+                valueBase = 467,
+                valueRange = 0,
+                coef = 0,
+                coefAP = 0,
+            },
+        }
+    },
+    [1277639] = { -- Contingency Plan (Rank 4)
+        spellLevel = 50,
+        maxLevel = 60,
+        duration = 15,
+        school = 2,
+        schoolMask = 2,
+        defType = 1,
+        effects = {
+            [1] = {
+                effectType = 6,
+                auraType = 8,
+                tickPeriod = 3,
+                valueBase = 102,
+                valueRange = 0,
+                coef = 0.20000000298,
+                coefAP = 0,
+            },
+            [2] = {
+                effectType = 6,
+                auraType = 69,
+                valueBase = 596,
+                valueRange = 0,
+                coef = 0,
+                coefAP = 0,
+            },
+        }
+    },
+    [1277640] = { -- Contingency Plan (Rank 5)
+        spellLevel = 60,
+        maxLevel = 70,
+        duration = 15,
+        school = 2,
+        schoolMask = 2,
+        defType = 1,
+        effects = {
+            [1] = {
+                effectType = 6,
+                auraType = 8,
+                tickPeriod = 3,
+                valueBase = 134,
+                valueRange = 0,
+                coef = 0.20000000298,
+                coefAP = 0,
+            },
+            [2] = {
+                effectType = 6,
+                auraType = 69,
+                valueBase = 926,
+                valueRange = 0,
+                coef = 0,
+                coefAP = 0,
+            },
+        }
+    },
     [1309595] = { -- Shadow Word: Death (Rank 1)
         spellLevel = 32,
         maxLevel = 37,
@@ -3268,6 +3647,71 @@ _addon.spellInfo = {
                 valueRange = 28,
                 valuePerLevel = 2.5,
                 coef = 0.42899999022,
+                coefAP = 0,
+            },
+        }
+    },
+    [1316991] = { -- Penance (Rank 4)
+        spellLevel = 60,
+        maxLevel = 60,
+        school = 2,
+        schoolMask = 2,
+        defType = 1,
+        effects = {
+            [1] = {
+                effectType = 10,
+                valueBase = 425,
+                valueRange = 0,
+                coef = 0.18999999762,
+                coefAP = 0,
+            },
+        }
+    },
+    [1316993] = { -- Penance (Rank 4)
+        spellLevel = 60,
+        maxLevel = 0,
+        school = 2,
+        schoolMask = 2,
+        defType = 1,
+        effects = {
+            [1] = {
+                effectType = 2,
+                valueBase = 92,
+                valueRange = 0,
+                coef = 0.18999999762,
+                coefAP = 0,
+            },
+        }
+    },
+    [1316995] = { -- Penance (Rank 4)
+        spellLevel = 60,
+        maxLevel = 0,
+        duration = 2,
+        baseCost = 385,
+        school = 2,
+        schoolMask = 2,
+        isChannel = true,
+        defType = 0,
+        extraTickAtApplication = true,
+        effects = {
+            [1] = {
+                effectType = 6,
+                auraType = 23,
+                tickPeriod = 1,
+                valueBase = 0,
+                valueRange = 0,
+                triggeredSpell = 1316991,
+                coef = 0,
+                coefAP = 0,
+            },
+            [2] = {
+                effectType = 6,
+                auraType = 23,
+                tickPeriod = 1,
+                valueBase = 0,
+                valueRange = 0,
+                triggeredSpell = 1316993,
+                coef = 0,
                 coefAP = 0,
             },
         }

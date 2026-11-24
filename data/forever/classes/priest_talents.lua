@@ -15,6 +15,19 @@ _addon.talentDataRaw = {
     -----------------------------
     -- Column group 1
     -----------------------------
+    { -- Power in Light (node 110853, 5 ranks)
+        name = "Power in Light",
+        spellId = 1309969,
+        maxRanks = 5,
+        effects = {
+            {
+                type = _addon.CONST.EFFECT_TYPE.SCRIPT_SPELLMOD_DONE_PCT,
+                affectSpell = {128, 32768, 0, 0},
+                scriptKey = "Priest_Power_in_Light",
+                perPoint = 2,
+            },
+        }
+    },
     { -- Twin Disciplines (node 105849, 5 ranks)
         name = "Twin Disciplines",
         spellId = 1225132,
@@ -76,6 +89,31 @@ _addon.talentDataRaw = {
                 type = _addon.CONST.EFFECT_TYPE.SPELLMOD_CHARGES,
                 affectSpell = {2, 0, 0, 0},
                 perPoint = 4,
+            },
+        }
+    },
+    { -- Renewed Hope (node 105835, 5 ranks)
+        name = "Renewed Hope",
+        spellId = 425280,
+        maxRanks = 5,
+        effects = {
+            {
+                type = _addon.CONST.EFFECT_TYPE.SCRIPT_SPELLMOD_CRIT_CHANCE,
+                affectSpell = {268704768, 65536, 0, 0},
+                scriptKey = "Priest_Renewed_Hope",
+                perPoint = 2,
+            },
+        }
+    },
+    { -- Divine Aegis (node 105840, 3 ranks)
+        name = "Divine Aegis",
+        spellId = 431622,
+        maxRanks = 3,
+        effects = {
+            {
+                type = _addon.CONST.EFFECT_TYPE.SPELLMOD_EXTRA_ON_CRIT,
+                affectSpell = {151264800, 65572, 0, 0},
+                perPoint = 5,
             },
         }
     },
@@ -147,6 +185,32 @@ _addon.talentDataRaw = {
                 type = _addon.CONST.EFFECT_TYPE.SPELLMOD_FLAT_DURATION,
                 affectSpell = {32768, 0, 0, 0},
                 perPoint = 3000,
+            },
+        }
+    },
+    { -- Improved Mind Flay (node 105825, 2 ranks)
+        name = "Improved Mind Flay",
+        spellId = 1225139,
+        maxRanks = 2,
+        effects = {
+            {
+                type = _addon.CONST.EFFECT_TYPE.SCRIPT_SPELLMOD_DONE_PCT,
+                affectSpell = {8388608, 0, 0, 0},
+                scriptKey = "Priest_Improved_Mind_Flay",
+                perPoint = 10,
+            },
+        }
+    },
+    { -- Early Demise (node 110854, 2 ranks)
+        name = "Early Demise",
+        spellId = 1310076,
+        maxRanks = 2,
+        effects = {
+            {
+                type = _addon.CONST.EFFECT_TYPE.SCRIPT_SPELLMOD_CRIT_CHANCE,
+                affectSpell = {0, 8194, 0, 0},
+                scriptKey = "Priest_Early_Demise",
+                perPoint = 15,
             },
         }
     },

@@ -1,6 +1,6 @@
 SpellCalc Forever data generation report
 Client build: wowf 1.60.1.71037
-Generated: 2026-11-24T15:48:46.669Z
+Generated: 2026-11-24T16:44:57.682Z
 
 Everything listed here was skipped or guessed by the generator and should be reviewed.
 
@@ -83,18 +83,16 @@ Everything listed here was skipped or guessed by the generator and should be rev
 
 == Spell data: priest (0)
 
-== Talents: priest (28)
+== Talents: priest (25)
   Devouring Contagion (1309950) effect 1 skipped: SPELL_AURA_DUMMY spell not handled! 1309950
   Devouring Contagion (1309950) effect 2 skipped: SPELL_AURA_DUMMY spell not handled! 1309950
   Shadow Weaving (15257) effect 0 skipped: Triggered spell needs some love: 15258
   Dark Inspiration (1326159) effect 0 skipped: SPELL_AURA_DUMMY spell not handled! 1326159
-  Improved Mind Flay (1225139) effect 0 skipped: SPELL_AURA_DUMMY spell not handled! 1225139
+  Improved Mind Flay (1225139) uses a hand-written definition: SCRIPT_SPELLMOD_DONE_PCT=10/pt
   Blackout (15326) effect 0 skipped: Triggered spell needs some love: 15269
   Spirit Tap (15270) effect 0 skipped: Triggered spell needs some love: 15271
-  Renewed Hope (425280) effect 0 skipped: SPELL_AURA_DUMMY spell not handled! 425280
-  Renewed Hope (425280) effect 1 skipped: SPELL_AURA_DUMMY spell not handled! 425280
-  Divine Aegis (431622) effect 0 skipped: SPELL_AURA_DUMMY spell not handled! 431622
-  Divine Aegis (431622) effect 1 skipped: SPELL_AURA_DUMMY spell not handled! 431622
+  Renewed Hope (425280) uses a hand-written definition: SCRIPT_SPELLMOD_CRIT_CHANCE=2/pt
+  Divine Aegis (431622) uses a hand-written definition: SPELLMOD_EXTRA_ON_CRIT=5/pt
   Inner Focus (14751) is an active ability, not applied as a permanent talent effect
   Martyrdom (14531) effect 0 skipped: Triggered spell needs some love: 27828
   Silent Resolve (14523) effect 1: aura type 232 is not handled, effect skipped
@@ -108,9 +106,8 @@ Everything listed here was skipped or guessed by the generator and should be rev
   Inspiration (14892) effect 0 skipped: SPELL_AURA_DUMMY spell not handled! 14892
   Blessed Recovery (27811) effect 0 skipped: SPELL_AURA_DUMMY spell not handled! 27811
   Blessed Recovery (27811) effect 1 skipped: SPELL_AURA_DUMMY spell not handled! 27811
-  Power in Light (1309969) effect 0 skipped: SPELL_AURA_DUMMY spell not handled! 1309969
-  Early Demise (1310076) effect 0 skipped: SPELL_AURA_DUMMY spell not handled! 1310076
-  Early Demise (1310076) effect 1 skipped: SPELL_AURA_DUMMY spell not handled! 1310076
+  Power in Light (1309969) uses a hand-written definition: SCRIPT_SPELLMOD_DONE_PCT=2/pt
+  Early Demise (1310076) uses a hand-written definition: SCRIPT_SPELLMOD_CRIT_CHANCE=15/pt
   node 110855: spell 14889 already handled by another node, skipped
 
 == Spell data: warlock (0)
@@ -920,7 +917,7 @@ The act of shapeshifting frees the caster of Polymorph and Movement Impairing ef
 
 == Target auras (0)
 
-== Assumable target auras (24)
+== Assumable target auras (27)
   PALADIN Oath of Light [1328548]: Holy Light +6.66666984558 per level (400 at 60)
   PALADIN Oath of Light [1328548]: Flash of Light +1.91666996479 per level (115 at 60)
   PALADIN Oath of Light [1328548]: Holy Shock +3.833329916 per level (230 at 60)
@@ -936,6 +933,9 @@ The act of shapeshifting frees the caster of Polymorph and Movement Impairing ef
   PALADIN: Hammer of Justice (Rank 4) [10308] as "Stunned or incapacitated target", caster's own damage only
   PALADIN: Consecrated Ground [1310905] as "One of the first enemies in your Consecration", caster's own damage only
   PRIEST: Shadow Weaving [15258], up to 5 stacks, caster's own damage only
+  PRIEST: Weakened Soul [6788], caster's own damage only
+  PRIEST: Power in Light [1309969] as "Your Holy Fire or Shadow Word: Pain on the target", caster's own damage only
+  PRIEST: Early Demise [1310076] as "Target at or below 20% health", caster's own damage only
   ROGUE: Expose Armor (Rank 5) [11198]
   ROGUE: Wound Poison (Rank 4) [13224], up to 5 stacks
   SHAMAN: Stormstrike [17364], caster's own damage only

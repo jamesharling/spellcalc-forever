@@ -112,6 +112,7 @@ end
 local stats = {
     manaMax = 0, -- Maximum mana
     healthMax = 0, -- Maximum health
+    spirit = 0, -- Spirit with all bonuses
     manaCurrent = 0, -- Current mana if update is active
     baseMana = 0,
     manaRegBase = 0, -- Mana regen based on spirit /sec
@@ -381,6 +382,8 @@ function _addon:UpdateManaRegen()
     local apiRegen = GetManaRegen();
     if AnySecret(spirit, apiRegen) then return end
     spirit = Num(spirit);
+    -- A change of Spirit always changes the regeneration below, which triggers the update.
+    stats.spirit = spirit;
 
     local spiritRegen = (12.5 + spirit / 4) / 2;
 

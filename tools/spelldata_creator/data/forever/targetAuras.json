@@ -16,6 +16,9 @@
         { "class": "PALADIN", "name": "Consecrated Ground", "id": 1310905, "label": "One of the first enemies in your Consecration", "note": "the talent: Holy damage against the first enemies that entered the Consecration" },
 
         { "class": "PRIEST", "name": "Shadow Vulnerability", "id": 15258, "note": "Shadow Weaving, from caster" },
+        { "class": "PRIEST", "name": "Weakened Soul", "note": "on the heal target: Renewed Hope's critical strike chance" },
+        { "class": "PRIEST", "name": "Power in Light", "id": 1309969, "label": "Your Holy Fire or Shadow Word: Pain on the target", "note": "the talent: Smite and Penance damage against such a target" },
+        { "class": "PRIEST", "name": "Early Demise", "id": 1310076, "label": "Target at or below 20% health", "note": "the talent: Shadow Word: Death's critical strike chance" },
 
         { "class": "ROGUE", "name": "Expose Armor", "note": "armor" },
         { "class": "ROGUE", "name": "Wound Poison", "id": 13224, "note": "healing taken (the debuff, not the weapon coating)" },

@@ -757,8 +757,8 @@ local function CalcSpell(spellId, calcedSpell, parentSpellData, parentValue)
             calcedEffect.effectivePower = 0;
             calcedEffect.flatMod = flatMod;
 
-            -- Spell power
-            if isHeal then
+            -- Spell power. Power Word: Shield (forceScaleWithHeal) scales with healing power like a heal.
+            if isHeal or effectData.forceScaleWithHeal then
                 calcedEffect.spellPower = stats.spellHealing + extraHealPower;
             else
                 calcedEffect.spellPower = stats.spellPower[spellInfo.school] + extraSpellPower;

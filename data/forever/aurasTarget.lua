@@ -137,6 +137,27 @@ _addon.aurasTarget = {
             hasStacks = true,
         },
     },
+    [6788] = { -- Weakened Soul
+        {
+            type = _addon.CONST.EFFECT_TYPE.SCRIPT_SET_VALUE,
+            value = 1,
+            scriptKey = "Priest_Weakened_Soul",
+        },
+    },
+    [1309969] = { -- Power in Light
+        {
+            type = _addon.CONST.EFFECT_TYPE.SCRIPT_SET_VALUE,
+            value = 1,
+            scriptKey = "Priest_Dot_On_Target",
+        },
+    },
+    [1310076] = { -- Early Demise
+        {
+            type = _addon.CONST.EFFECT_TYPE.SCRIPT_SET_VALUE,
+            value = 1,
+            scriptKey = "Priest_Target_Low_Health",
+        },
+    },
     [11198] = { -- Expose Armor (Rank 5)
         {
             type = _addon.CONST.EFFECT_TYPE.SCHOOLMOD_RESISTANCE_PENETRATION,
@@ -222,6 +243,9 @@ _addon.assumableTargetAuras = {
     { spellId = 10308, class = "PALADIN", maxStacks = 1, fromCaster = true, label = "Stunned or incapacitated target" }, -- Hammer of Justice (Rank 4)
     { spellId = 1310905, class = "PALADIN", maxStacks = 1, fromCaster = true, label = "One of the first enemies in your Consecration" }, -- Consecrated Ground
     { spellId = 15258, class = "PRIEST", maxStacks = 5, fromCaster = true }, -- Shadow Weaving
+    { spellId = 6788, class = "PRIEST", maxStacks = 1, fromCaster = true }, -- Weakened Soul
+    { spellId = 1309969, class = "PRIEST", maxStacks = 1, fromCaster = true, label = "Your Holy Fire or Shadow Word: Pain on the target" }, -- Power in Light
+    { spellId = 1310076, class = "PRIEST", maxStacks = 1, fromCaster = true, label = "Target at or below 20% health" }, -- Early Demise
     { spellId = 11198, class = "ROGUE", maxStacks = 1 }, -- Expose Armor (Rank 5)
     { spellId = 13224, class = "ROGUE", maxStacks = 5 }, -- Wound Poison (Rank 4)
     { spellId = 17364, class = "SHAMAN", maxStacks = 1, fromCaster = true }, -- Stormstrike

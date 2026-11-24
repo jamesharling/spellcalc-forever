@@ -241,6 +241,8 @@ interface EffectInfo {
     pctOfMaxHealth?: boolean,
     /** Adds this many times the damage per second of the main hand weapon (Hammer of the Righteous). */
     weaponDpsMult?: number,
+    /** A periodic mana gain whose total also includes the caster's Spirit (Dark Sacrifice). */
+    totalPlusSpirit?: boolean,
 }
 
 const enum PowerType {

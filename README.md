@@ -47,7 +47,8 @@ from upstream SpellCalc in more than the TOC:
   (removed from Forever) is not offered at all. The settings are shared by every character of the account, so
   such a debuff left selected by another class is not applied either. Some entries stand for a state of the
   target instead of one debuff: "Frozen target" and "Your Fire effects on the target" (see *Mage* below),
-  "Stunned or incapacitated target" and "One of the first enemies in your Consecration" (see *Paladin*).
+  "Stunned or incapacitated target" and "One of the first enemies in your Consecration" (see *Paladin*),
+  "Your Holy Fire or Shadow Word: Pain on the target" and "Target at or below 20% health" (see *Priest*).
 - **Fixed assumptions instead of live state** where the live value is only readable when it doesn't matter:
   the mana pool always starts full (current mana is secret in combat), finishing moves use an assumed
   combo point count (Settings > Target), and the table of raid boss resistances by NPC ID is gone (unit
@@ -123,6 +124,18 @@ from upstream SpellCalc in more than the TOC:
   Not calculated: Seal of Light, Judgement of Light and Lay on Hands (their tooltips already give the amount,
   nothing scales), Seal of Fury's absorb shield, and the mana returns of Sanctified Judgement and Shield
   Specialization. The Vengeance buff counts 3% per application, the value of 3/3.
+- **Priest.** Every rank of Penance is calculated (upstream's table only knew rank 1): 3 volleys of the heal
+  or the damage its tooltip names. Power Word: Shield scales with healing power again (the generated flag for
+  it was no longer read). Contingency Plan shows the periodic heal and the absorb it sets off, and Dark
+  Sacrifice the mana it gives, Spirit included. Divine Aegis adds its share of a critical heal to the average
+  (the cap per level is not modelled). Improved Mind Flay makes each tick larger than the one before; the tick
+  shown is the average, so the total is right. Spirit Tap lets half the mana regeneration continue while
+  casting. Three talents depend on the target and are assumed in Settings > Target Auras: "Weakened Soul" on
+  the heal target gives Renewed Hope's critical strike chance to Flash Heal, Lesser Heal, Heal, Greater Heal
+  and Penance; "Your Holy Fire or Shadow Word: Pain on the target" gives Smite and Penance the Power in Light
+  bonus; "Target at or below 20% health" gives Shadow Word: Death the critical strike chance of Early Demise.
+  Not calculated: Lightwell and Mana Burn (nothing scales, their tooltips give the amounts), Vampiric Embrace,
+  Holy Binding's heal on the priest, and Litany of Light's mana return.
 - **Area spells that tick through an area trigger** (Hurricane, Blizzard, Rain of Fire, the burn of
   Flamestrike, Consecration) only create the trigger on Forever. The generator takes the damage of a tick from
   the spell the tooltip names, one tick per period.
@@ -183,6 +196,11 @@ Nothing here has run on a live Forever client (the beta closed before this port 
     Holy Light on an Oath of Light target with and without Healing Light: the addon adds the Oath's amount
     before the talent's percentage. A critical heal with Holy Power (175% at 5/5 assumed). Templar's Bulwark's
     tooltip against the addon.
+15. Priest: Power Word: Shield's tooltip against the addon in gear with more healing than spell damage (the
+    addon uses healing power). The three ticks of Mind Flay with Improved Mind Flay in the combat log: the addon
+    assumes each is 10% or 20% larger than the one before, compounding. A Divine Aegis shield against 15% of
+    the critical heal that made it. Dark Sacrifice's mana against 5 ticks plus Spirit. Penance at rank 2 and
+    above against the combat log.
 
 ## Regenerating data
 
@@ -285,7 +303,9 @@ npm test
   Consecration's ticks, Templar's Bulwark, Hammer of the Righteous, Judgement of Command on a stunned target,
   Light's Vigil, the Exorcism that Exorcist puts in place (a spell override in the stub, and an Undead target),
   Holy Power, Two-Handed Weapon Specialization with and without a two-hander, Oath of Light, Boundless Light
-  and Consecrated Ground. For every class it selects the
+  and Consecrated Ground. For a priest it checks Penance at every rank, Contingency Plan, Dark Sacrifice,
+  Power Word: Shield's healing power, Divine Aegis, Improved Mind Flay, Spirit Tap, and Renewed Hope, Power in
+  Light and Early Demise with and without their target state. For every class it selects the
   own-damage target auras of the other classes and checks nothing changes. It validates the settings table
   with AceConfig,
   and checks old saved
